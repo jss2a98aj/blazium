@@ -357,6 +357,9 @@ public:
 	virtual RID joint_create() override;
 	virtual void joint_clear(RID p_joint) override;
 
+	virtual void joint_set_enabled(RID p_joint, bool p_enabled) override;
+	virtual bool joint_is_enabled(RID p_joint) const override;
+
 	virtual void joint_make_pin(RID p_joint, RID p_body_a, const Vector3 &p_local_a, RID p_body_b, const Vector3 &p_local_b) override;
 
 	virtual void pin_joint_set_param(RID p_joint, PhysicsServer3D::PinJointParam p_param, real_t p_value) override;
@@ -441,9 +444,6 @@ public:
 
 	void space_dump_debug_snapshot(RID p_space, const String &p_dir);
 #endif
-
-	bool joint_get_enabled(RID p_joint) const;
-	void joint_set_enabled(RID p_joint, bool p_enabled);
 
 	int joint_get_solver_velocity_iterations(RID p_joint);
 	void joint_set_solver_velocity_iterations(RID p_joint, int p_value);
