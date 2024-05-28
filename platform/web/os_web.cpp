@@ -181,7 +181,7 @@ String OS_Web::get_unique_id() const {
 			})();
 		)"));
 
-		uid = uid.replace(" ", "").sha256_text();
+		uid = uid.remove_char(' ').sha256_text();
 	}
 
 	return uid;
