@@ -69,10 +69,15 @@ void LineEdit::_move_caret_left(bool p_select, bool p_move_by_word) {
 		int cc = caret_column;
 
 		PackedInt32Array words = TS->shaped_text_get_word_breaks(text_rid);
-		for (int i = words.size() - 2; i >= 0; i = i - 2) {
-			if (words[i] < cc) {
-				cc = words[i];
-				break;
+		if (words.is_empty() || cc <= words[0]) {
+			// Move to the start when there are no more words.
+			cc = 0;
+		} else {
+			for (int i = words.size() - 2; i >= 0; i = i - 2) {
+				if (words[i] < cc) {
+					cc = words[i];
+					break;
+				}
 			}
 		}
 
@@ -102,10 +107,15 @@ void LineEdit::_move_caret_right(bool p_select, bool p_move_by_word) {
 		int cc = caret_column;
 
 		PackedInt32Array words = TS->shaped_text_get_word_breaks(text_rid);
-		for (int i = 1; i < words.size(); i = i + 2) {
-			if (words[i] > cc) {
-				cc = words[i];
-				break;
+		if (words.is_empty() || cc >= words[words.size() - 1]) {
+			// Move to the end when there are no more words.
+			cc = text.length();
+		} else {
+			for (int i = 1; i < words.size(); i = i + 2) {
+				if (words[i] > cc) {
+					cc = words[i];
+					break;
+				}
 			}
 		}
 
@@ -160,10 +170,15 @@ void LineEdit::_backspace(bool p_word, bool p_all_to_left) {
 		int cc = caret_column;
 
 		PackedInt32Array words = TS->shaped_text_get_word_breaks(text_rid);
-		for (int i = words.size() - 2; i >= 0; i = i - 2) {
-			if (words[i] < cc) {
-				cc = words[i];
-				break;
+		if (words.is_empty() || cc <= words[0]) {
+			// Delete to the start when there are no more words.
+			cc = 0;
+		} else {
+			for (int i = words.size() - 2; i >= 0; i = i - 2) {
+				if (words[i] < cc) {
+					cc = words[i];
+					break;
+				}
 			}
 		}
 
@@ -199,10 +214,15 @@ void LineEdit::_delete(bool p_word, bool p_all_to_right) {
 	if (p_word) {
 		int cc = caret_column;
 		PackedInt32Array words = TS->shaped_text_get_word_breaks(text_rid);
-		for (int i = 1; i < words.size(); i = i + 2) {
-			if (words[i] > cc) {
-				cc = words[i];
-				break;
+		if (words.is_empty() || cc >= words[words.size() - 1]) {
+			// Delete to the end when there are no more words.
+			cc = text.length();
+		} else {
+			for (int i = 1; i < words.size(); i = i + 2) {
+				if (words[i] > cc) {
+					cc = words[i];
+					break;
+				}
 			}
 		}
 
