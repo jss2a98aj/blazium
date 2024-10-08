@@ -131,6 +131,7 @@ void EditorBottomPanel::_switch_to_item(bool p_visible, int p_idx, bool p_ignore
 		pin_button->show();
 
 		expand_button->show();
+		button_scroll->ensure_control_visible(items[p_idx].button);
 		if (expand_button->is_pressed()) {
 			EditorNode::get_top_split()->hide();
 		}
