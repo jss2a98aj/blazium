@@ -12,7 +12,7 @@ namespace GodotTools.ProjectEditor
     {
         public static string GodotSdkAttrValue => $"Godot.NET.Sdk/{GeneratedGodotNupkgsVersions.GodotNETSdk}";
 
-        public static string GodotMinimumRequiredTfm => "net8.0";
+        public static string GodotMinimumRequiredTfm => "net6.0";
 
         public static ProjectRootElement GenGameProject(string name)
         {
@@ -25,6 +25,12 @@ namespace GodotTools.ProjectEditor
 
             var mainGroup = root.AddPropertyGroup();
             mainGroup.AddProperty("TargetFramework", GodotMinimumRequiredTfm);
+
+            var net7 = mainGroup.AddProperty("TargetFramework", "net7.0");
+            net7.Condition = " '$(GodotTargetPlatform)' == 'android' ";
+
+            var net8 = mainGroup.AddProperty("TargetFramework", "net8.0");
+            net8.Condition = " '$(GodotTargetPlatform)' == 'ios' ";
 
             mainGroup.AddProperty("EnableDynamicLoading", "true");
 
