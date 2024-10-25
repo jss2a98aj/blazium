@@ -78,6 +78,8 @@ private:
 	struct ThemeCache {
 		Ref<StyleBox> panel_style;
 		Ref<StyleBox> focus_style;
+		int h_separation = 0;
+		int v_separation = 0;
 	} theme_cache;
 
 	void _cancel_drag();
