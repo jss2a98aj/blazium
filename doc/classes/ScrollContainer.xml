@@ -110,6 +110,12 @@
 		</constant>
 	</constants>
 	<theme_items>
+		<theme_item name="h_scroll_bar_separation" data_type="constant" type="int" default="0">
+			The vertical separation applied when the horizontal scroll bar is visible.
+		</theme_item>
+		<theme_item name="v_scroll_bar_separation" data_type="constant" type="int" default="0">
+			The horizontal separation applied when the vertical scroll bar is visible.
+		</theme_item>
 		<theme_item name="focus" data_type="style" type="StyleBox">
 			The focus border [StyleBox] of the [ScrollContainer]. Only used if [member draw_focus_border] is [code]true[/code].
 		</theme_item>
