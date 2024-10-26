@@ -51,7 +51,7 @@ TEST_SUITE("[TextServer]") {
 				}
 
 				RID font = ts->create_font();
-				ts->font_set_data_ptr(font, _font_NotoSans_Regular, _font_NotoSans_Regular_size);
+				ts->font_set_data_ptr(font, _font_Inter_Regular, _font_Inter_Regular_size);
 				CHECK_FALSE_MESSAGE(font == RID(), "Loading font failed.");
 				ts->free_rid(font);
 			}
@@ -67,7 +67,7 @@ TEST_SUITE("[TextServer]") {
 				}
 
 				RID font1 = ts->create_font();
-				ts->font_set_data_ptr(font1, _font_NotoSans_Regular, _font_NotoSans_Regular_size);
+				ts->font_set_data_ptr(font1, _font_Inter_Regular, _font_Inter_Regular_size);
 				ts->font_set_allow_system_fallback(font1, false);
 				RID font2 = ts->create_font();
 				ts->font_set_data_ptr(font2, _font_NotoSansThai_Regular, _font_NotoSansThai_Regular_size);
@@ -122,7 +122,7 @@ TEST_SUITE("[TextServer]") {
 				}
 
 				RID font1 = ts->create_font();
-				ts->font_set_data_ptr(font1, _font_NotoSans_Regular, _font_NotoSans_Regular_size);
+				ts->font_set_data_ptr(font1, _font_Inter_Regular, _font_Inter_Regular_size);
 				RID font2 = ts->create_font();
 				ts->font_set_data_ptr(font2, _font_Vazirmatn_Regular, _font_Vazirmatn_Regular_size);
 
@@ -174,7 +174,7 @@ TEST_SUITE("[TextServer]") {
 				}
 
 				RID font1 = ts->create_font();
-				ts->font_set_data_ptr(font1, _font_NotoSans_Regular, _font_NotoSans_Regular_size);
+				ts->font_set_data_ptr(font1, _font_Inter_Regular, _font_Inter_Regular_size);
 				ts->font_set_allow_system_fallback(font1, false);
 				RID font2 = ts->create_font();
 				ts->font_set_data_ptr(font2, _font_NotoSansThai_Regular, _font_NotoSansThai_Regular_size);
@@ -570,7 +570,7 @@ TEST_SUITE("[TextServer]") {
 				//                   5^  10^
 
 				RID font1 = ts->create_font();
-				ts->font_set_data_ptr(font1, _font_NotoSans_Regular, _font_NotoSans_Regular_size);
+				ts->font_set_data_ptr(font1, _font_Inter_Regular, _font_Inter_Regular_size);
 				RID font2 = ts->create_font();
 				ts->font_set_data_ptr(font2, _font_NotoSansThai_Regular, _font_NotoSansThai_Regular_size);
 
@@ -628,7 +628,7 @@ TEST_SUITE("[TextServer]") {
 				}
 
 				RID font1 = ts->create_font();
-				ts->font_set_data_ptr(font1, _font_NotoSans_Regular, _font_NotoSans_Regular_size);
+				ts->font_set_data_ptr(font1, _font_Inter_Regular, _font_Inter_Regular_size);
 				RID font2 = ts->create_font();
 				ts->font_set_data_ptr(font2, _font_Vazirmatn_Regular, _font_Vazirmatn_Regular_size);
 
@@ -942,7 +942,7 @@ TEST_SUITE("[TextServer]") {
 				}
 
 				RID font1 = ts->create_font();
-				ts->font_set_data_ptr(font1, _font_NotoSans_Regular, _font_NotoSans_Regular_size);
+				ts->font_set_data_ptr(font1, _font_Inter_Regular, _font_Inter_Regular_size);
 
 				Array font;
 				font.push_back(font1);
