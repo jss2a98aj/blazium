@@ -3142,6 +3142,7 @@ bool TextEdit::has_ime_text() const {
 
 void TextEdit::cancel_ime() {
 	if (!has_ime_text()) {
+		_close_ime_window();
 		return;
 	}
 	ime_text = String();
@@ -3154,6 +3155,7 @@ void TextEdit::cancel_ime() {
 
 void TextEdit::apply_ime() {
 	if (!has_ime_text()) {
+		_close_ime_window();
 		return;
 	}
 

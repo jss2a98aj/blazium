@@ -122,6 +122,7 @@ bool LineEdit::has_ime_text() const {
 
 void LineEdit::cancel_ime() {
 	if (!has_ime_text()) {
+		_close_ime_window();
 		return;
 	}
 	ime_text = String();
@@ -134,6 +135,7 @@ void LineEdit::cancel_ime() {
 
 void LineEdit::apply_ime() {
 	if (!has_ime_text()) {
+		_close_ime_window();
 		return;
 	}
 
