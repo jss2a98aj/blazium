@@ -213,7 +213,7 @@ namespace Godot
         {
             while (!IsNativeClass(t))
             {
-                Debug.Assert(t.BaseType is not null, "Script types must derive from a native Godot type.");
+                Debug.Assert(t.BaseType is not null, "Script types must derive from a native Blazium type.");
 
                 t = t.BaseType;
             }
