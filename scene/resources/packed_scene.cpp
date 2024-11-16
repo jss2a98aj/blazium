@@ -790,7 +790,7 @@ Error SceneState::_parse_node(Node *p_owner, Node *p_node, int p_parent_idx, Has
 				int slash_pos = subtype_string.find_char('/');
 				PropertyHint subtype_hint = PropertyHint::PROPERTY_HINT_NONE;
 				if (slash_pos >= 0) {
-					subtype_hint = PropertyHint(subtype_string.get_slice("/", 1).to_int());
+					subtype_hint = PropertyHint(subtype_string.get_slicec('/', 1).to_int());
 					subtype_string = subtype_string.substr(0, slash_pos);
 				}
 				Variant::Type subtype = Variant::Type(subtype_string.to_int());

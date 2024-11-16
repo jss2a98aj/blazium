@@ -138,9 +138,9 @@ void EditorFileDialog::_native_dialog_cb(bool p_ok, const Vector<String> &p_file
 			} else if (filters.size() > 1 && p_filter == 0) {
 				// Match all filters.
 				for (int i = 0; i < filters.size(); i++) {
-					String flt = filters[i].get_slice(";", 0);
+					String flt = filters[i].get_slicec(';', 0);
 					for (int j = 0; j < flt.get_slice_count(","); j++) {
-						String str = flt.get_slice(",", j).strip_edges();
+						String str = flt.get_slicec(',', j).strip_edges();
 						if (f.matchn(str)) {
 							valid = true;
 							break;
@@ -156,10 +156,10 @@ void EditorFileDialog::_native_dialog_cb(bool p_ok, const Vector<String> &p_file
 					idx--;
 				}
 				if (idx >= 0 && idx < filters.size()) {
-					String flt = filters[idx].get_slice(";", 0);
+					String flt = filters[idx].get_slicec(';', 0);
 					int filter_slice_count = flt.get_slice_count(",");
 					for (int j = 0; j < filter_slice_count; j++) {
-						String str = (flt.get_slice(",", j).strip_edges());
+						String str = flt.get_slicec(',', j).strip_edges();
 						if (f.matchn(str)) {
 							valid = true;
 							break;
@@ -167,7 +167,7 @@ void EditorFileDialog::_native_dialog_cb(bool p_ok, const Vector<String> &p_file
 					}
 
 					if (!valid && filter_slice_count > 0) {
-						String str = (flt.get_slice(",", 0).strip_edges());
+						String str = flt.get_slicec(',', 0).strip_edges();
 						f += str.substr(1);
 						file->set_text(f.get_file());
 						valid = true;
@@ -180,8 +180,8 @@ void EditorFileDialog::_native_dialog_cb(bool p_ok, const Vector<String> &p_file
 			// Add first extension of filter if no valid extension is found.
 			if (!valid) {
 				int idx = p_filter;
-				String flt = filters[idx].get_slice(";", 0);
-				String ext = flt.get_slice(",", 0).strip_edges().get_extension();
+				String flt = filters[idx].get_slicec(';', 0);
+				String ext = flt.get_slicec(',', 0).strip_edges().get_extension();
 				f += "." + ext;
 			}
 			emit_signal(SNAME("file_selected"), f);
@@ -616,9 +616,9 @@ void EditorFileDialog::_action_pressed() {
 		} else if (filters.size() > 1 && filter->get_selected() == 0) {
 			// Match all filters.
 			for (int i = 0; i < filters.size(); i++) {
-				String flt = filters[i].get_slice(";", 0);
+				String flt = filters[i].get_slicec(';', 0);
 				for (int j = 0; j < flt.get_slice_count(","); j++) {
-					String str = flt.get_slice(",", j).strip_edges();
+					String str = flt.get_slicec(',', j).strip_edges();
 					if (f.matchn(str)) {
 						valid = true;
 						break;
@@ -634,10 +634,10 @@ void EditorFileDialog::_action_pressed() {
 				idx--;
 			}
 			if (idx >= 0 && idx < filters.size()) {
-				String flt = filters[idx].get_slice(";", 0);
+				String flt = filters[idx].get_slicec(';', 0);
 				int filter_slice_count = flt.get_slice_count(",");
 				for (int j = 0; j < filter_slice_count; j++) {
-					String str = (flt.get_slice(",", j).strip_edges());
+					String str = (flt.get_slicec(',', j).strip_edges());
 					if (f.matchn(str)) {
 						valid = true;
 						break;
@@ -645,7 +645,7 @@ void EditorFileDialog::_action_pressed() {
 				}
 
 				if (!valid && filter_slice_count > 0) {
-					String str = (flt.get_slice(",", 0).strip_edges());
+					String str = flt.get_slicec(',', 0).strip_edges();
 					f += str.substr(1);
 					_request_single_thumbnail(get_current_dir().path_join(f.get_file()));
 					file->set_text(f.get_file());
@@ -667,8 +667,8 @@ void EditorFileDialog::_action_pressed() {
 		// Add first extension of filter if no valid extension is found.
 		if (!valid) {
 			int idx = filter->get_selected();
-			String flt = filters[idx].get_slice(";", 0);
-			String ext = flt.get_slice(",", 0).strip_edges().get_extension();
+			String flt = filters[idx].get_slicec(';', 0);
+			String ext = flt.get_slicec(',', 0).strip_edges().get_extension();
 			f += "." + ext;
 		}
 
@@ -1101,9 +1101,9 @@ void EditorFileDialog::update_file_list() {
 	} else if (filters.size() > 1 && filter->get_selected() == 0) {
 		// match all filters
 		for (int i = 0; i < filters.size(); i++) {
-			String f = filters[i].get_slice(";", 0);
+			String f = filters[i].get_slicec(';', 0);
 			for (int j = 0; j < f.get_slice_count(","); j++) {
-				patterns.push_back(f.get_slice(",", j).strip_edges());
+				patterns.push_back(f.get_slicec(',', j).strip_edges());
 			}
 		}
 	} else {
@@ -1113,9 +1113,9 @@ void EditorFileDialog::update_file_list() {
 		}
 
 		if (idx >= 0 && idx < filters.size()) {
-			String f = filters[idx].get_slice(";", 0);
+			String f = filters[idx].get_slicec(';', 0);
 			for (int j = 0; j < f.get_slice_count(","); j++) {
-				patterns.push_back(f.get_slice(",", j).strip_edges());
+				patterns.push_back(f.get_slicec(',', j).strip_edges());
 			}
 		}
 	}

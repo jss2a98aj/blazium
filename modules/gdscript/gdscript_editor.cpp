@@ -530,9 +530,9 @@ String GDScriptLanguage::make_function(const String &p_class, const String &p_na
 			if (i > 0) {
 				s += ", ";
 			}
-			s += p_args[i].get_slice(":", 0);
+			s += p_args[i].get_slicec(':', 0);
 			if (th) {
-				String type = p_args[i].get_slice(":", 1);
+				String type = p_args[i].get_slicec(':', 1);
 				if (!type.is_empty()) {
 					s += ": " + type;
 				}
@@ -1862,7 +1862,7 @@ static bool _guess_expression_type(GDScriptParser::CompletionContext &p_context,
 								if (all_is_const && call->function_name == SNAME("get_node") && ClassDB::is_parent_class(native_type.native_type, SNAME("Node")) && args.size()) {
 									String arg1 = args[0];
 									if (arg1.begins_with("/root/")) {
-										String which = arg1.get_slice("/", 2);
+										String which = arg1.get_slicec('/', 2);
 										if (!which.is_empty()) {
 											// Try singletons first
 											if (GDScriptLanguage::get_singleton()->get_named_globals_map().has(which)) {
@@ -2741,8 +2741,8 @@ static void _find_enumeration_candidates(GDScriptParser::CompletionContext &p_co
 			}
 		}
 	} else {
-		String class_name = p_enum_hint.get_slice(".", 0);
-		String enum_name = p_enum_hint.get_slice(".", 1);
+		String class_name = p_enum_hint.get_slicec('.', 0);
+		String enum_name = p_enum_hint.get_slicec('.', 1);
 
 		if (!ClassDB::class_exists(class_name)) {
 			return;
@@ -2945,7 +2945,7 @@ static void _find_call_arguments(GDScriptParser::CompletionContext &p_context, c
 						if (!s.begins_with("autoload/")) {
 							continue;
 						}
-						String name = s.get_slice("/", 1);
+						String name = s.get_slicec('/', 1);
 						String path = ("/root/" + name).quote(quote_style);
 						if (use_node_paths) {
 							path = "^" + path;
@@ -2964,7 +2964,7 @@ static void _find_call_arguments(GDScriptParser::CompletionContext &p_context, c
 						if (!s.begins_with("input/")) {
 							continue;
 						}
-						String name = s.get_slice("/", 1).quote(quote_style);
+						String name = s.get_slicec('/', 1).quote(quote_style);
 						if (use_string_names) {
 							name = "&" + name;
 						}
@@ -3484,7 +3484,7 @@ static void _find_call_arguments(GDScriptParser::CompletionContext &p_context, c
 			for (const MethodInfo &mi : virtual_methods) {
 				String method_hint = mi.name;
 				if (method_hint.contains_char(':')) {
-					method_hint = method_hint.get_slice(":", 0);
+					method_hint = method_hint.get_slicec(':', 0);
 				}
 				method_hint += "(";
 
