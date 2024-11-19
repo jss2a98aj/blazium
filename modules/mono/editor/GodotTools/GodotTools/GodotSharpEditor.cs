@@ -177,7 +177,7 @@ namespace GodotTools
 
         private static readonly string[] VsCodeNames =
         {
-            "code", "code-oss", "vscode", "vscode-oss", "visual-studio-code", "visual-studio-code-oss", "codium"
+            "code", "code-oss", "vscode", "vscode-oss", "visual-studio-code", "visual-studio-code-oss"
         };
 
         [UsedImplicitly]
@@ -339,28 +339,6 @@ namespace GodotTools
 
                             args.Add("--args");
                         }
-
-                        // Try VSCodium as a fallback if Visual Studio Code can't be found.
-                        if (!macOSAppBundleInstalled)
-                        {
-                            const string VscodiumBundleId = "com.vscodium.codium";
-                            macOSAppBundleInstalled = Internal.IsMacOSAppBundleInstalled(VscodiumBundleId);
-
-                            if (macOSAppBundleInstalled)
-                            {
-                                args.Add("-b");
-                                args.Add(VscodiumBundleId);
-
-                                // The reusing of existing windows made by the 'open' command might not choose a window that is
-                                // editing our folder. It's better to ask for a new window and let VSCode do the window management.
-                                args.Add("-n");
-
-                                // The open process must wait until the application finishes (which is instant in VSCode's case)
-                                args.Add("--wait-apps");
-
-                                args.Add("--args");
-                            }
-                        }
                     }
 
                     args.Add(Path.GetDirectoryName(GodotSharpDirs.ProjectSlnPath)!);
@@ -383,7 +361,7 @@ namespace GodotTools
                     {
                         if (!macOSAppBundleInstalled && string.IsNullOrEmpty(_vsCodePath))
                         {
-                            GD.PushError("Cannot find code editor: Visual Studio Code or VSCodium");
+                            GD.PushError("Cannot find code editor: Visual Studio Code");
                             return Error.FileNotFound;
                         }
 
@@ -393,7 +371,7 @@ namespace GodotTools
                     {
                         if (string.IsNullOrEmpty(_vsCodePath))
                         {
-                            GD.PushError("Cannot find code editor: Visual Studio Code or VSCodium");
+                            GD.PushError("Cannot find code editor: Visual Studio Code");
                             return Error.FileNotFound;
                         }
 
@@ -406,11 +384,12 @@ namespace GodotTools
                     }
                     catch (Exception e)
                     {
-                        GD.PushError($"Error when trying to run code editor: Visual Studio Code or VSCodium. Exception message: '{e.Message}'");
+                        GD.PushError($"Error when trying to run code editor: Visual Studio Code. Exception message: '{e.Message}'");
                     }
 
                     break;
                 }
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -567,7 +546,7 @@ namespace GodotTools
             {
                 settingsHintStr += $",Visual Studio:{(int)ExternalEditorId.VisualStudio}" +
                                    $",MonoDevelop:{(int)ExternalEditorId.MonoDevelop}" +
-                                   $",Visual Studio Code and VSCodium:{(int)ExternalEditorId.VsCode}" +
+                                   $",Visual Studio Code:{(int)ExternalEditorId.VsCode}" +
                                    $",JetBrains Rider and Fleet:{(int)ExternalEditorId.Rider}" +
                                    $",Custom:{(int)ExternalEditorId.CustomEditor}";
             }
@@ -575,14 +554,14 @@ namespace GodotTools
             {
                 settingsHintStr += $",Visual Studio:{(int)ExternalEditorId.VisualStudioForMac}" +
                                    $",MonoDevelop:{(int)ExternalEditorId.MonoDevelop}" +
-                                   $",Visual Studio Code and VSCodium:{(int)ExternalEditorId.VsCode}" +
+                                   $",Visual Studio Code:{(int)ExternalEditorId.VsCode}" +
                                    $",JetBrains Rider and Fleet:{(int)ExternalEditorId.Rider}" +
                                    $",Custom:{(int)ExternalEditorId.CustomEditor}";
             }
             else if (OS.IsUnixLike)
             {
                 settingsHintStr += $",MonoDevelop:{(int)ExternalEditorId.MonoDevelop}" +
-                                   $",Visual Studio Code and VSCodium:{(int)ExternalEditorId.VsCode}" +
+                                   $",Visual Studio Code:{(int)ExternalEditorId.VsCode}" +
                                    $",JetBrains Rider and Fleet:{(int)ExternalEditorId.Rider}" +
                                    $",Custom:{(int)ExternalEditorId.CustomEditor}";
             }
