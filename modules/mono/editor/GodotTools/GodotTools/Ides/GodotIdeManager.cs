@@ -64,6 +64,8 @@ namespace GodotTools.Ides
                     return "VisualStudio";
                 case ExternalEditorId.VsCode:
                     return "VisualStudioCode";
+                case ExternalEditorId.Codium:
+                    return "Codium";
                 case ExternalEditorId.Rider:
                     return "Rider";
                 case ExternalEditorId.Fleet:
@@ -108,6 +110,7 @@ namespace GodotTools.Ides
                 case ExternalEditorId.None:
                 case ExternalEditorId.VisualStudio:
                 case ExternalEditorId.VsCode:
+                case ExternalEditorId.Codium:
                 case ExternalEditorId.Rider:
                 case ExternalEditorId.Fleet:
                 case ExternalEditorId.CustomEditor:
