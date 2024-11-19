@@ -174,10 +174,16 @@ namespace GodotTools
         }
 
         private static string _vsCodePath = string.Empty;
+        private static string _codiumPath = string.Empty;
 
         private static readonly string[] VsCodeNames =
         {
             "code", "code-oss", "vscode", "vscode-oss", "visual-studio-code", "visual-studio-code-oss"
+        };
+
+        private static readonly string[] CodiumNames =
+        {
+            "codium"
         };
 
         [UsedImplicitly]
@@ -321,14 +327,14 @@ namespace GodotTools
                     if (OS.IsMacOS)
                     {
                         // The package path is '/Applications/Visual Studio Code.app'
-                        const string vscodeBundleId = "com.microsoft.VSCode";
+                        const string VscodeBundleId = "com.microsoft.VSCode";
 
-                        macOSAppBundleInstalled = Internal.IsMacOSAppBundleInstalled(vscodeBundleId);
+                        macOSAppBundleInstalled = Internal.IsMacOSAppBundleInstalled(VscodeBundleId);
 
                         if (macOSAppBundleInstalled)
                         {
                             args.Add("-b");
-                            args.Add(vscodeBundleId);
+                            args.Add(VscodeBundleId);
 
                             // The reusing of existing windows made by the 'open' command might not choose a window that is
                             // editing our folder. It's better to ask for a new window and let VSCode do the window management.
@@ -385,6 +391,89 @@ namespace GodotTools
                     catch (Exception e)
                     {
                         GD.PushError($"Error when trying to run code editor: Visual Studio Code. Exception message: '{e.Message}'");
+                    }
+
+                    break;
+                }
+                case ExternalEditorId.Codium:
+                {
+                    if (string.IsNullOrEmpty(_vsCodePath) || !File.Exists(_vsCodePath))
+                    {
+                        // Try to search it again if it wasn't found last time or if it was removed from its location
+                        _codiumPath = CodiumNames.SelectFirstNotNull(OS.PathWhich, orElse: string.Empty);
+                    }
+
+                    var args = new List<string>();
+
+                    bool macOSAppBundleInstalled = false;
+
+                    if (OS.IsMacOS)
+                    {
+                        // The package path is '/Applications/Visual Studio Code.app'
+                        const string CodiumBundleId = "com.vscodium.codium";
+
+                        macOSAppBundleInstalled = Internal.IsMacOSAppBundleInstalled(CodiumBundleId);
+
+                        if (macOSAppBundleInstalled)
+                        {
+                            args.Add("-b");
+                            args.Add(CodiumBundleId);
+
+                            // The reusing of existing windows made by the 'open' command might not choose a window that is
+                            // editing our folder. It's better to ask for a new window and let VSCode do the window management.
+                            args.Add("-n");
+
+                            // The open process must wait until the application finishes (which is instant in VSCode's case)
+                            args.Add("--wait-apps");
+
+                            args.Add("--args");
+                        }
+                    }
+
+                    args.Add(Path.GetDirectoryName(GodotSharpDirs.ProjectSlnPath)!);
+
+                    string scriptPath = ProjectSettings.GlobalizePath(script.ResourcePath);
+
+                    if (line >= 0)
+                    {
+                        args.Add("-g");
+                        args.Add($"{scriptPath}:{line + 1}:{col + 1}");
+                    }
+                    else
+                    {
+                        args.Add(scriptPath);
+                    }
+
+                    string command;
+
+                    if (OS.IsMacOS)
+                    {
+                        if (!macOSAppBundleInstalled && string.IsNullOrEmpty(_vsCodePath))
+                        {
+                            GD.PushError("Cannot find code editor: VSCodium");
+                            return Error.FileNotFound;
+                        }
+
+                        command = macOSAppBundleInstalled ? "/usr/bin/open" : _vsCodePath;
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(_vsCodePath))
+                        {
+                            GD.PushError("Cannot find code editor: VSCodium");
+                            return Error.FileNotFound;
+                        }
+
+                        command = _vsCodePath;
+                    }
+
+                    try
+                    {
+                        OS.RunProcess(command, args);
+                    }
+                    catch (Exception e)
+                    {
+                        GD.PushError($"Error when trying to run code editor: VSCodium. Exception message: '{e.Message}'");
                     }
 
                     break;
@@ -547,6 +636,7 @@ namespace GodotTools
                 settingsHintStr += $",Visual Studio:{(int)ExternalEditorId.VisualStudio}" +
                                    $",MonoDevelop:{(int)ExternalEditorId.MonoDevelop}" +
                                    $",Visual Studio Code:{(int)ExternalEditorId.VsCode}" +
+                                   $",VSCodium:{(int)ExternalEditorId.Codium}" +
                                    $",JetBrains Rider and Fleet:{(int)ExternalEditorId.Rider}" +
                                    $",Custom:{(int)ExternalEditorId.CustomEditor}";
             }
@@ -555,6 +645,7 @@ namespace GodotTools
                 settingsHintStr += $",Visual Studio:{(int)ExternalEditorId.VisualStudioForMac}" +
                                    $",MonoDevelop:{(int)ExternalEditorId.MonoDevelop}" +
                                    $",Visual Studio Code:{(int)ExternalEditorId.VsCode}" +
+                                   $",VSCodium:{(int)ExternalEditorId.Codium}" +
                                    $",JetBrains Rider and Fleet:{(int)ExternalEditorId.Rider}" +
                                    $",Custom:{(int)ExternalEditorId.CustomEditor}";
             }
@@ -562,6 +653,7 @@ namespace GodotTools
             {
                 settingsHintStr += $",MonoDevelop:{(int)ExternalEditorId.MonoDevelop}" +
                                    $",Visual Studio Code:{(int)ExternalEditorId.VsCode}" +
+                                   $",VSCodium:{(int)ExternalEditorId.Codium}" +
                                    $",JetBrains Rider and Fleet:{(int)ExternalEditorId.Rider}" +
                                    $",Custom:{(int)ExternalEditorId.CustomEditor}";
             }
