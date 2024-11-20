@@ -147,6 +147,4 @@ public:
 
 	ColorModeOKHSL(ColorPicker *p_color_picker) :
 			ColorMode(p_color_picker) {}
-
-	~ColorModeOKHSL() {}
 };
