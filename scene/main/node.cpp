@@ -119,10 +119,6 @@ void Node::_notification(int p_notification) {
 			}
 #endif
 
-			if (data.auto_translate_mode != AUTO_TRANSLATE_MODE_DISABLED) {
-				notification(NOTIFICATION_TRANSLATION_CHANGED);
-			}
-
 			if (data.input) {
 				add_to_group("_vp_input" + itos(get_viewport()->get_instance_id()));
 			}
@@ -138,6 +134,12 @@ void Node::_notification(int p_notification) {
 
 			get_tree()->nodes_in_tree_count++;
 			orphan_node_count--;
+		} break;
+
+		case NOTIFICATION_POST_ENTER_TREE: {
+			if (data.auto_translate_mode != AUTO_TRANSLATE_MODE_DISABLED) {
+				notification(NOTIFICATION_TRANSLATION_CHANGED);
+			}
 		} break;
 
 		case NOTIFICATION_EXIT_TREE: {
