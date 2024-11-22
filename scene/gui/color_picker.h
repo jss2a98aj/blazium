@@ -37,10 +37,6 @@
 
 class AspectRatioContainer;
 class ColorMode;
-class ColorModeRGB;
-class ColorModeHSV;
-class ColorModeRAW;
-class ColorModeOKHSL;
 class ColorPickerShape;
 class GridContainer;
 class HSlider;
@@ -124,11 +120,11 @@ private:
 		MENU_CLEAR,
 	};
 
-	static Ref<Shader> wheel_shader;
-	static Ref<Shader> circle_shader;
-	static Ref<Shader> circle_ok_color_shader;
-	static List<Color> preset_cache;
-	static List<Color> recent_preset_cache;
+	static inline Ref<Shader> wheel_shader;
+	static inline Ref<Shader> circle_shader;
+	static inline Ref<Shader> circle_ok_color_shader;
+	static inline List<Color> preset_cache;
+	static inline List<Color> recent_preset_cache;
 
 #ifdef TOOLS_ENABLED
 	Object *editor_settings = nullptr;
