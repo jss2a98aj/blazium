@@ -130,6 +130,7 @@ module.exports = [
 				...globals.browser,
 				'Features': true,
 				'Godot': true,
+				'Blazium': true,
 				'InternalConfig': true,
 				'Preloader': true,
 			},
