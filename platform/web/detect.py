@@ -113,7 +113,7 @@ def configure(env: "SConsEnvironment"):
 
     # Minimum emscripten requirements.
     if cc_semver < (4, 0, 0):
-        print_error("The minimum Emscripten version to build Godot is 4.0.0, detected: %s.%s.%s" % cc_semver)
+        print_error("The minimum Emscripten version to build Blazium is 4.0.0, detected: %s.%s.%s" % cc_semver)
         sys.exit(255)
 
     env.Append(LIBEMITTER=[library_emitter])
@@ -312,8 +312,8 @@ def configure(env: "SConsEnvironment"):
     # Reduce code size by generating less support code (e.g. skip NodeJS support).
     env.Append(LINKFLAGS=["-sENVIRONMENT=web,worker"])
 
-    # Wrap the JavaScript support code around a closure named Godot.
-    env.Append(LINKFLAGS=["-sMODULARIZE=1", "-sEXPORT_NAME='Godot'"])
+    # Wrap the JavaScript support code around a closure named Blazium.
+    env.Append(LINKFLAGS=["-sMODULARIZE=1", "-sEXPORT_NAME='Blazium'"])
 
     # Force long jump mode to 'wasm'
     env.Append(CCFLAGS=["-sSUPPORT_LONGJMP='wasm'"])
