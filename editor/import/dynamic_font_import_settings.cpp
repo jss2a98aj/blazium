@@ -505,6 +505,8 @@ void DynamicFontImportSettingsDialog::_main_prop_changed(const String &p_edited_
 			}
 			font_preview->set_subpixel_positioning((TextServer::SubpixelPositioning)font_subpixel_positioning);
 			_variations_validate();
+		} else if (p_edited_property == "lcd_subpixel_layout") {
+			font_preview->set_lcd_subpixel_layout((TextServer::FontLCDSubpixelLayout)import_settings_data->get("lcd_subpixel_layout").operator int());
 		} else if (p_edited_property == "keep_rounding_remainders") {
 			font_preview->set_keep_rounding_remainders(import_settings_data->get("keep_rounding_remainders"));
 		}
@@ -980,6 +982,7 @@ void DynamicFontImportSettingsDialog::_re_import() {
 	main_settings["modulate_color_glyphs"] = import_settings_data->get("modulate_color_glyphs");
 	main_settings["hinting"] = import_settings_data->get("hinting");
 	main_settings["subpixel_positioning"] = import_settings_data->get("subpixel_positioning");
+	main_settings["lcd_subpixel_layout"] = import_settings_data->get("lcd_subpixel_layout");
 	main_settings["keep_rounding_remainders"] = import_settings_data->get("keep_rounding_remainders");
 	main_settings["fallbacks"] = import_settings_data->get("fallbacks");
 	main_settings["compress"] = import_settings_data->get("compress");
@@ -1291,6 +1294,7 @@ void DynamicFontImportSettingsDialog::open_settings(const String &p_path) {
 			}
 		}
 		font_preview->set_subpixel_positioning((TextServer::SubpixelPositioning)font_subpixel_positioning);
+		font_preview->set_lcd_subpixel_layout((TextServer::FontLCDSubpixelLayout)import_settings_data->get("lcd_subpixel_layout").operator int());
 		font_preview->set_keep_rounding_remainders(import_settings_data->get("keep_rounding_remainders"));
 	}
 	font_preview_label->add_theme_font_override(SceneStringName(font), font_preview);
@@ -1324,6 +1328,7 @@ DynamicFontImportSettingsDialog::DynamicFontImportSettingsDialog() {
 	options_general.push_back(ResourceImporter::ImportOption(PropertyInfo(Variant::BOOL, "modulate_color_glyphs"), false));
 	options_general.push_back(ResourceImporter::ImportOption(PropertyInfo(Variant::INT, "hinting", PROPERTY_HINT_ENUM, "None,Light,Normal"), 1));
 	options_general.push_back(ResourceImporter::ImportOption(PropertyInfo(Variant::INT, "subpixel_positioning", PROPERTY_HINT_ENUM, "Disabled,Auto,One Half of a Pixel,One Quarter of a Pixel,Auto (Except Pixel Fonts)"), 4));
+	options_general.push_back(ResourceImporter::ImportOption(PropertyInfo(Variant::INT, "lcd_subpixel_layout", PROPERTY_HINT_ENUM, "Disabled,Horizontal RGB,Horizontal BGR,Vertical RGB,Vertical BGR"), 1));
 	options_general.push_back(ResourceImporter::ImportOption(PropertyInfo(Variant::BOOL, "keep_rounding_remainders"), true));
 
 	options_general.push_back(ResourceImporter::ImportOption(PropertyInfo(Variant::NIL, "Metadata Overrides", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP), Variant()));
