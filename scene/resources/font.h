@@ -202,6 +202,7 @@ class FontFile : public Font {
 	bool allow_system_fallback = true;
 	TextServer::Hinting hinting = TextServer::HINTING_LIGHT;
 	TextServer::SubpixelPositioning subpixel_positioning = TextServer::SUBPIXEL_POSITIONING_AUTO;
+	TextServer::FontLCDSubpixelLayout lcd_subpixel_layout = TextServer::FONT_LCD_SUBPIXEL_LAYOUT_HRGB;
 	bool keep_rounding_remainders = true;
 	double oversampling_override = 0.0;
 
@@ -288,6 +289,9 @@ public:
 
 	virtual void set_subpixel_positioning(TextServer::SubpixelPositioning p_subpixel);
 	virtual TextServer::SubpixelPositioning get_subpixel_positioning() const;
+
+	virtual void set_lcd_subpixel_layout(TextServer::FontLCDSubpixelLayout p_subpixel_layout);
+	virtual TextServer::FontLCDSubpixelLayout get_lcd_subpixel_layout() const;
 
 	virtual void set_keep_rounding_remainders(bool p_keep_rounding_remainders);
 	virtual bool get_keep_rounding_remainders() const;
@@ -493,6 +497,7 @@ class SystemFont : public Font {
 	bool allow_system_fallback = true;
 	TextServer::Hinting hinting = TextServer::HINTING_LIGHT;
 	TextServer::SubpixelPositioning subpixel_positioning = TextServer::SUBPIXEL_POSITIONING_AUTO;
+	TextServer::FontLCDSubpixelLayout lcd_subpixel_layout = TextServer::FONT_LCD_SUBPIXEL_LAYOUT_HRGB;
 	bool keep_rounding_remainders = true;
 	double oversampling_override = 0.0;
 	bool msdf = false;
@@ -532,8 +537,11 @@ public:
 	virtual void set_hinting(TextServer::Hinting p_hinting);
 	virtual TextServer::Hinting get_hinting() const;
 
-	virtual void set_subpixel_positioning(TextServer::SubpixelPositioning p_subpixel);
+	virtual void set_subpixel_positioning(TextServer::SubpixelPositioning p_subpixel_positioning);
 	virtual TextServer::SubpixelPositioning get_subpixel_positioning() const;
+
+	virtual void set_lcd_subpixel_layout(TextServer::FontLCDSubpixelLayout p_subpixel_layout);
+	virtual TextServer::FontLCDSubpixelLayout get_lcd_subpixel_layout() const;
 
 	virtual void set_keep_rounding_remainders(bool p_keep_rounding_remainders);
 	virtual bool get_keep_rounding_remainders() const;

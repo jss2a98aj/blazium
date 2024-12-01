@@ -55,6 +55,7 @@ void ThemeDB::initialize_theme() {
 	TextServer::FontAntialiasing font_antialiasing = (TextServer::FontAntialiasing)(int)GLOBAL_GET("gui/theme/default_font_antialiasing");
 	TextServer::Hinting font_hinting = (TextServer::Hinting)(int)GLOBAL_GET("gui/theme/default_font_hinting");
 	TextServer::SubpixelPositioning font_subpixel_positioning = (TextServer::SubpixelPositioning)(int)GLOBAL_GET("gui/theme/default_font_subpixel_positioning");
+	TextServer::FontLCDSubpixelLayout lcd_subpixel_layout = (TextServer::FontLCDSubpixelLayout)(int)GLOBAL_GET("gui/theme/lcd_subpixel_layout");
 
 	const bool font_msdf = GLOBAL_GET("gui/theme/default_font_multichannel_signed_distance_field");
 	const bool font_generate_mipmaps = GLOBAL_GET("gui/theme/default_font_generate_mipmaps");
@@ -83,7 +84,7 @@ void ThemeDB::initialize_theme() {
 	// Always generate the default theme to serve as a fallback for all required theme definitions.
 
 	if (RenderingServer::get_singleton()) {
-		make_default_theme(default_theme_scale, project_font, font_subpixel_positioning, font_hinting, font_antialiasing, font_msdf, font_generate_mipmaps);
+		make_default_theme(default_theme_scale, project_font, font_subpixel_positioning, font_hinting, font_antialiasing, lcd_subpixel_layout, font_msdf, font_generate_mipmaps);
 	}
 
 	_init_default_theme_context();

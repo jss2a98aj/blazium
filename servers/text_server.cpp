@@ -238,6 +238,9 @@ void TextServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("font_set_antialiasing", "font_rid", "antialiasing"), &TextServer::font_set_antialiasing);
 	ClassDB::bind_method(D_METHOD("font_get_antialiasing", "font_rid"), &TextServer::font_get_antialiasing);
 
+	ClassDB::bind_method(D_METHOD("font_set_lcd_subpixel_layout", "font_rid", "lcd_subpixel_layout"), &TextServer::font_set_lcd_subpixel_layout);
+	ClassDB::bind_method(D_METHOD("font_get_lcd_subpixel_layout", "font_rid"), &TextServer::font_get_lcd_subpixel_layout);
+
 	ClassDB::bind_method(D_METHOD("font_set_disable_embedded_bitmaps", "font_rid", "disable_embedded_bitmaps"), &TextServer::font_set_disable_embedded_bitmaps);
 	ClassDB::bind_method(D_METHOD("font_get_disable_embedded_bitmaps", "font_rid"), &TextServer::font_get_disable_embedded_bitmaps);
 
@@ -2351,6 +2354,7 @@ TextServer::TextServer() {
 	GLOBAL_DEF_RST(PropertyInfo(Variant::INT, "gui/theme/default_font_antialiasing", PROPERTY_HINT_ENUM, "None,Grayscale,LCD Subpixel", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED), 1);
 	GLOBAL_DEF_RST(PropertyInfo(Variant::INT, "gui/theme/default_font_hinting", PROPERTY_HINT_ENUM, "None,Light,Normal", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED), TextServer::HINTING_LIGHT);
 	GLOBAL_DEF_RST(PropertyInfo(Variant::INT, "gui/theme/default_font_subpixel_positioning", PROPERTY_HINT_ENUM, "Disabled,Auto,One Half of a Pixel,One Quarter of a Pixel", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED), TextServer::SUBPIXEL_POSITIONING_AUTO);
+	GLOBAL_DEF_RST(PropertyInfo(Variant::INT, "gui/theme/lcd_subpixel_layout", PROPERTY_HINT_ENUM, "Disabled,Horizontal RGB,Horizontal BGR,Vertical RGB,Vertical BGR"), 1);
 
 	GLOBAL_DEF_RST("gui/theme/default_font_multichannel_signed_distance_field", false);
 	GLOBAL_DEF_RST("gui/theme/default_font_generate_mipmaps", false);
