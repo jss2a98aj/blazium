@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-package org.godotengine.editor
+package app.blazium.editor
 
 import android.app.PictureInPictureParams
 import android.content.pm.PackageManager
@@ -38,10 +38,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
-import org.godotengine.editor.embed.GameMenuFragment
-import org.godotengine.godot.utils.GameMenuUtils
-import org.godotengine.godot.utils.ProcessPhoenix
-import org.godotengine.godot.utils.isNativeXRDevice
+import app.blazium.editor.embed.GameMenuFragment
+import app.blazium.godot.utils.GameMenuUtils
+import app.blazium.godot.utils.ProcessPhoenix
+import app.blazium.godot.utils.isNativeXRDevice
 
 /**
  * Drives the 'run project' window of the Godot Editor.
