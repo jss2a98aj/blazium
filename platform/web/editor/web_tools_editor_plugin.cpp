@@ -62,6 +62,8 @@ void WebToolsEditorPlugin::_download_zip() {
 		ERR_PRINT("Downloading the project as a ZIP archive is only available in Editor mode.");
 		return;
 	}
+
+
 	const String output_name = ProjectZIPPacker::get_project_zip_safe_name();
 	const String output_path = String("/tmp").path_join(output_name);
 	ProjectZIPPacker::pack_project_zip(output_path);
