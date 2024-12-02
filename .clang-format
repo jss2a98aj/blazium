@@ -137,7 +137,7 @@ InsertBraces: true
 #   Hex: 0
 #   HexMinDigits: 0
 JavaImportGroups:
-  - org.godotengine
+  - app.blazium
   - android
   - androidx
   - com.android

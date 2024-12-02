@@ -28,9 +28,9 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-package org.godotengine.godot.plugin;
+package app.blazium.godot.plugin;
 
-import org.godotengine.godot.Godot;
+import app.blazium.godot.Godot;
 
 import android.app.Activity;
 import android.content.pm.ApplicationInfo;
@@ -56,11 +56,11 @@ public final class GodotPluginRegistry {
 	/**
 	 * Prefix used for version 1 of the Godot plugin, mostly compatible with Godot 3.x
 	 */
-	private static final String GODOT_PLUGIN_V1_NAME_PREFIX = "org.godotengine.plugin.v1.";
+	private static final String GODOT_PLUGIN_V1_NAME_PREFIX = "app.blazium.plugin.v1.";
 	/**
 	 * Prefix used for version 2 of the Godot plugin, compatible with Godot 4.2+
 	 */
-	private static final String GODOT_PLUGIN_V2_NAME_PREFIX = "org.godotengine.plugin.v2.";
+	private static final String GODOT_PLUGIN_V2_NAME_PREFIX = "app.blazium.plugin.v2.";
 
 	private static GodotPluginRegistry instance;
 	private final ConcurrentHashMap<String, GodotPlugin> registry;

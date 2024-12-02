@@ -973,9 +973,9 @@ bool JavaClassWrapper::_get_type_sig(JNIEnv *env, jobject obj, uint32_t &sig, St
 	} else if (str_type == "java.lang.CharSequence") {
 		t |= JavaClass::ARG_TYPE_CHARSEQUENCE;
 		strsig += "Ljava/lang/CharSequence;";
-	} else if (str_type == "org.godotengine.godot.variant.Callable") {
+	} else if (str_type == "app.blazium.godot.variant.Callable") {
 		t |= JavaClass::ARG_TYPE_CALLABLE;
-		strsig += "Lorg/godotengine/godot/variant/Callable;";
+		strsig += "Lapp/blazium/godot/variant/Callable;";
 	} else if (str_type == "java.lang.Boolean") {
 		t |= JavaClass::ARG_TYPE_BOOLEAN | JavaClass::ARG_NUMBER_CLASS_BIT;
 		strsig += "Ljava/lang/Boolean;";
