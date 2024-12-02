@@ -28,15 +28,15 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-package org.godotengine.editor
+package app.blazium.editor
 
 import android.Manifest
 import android.util.Log
 import androidx.annotation.CallSuper
-import org.godotengine.godot.GodotLib
-import org.godotengine.godot.utils.GameMenuUtils
-import org.godotengine.godot.utils.PermissionsUtil
-import org.godotengine.godot.utils.ProcessPhoenix
+import app.blazium.godot.GodotLib
+import app.blazium.godot.utils.GameMenuUtils
+import app.blazium.godot.utils.PermissionsUtil
+import app.blazium.godot.utils.ProcessPhoenix
 
 /**
  * Base class for the Godot play windows.

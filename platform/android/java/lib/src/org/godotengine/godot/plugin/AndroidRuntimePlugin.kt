@@ -28,10 +28,10 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-package org.godotengine.godot.plugin
+package app.blazium.godot.plugin
 
-import org.godotengine.godot.Godot
-import org.godotengine.godot.variant.Callable
+import app.blazium.godot.Godot
+import app.blazium.godot.variant.Callable
 
 /**
  * Provides access to the Android runtime capabilities.

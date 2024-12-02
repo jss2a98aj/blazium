@@ -30,7 +30,7 @@ android {
         manifestPlaceholders = [godotLibraryVersion: getGodotLibraryVersionName()]
     }
 
-    namespace = "org.godotengine.godot"
+    namespace = "app.blazium.godot"
 
     compileOptions {
         sourceCompatibility versions.javaVersion
