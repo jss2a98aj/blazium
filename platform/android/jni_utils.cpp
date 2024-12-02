@@ -40,7 +40,7 @@ jobject callable_to_jcallable(JNIEnv *p_env, const Variant &p_callable) {
 
 	Variant *callable_jcopy = memnew(Variant(p_callable));
 
-	jclass bclass = p_env->FindClass("org/godotengine/godot/variant/Callable");
+	jclass bclass = p_env->FindClass("app/blazium/godot/variant/Callable");
 	jmethodID ctor = p_env->GetMethodID(bclass, "<init>", "(J)V");
 	jobject jcallable = p_env->NewObject(bclass, ctor, reinterpret_cast<int64_t>(callable_jcopy));
 	p_env->DeleteLocalRef(bclass);
@@ -52,7 +52,7 @@ Callable jcallable_to_callable(JNIEnv *p_env, jobject p_jcallable_obj) {
 	ERR_FAIL_NULL_V(p_env, Callable());
 
 	const Variant *callable_variant = nullptr;
-	jclass callable_class = p_env->FindClass("org/godotengine/godot/variant/Callable");
+	jclass callable_class = p_env->FindClass("app/blazium/godot/variant/Callable");
 	if (callable_class && p_env->IsInstanceOf(p_jcallable_obj, callable_class)) {
 		jmethodID get_native_pointer = p_env->GetMethodID(callable_class, "getNativePointer", "()J");
 		jlong native_callable = p_env->CallLongMethod(p_jcallable_obj, get_native_pointer);
@@ -159,7 +159,7 @@ jvalret _variant_to_jvalue(JNIEnv *env, Variant::Type p_type, const Variant *p_a
 
 		case Variant::DICTIONARY: {
 			Dictionary dict = *p_arg;
-			jclass dclass = env->FindClass("org/godotengine/godot/Dictionary");
+			jclass dclass = env->FindClass("app/blazium/godot/Dictionary");
 			jmethodID ctor = env->GetMethodID(dclass, "<init>", "()V");
 			jobject jdict = env->NewObject(dclass, ctor);
 
@@ -423,7 +423,7 @@ Variant _jobject_to_variant(JNIEnv *env, jobject obj) {
 		return varr;
 	}
 
-	if (name == "java.util.HashMap" || name == "org.godotengine.godot.Dictionary") {
+	if (name == "java.util.HashMap" || name == "app.blazium.godot.Dictionary") {
 		Dictionary ret;
 		jclass oclass = c;
 		jmethodID get_keys = env->GetMethodID(oclass, "get_keys", "()[Ljava/lang/String;");
@@ -445,7 +445,7 @@ Variant _jobject_to_variant(JNIEnv *env, jobject obj) {
 		return ret;
 	}
 
-	if (name == "org.godotengine.godot.variant.Callable") {
+	if (name == "app.blazium.godot.variant.Callable") {
 		return jcallable_to_callable(env, obj);
 	}
 
@@ -476,8 +476,8 @@ Variant::Type get_jni_type(const String &p_type) {
 		{ "[D", Variant::PACKED_FLOAT64_ARRAY },
 		{ "[Ljava.lang.String;", Variant::PACKED_STRING_ARRAY },
 		{ "[Ljava.lang.CharSequence;", Variant::PACKED_STRING_ARRAY },
-		{ "org.godotengine.godot.Dictionary", Variant::DICTIONARY },
-		{ "org.godotengine.godot.variant.Callable", Variant::CALLABLE },
+		{ "app.blazium.godot.Dictionary", Variant::DICTIONARY },
+		{ "app.blazium.godot.variant.Callable", Variant::CALLABLE },
 		{ nullptr, Variant::NIL }
 	};
 
