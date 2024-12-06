@@ -510,4 +510,16 @@ abstract class BaseGodotEditor : GodotActivity() {
 		val godot = godot ?: return Error.ERR_UNCONFIGURED
 		return verifyApk(godot.fileAccessHandler, apkPath)
 	}
+
+	override fun supportsFeature(featureTag: String): Boolean {
+		if (featureTag == "xr_editor") {
+			return isNativeXRDevice();
+		}
+
+		if (featureTag == "horizonos") {
+			return isHorizonOSDevice()
+		}
+
+        return false
+    }
 }
