@@ -241,7 +241,7 @@ class EditorFileSystem : public Node {
 
 	bool _find_file(const String &p_file, EditorFileSystemDirectory **r_d, int &r_file_pos) const;
 
-	void _scan_fs_changes(EditorFileSystemDirectory *p_dir, ScanProgress &p_progress);
+	void _scan_fs_changes(EditorFileSystemDirectory *p_dir, ScanProgress &p_progress, bool p_recursive = true);
 
 	void _delete_internal_files(const String &p_file);
 	int _insert_actions_delete_files_directory(EditorFileSystemDirectory *p_dir);
@@ -252,7 +252,7 @@ class EditorFileSystem : public Node {
 	HashSet<String> import_extensions;
 
 	int _scan_new_dir(ScannedDirectory *p_dir, Ref<DirAccess> &da);
-	void _process_file_system(const ScannedDirectory *p_scan_dir, EditorFileSystemDirectory *p_dir, ScanProgress &p_progress);
+	void _process_file_system(const ScannedDirectory *p_scan_dir, EditorFileSystemDirectory *p_dir, ScanProgress &p_progress, HashSet<String> *p_processed_files);
 
 	Thread thread_sources;
 	bool scanning_changes = false;
@@ -302,6 +302,7 @@ class EditorFileSystem : public Node {
 	void _update_script_classes();
 	void _update_script_documentation();
 	void _process_update_pending();
+	void _process_removed_files(const HashSet<String> &p_processed_files);
 
 	Mutex update_scene_mutex;
 	HashSet<String> update_scene_paths;
@@ -323,6 +324,19 @@ class EditorFileSystem : public Node {
 
 	HashSet<String> group_file_cache;
 	HashMap<String, String> file_icon_cache;
+
+	struct CopiedFile {
+		String from;
+		String to;
+	};
+
+	bool refresh_queued = false;
+	HashSet<ObjectID> folders_to_sort;
+
+	Error _copy_file(const String &p_from, const String &p_to);
+	bool _copy_directory(const String &p_from, const String &p_to, List<CopiedFile> *p_files);
+	void _queue_refresh_filesystem();
+	void _refresh_filesystem();
 
 	struct ImportThreadData {
 		const ImportFile *reimport_files;
@@ -377,7 +391,9 @@ public:
 	bool is_group_file(const String &p_path) const;
 	void move_group_file(const String &p_path, const String &p_new_path);
 
-	void add_new_directory(const String &p_path);
+	Error make_dir_recursive(const String &p_path, const String &p_base_path = String());
+	Error copy_file(const String &p_from, const String &p_to);
+	Error copy_directory(const String &p_from, const String &p_to);
 
 	static bool _should_skip_directory(const String &p_path);
 

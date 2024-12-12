@@ -194,8 +194,6 @@ private:
 	DependencyRemoveDialog *remove_dialog = nullptr;
 
 	EditorDirDialog *move_dialog = nullptr;
-	ConfirmationDialog *duplicate_dialog = nullptr;
-	LineEdit *duplicate_dialog_text = nullptr;
 	DirectoryCreateDialog *make_dir_dialog = nullptr;
 
 	ConfirmationDialog *overwrite_dialog = nullptr;
@@ -263,7 +261,6 @@ private:
 	void _toggle_file_display();
 	void _set_file_display(bool p_active);
 	void _fs_changed();
-	void _directory_created(const String &p_path);
 
 	void _select_file(const String &p_path, bool p_select_in_favorites = false);
 	void _tree_activate_file();
@@ -294,7 +291,7 @@ private:
 	void _resource_created();
 	void _make_scene_confirm();
 	void _rename_operation_confirm();
-	void _duplicate_operation_confirm();
+	void _duplicate_operation_confirm(const String &p_path);
 	void _overwrite_dialog_action(bool p_overwrite);
 	Vector<String> _check_existing();
 	void _move_operation_confirm(const String &p_to_path, bool p_copy = false, Overwrite p_overwrite = OVERWRITE_UNDECIDED);
@@ -404,10 +401,12 @@ public:
 	void navigate_to_path(const String &p_path);
 	void focus_on_path();
 	void focus_on_filter();
+	void create_directory(const String &p_path, const String &p_base_dir);
 
 	ScriptCreateDialog *get_script_create_dialog() const;
 
 	void fix_dependencies(const String &p_for_file);
+	void update_all();
 
 	int get_h_split_offset() const { return split_box_offset_h; }
 	void set_h_split_offset(int p_offset) { split_box_offset_h = p_offset; }

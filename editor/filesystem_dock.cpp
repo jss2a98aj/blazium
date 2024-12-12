@@ -218,6 +218,7 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 	// Set custom folder color (if applicable).
 	bool has_custom_color = assigned_folder_colors.has(lpath);
 	Color custom_color = has_custom_color ? folder_colors[assigned_folder_colors[lpath]] : Color();
+	Ref<DirAccess> da = DirAccess::create(DirAccess::ACCESS_RESOURCES);
 
 	if (has_custom_color) {
 		subdirectory_item->set_icon_modulate(0, editor_is_dark_theme ? custom_color : custom_color * ITEM_COLOR_SCALE);
@@ -239,6 +240,10 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 	subdirectory_item->set_text(0, dname);
 	subdirectory_item->set_structured_text_bidi_override(0, TextServer::STRUCTURED_TEXT_FILE);
 	subdirectory_item->set_icon(0, get_editor_theme_icon(SNAME("Folder")));
+	if (da->is_link(lpath)) {
+		subdirectory_item->set_icon_overlay(0, get_editor_theme_icon(SNAME("LinkOverlay")));
+		subdirectory_item->set_tooltip_text(0, vformat(TTR("Link to: %s"), da->read_link(lpath)));
+	}
 	subdirectory_item->set_selectable(0, true);
 	subdirectory_item->set_metadata(0, lpath);
 	if (!p_select_in_favorites && (current_path == lpath || ((display_mode != DISPLAY_MODE_TREE_ONLY) && current_path.get_base_dir() == lpath))) {
@@ -311,6 +316,10 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 			file_item->set_text(0, fi.name);
 			file_item->set_structured_text_bidi_override(0, TextServer::STRUCTURED_TEXT_FILE);
 			file_item->set_icon(0, _get_tree_item_icon(!fi.import_broken, fi.type, fi.icon_path));
+			if (da->is_link(file_metadata)) {
+				file_item->set_icon_overlay(0, get_editor_theme_icon(SNAME("LinkOverlay")));
+				file_item->set_tooltip_text(0, vformat(TTR("Link to: %s"), da->read_link(file_metadata)));
+			}
 			file_item->set_icon_max_width(0, icon_size);
 			Color parent_bg_color = subdirectory_item->get_custom_bg_color(0);
 			if (has_custom_color) {
@@ -640,8 +649,7 @@ void FileSystemDock::_notification(int p_what) {
 			}
 
 			if (do_redraw) {
-				_update_file_list(true);
-				_update_tree(get_uncollapsed_paths());
+				update_all();
 			}
 
 			if (EditorThemeManager::is_generated_theme_outdated()) {
@@ -1293,13 +1301,7 @@ void FileSystemDock::_fs_changed() {
 	scanning_vb->hide();
 	split_box->show();
 
-	if (tree->is_visible()) {
-		_update_tree(get_uncollapsed_paths());
-	}
-
-	if (file_list_vb->is_visible()) {
-		_update_file_list(true);
-	}
+	update_all();
 
 	if (!select_after_scan.is_empty()) {
 		_navigate_to_path(select_after_scan);
@@ -1309,15 +1311,6 @@ void FileSystemDock::_fs_changed() {
 	}
 
 	set_process(false);
-}
-
-void FileSystemDock::_directory_created(const String &p_path) {
-	if (!DirAccess::exists(p_path)) {
-		return;
-	}
-	EditorFileSystem::get_singleton()->add_new_directory(p_path);
-	_update_tree(get_uncollapsed_paths());
-	_update_file_list(true);
 }
 
 void FileSystemDock::_set_scanning_mode() {
@@ -1496,76 +1489,22 @@ void FileSystemDock::_try_duplicate_item(const FileOrFolder &p_item, const Strin
 		EditorNode::get_singleton()->add_io_error(TTR("Cannot move a folder into itself.") + "\n" + old_path + "\n");
 		return;
 	}
-	Ref<DirAccess> da = DirAccess::create(DirAccess::ACCESS_RESOURCES);
 
 	if (p_item.is_file) {
 		print_verbose("Duplicating " + old_path + " -> " + new_path);
 
 		// Create the directory structure.
-		da->make_dir_recursive(new_path.get_base_dir());
+		EditorFileSystem::get_singleton()->make_dir_recursive(p_new_path.get_base_dir());
 
-		if (FileAccess::exists(old_path + ".import")) {
-			Error err = da->copy(old_path, new_path);
-			if (err != OK) {
-				EditorNode::get_singleton()->add_io_error(TTR("Error duplicating:") + "\n" + old_path + ": " + error_names[err] + "\n");
-				return;
-			}
-
-			// Remove uid from .import file to avoid conflict.
-			Ref<ConfigFile> cfg;
-			cfg.instantiate();
-			cfg->load(old_path + ".import");
-			cfg->erase_section_key("remap", "uid");
-			err = cfg->save(new_path + ".import");
-			if (err != OK) {
-				EditorNode::get_singleton()->add_io_error(TTR("Error duplicating:") + "\n" + old_path + ".import: " + error_names[err] + "\n");
-				return;
-			}
-		} else {
-			// Files which do not use an uid can just be copied.
-			if (ResourceLoader::get_resource_uid(old_path) == ResourceUID::INVALID_ID) {
-				Error err = da->copy(old_path, new_path);
-				if (err != OK) {
-					EditorNode::get_singleton()->add_io_error(TTR("Error duplicating:") + "\n" + old_path + ": " + error_names[err] + "\n");
-				}
-				return;
-			}
-
-			// Load the resource and save it again in the new location (this generates a new UID).
-			Error err;
-			Ref<Resource> res = ResourceLoader::load(old_path, "", ResourceFormatLoader::CACHE_MODE_REUSE, &err);
-			if (err == OK && res.is_valid()) {
-				err = ResourceSaver::save(res, new_path, ResourceSaver::FLAG_COMPRESS);
-				if (err != OK) {
-					EditorNode::get_singleton()->add_io_error(TTR("Error duplicating:") + " " + vformat(TTR("Failed to save resource at %s: %s"), new_path, error_names[err]));
-				}
-			} else if (err != OK) {
-				// When loading files like text files the error is OK but the resource is still null.
-				// We can ignore such files.
-				EditorNode::get_singleton()->add_io_error(TTR("Error duplicating:") + " " + vformat(TTR("Failed to load resource at %s: %s"), new_path, error_names[err]));
-			}
+		Error err = EditorFileSystem::get_singleton()->copy_file(old_path, new_path);
+		if (err != OK) {
+			EditorNode::get_singleton()->add_io_error(TTR("Error duplicating:") + "\n" + old_path + ": " + error_names[err] + "\n");
 		}
 	} else {
-		da->make_dir(new_path);
-
-		// Recursively duplicate all files inside the folder.
-		Ref<DirAccess> old_dir = DirAccess::open(old_path);
-		ERR_FAIL_COND(old_dir.is_null());
-
-		Ref<FileAccess> file_access = FileAccess::create(FileAccess::ACCESS_RESOURCES);
-		old_dir->set_include_navigational(false);
-		old_dir->list_dir_begin();
-		for (String f = old_dir->_get_next(); !f.is_empty(); f = old_dir->_get_next()) {
-			if (f.get_extension() == "import") {
-				continue;
-			}
-			if (file_access->file_exists(old_path + f)) {
-				_try_duplicate_item(FileOrFolder(old_path + f, true), new_path + f);
-			} else if (da->dir_exists(old_path + f)) {
-				_try_duplicate_item(FileOrFolder(old_path + f, false), new_path + f);
-			}
+		Error err = EditorFileSystem::get_singleton()->copy_directory(old_path, new_path);
+		if (err != OK) {
+			EditorNode::get_singleton()->add_io_error(TTR("Error duplicating directory:") + "\n" + old_path + "\n");
 		}
-		old_dir->list_dir_end();
 	}
 }
 
@@ -1870,39 +1809,16 @@ void FileSystemDock::_rename_operation_confirm() {
 	_rescan();
 }
 
-void FileSystemDock::_duplicate_operation_confirm() {
-	String new_name = duplicate_dialog_text->get_text().strip_edges();
-	if (new_name.length() == 0) {
-		EditorNode::get_singleton()->show_warning(TTR("No name provided."));
-		return;
-	} else if (new_name.contains("/") || new_name.contains("\\") || new_name.contains(":")) {
-		EditorNode::get_singleton()->show_warning(TTR("Name contains invalid characters."));
-		return;
-	} else if (new_name[0] == '.') {
-		EditorNode::get_singleton()->show_warning(TTR("Name begins with a dot."));
-		return;
+void FileSystemDock::_duplicate_operation_confirm(const String &p_path) {
+	const String base_dir = p_path.trim_suffix("/").get_base_dir();
+	if (!DirAccess::dir_exists_absolute(base_dir)) {
+		Error err = EditorFileSystem::get_singleton()->make_dir_recursive(base_dir);
+		if (err != OK) {
+			EditorNode::get_singleton()->show_warning(vformat(TTR("Could not create base directory: %s"), error_names[err]));
+			return;
+		}
 	}
-
-	String base_dir = to_duplicate.path.get_base_dir();
-	// get_base_dir() returns "some/path" if the original path was "some/path/", so work it around.
-	if (to_duplicate.path.ends_with("/")) {
-		base_dir = base_dir.get_base_dir();
-	}
-
-	String new_path = base_dir.path_join(new_name);
-
-	// Present a more user friendly warning for name conflict
-	Ref<DirAccess> da = DirAccess::create(DirAccess::ACCESS_RESOURCES);
-	if (da->file_exists(new_path) || da->dir_exists(new_path)) {
-		EditorNode::get_singleton()->show_warning(TTR("A file or folder with this name already exists."));
-		return;
-	}
-
-	_try_duplicate_item(to_duplicate, new_path);
-
-	// Rescan everything.
-	print_verbose("FileSystem: calling rescan.");
-	_rescan();
+	_try_duplicate_item(to_duplicate, p_path);
 }
 
 void FileSystemDock::_overwrite_dialog_action(bool p_overwrite) {
@@ -2478,24 +2394,22 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 		} break;
 
 		case FILE_DUPLICATE: {
-			// Duplicate the selected files.
-			for (int i = 0; i < p_selected.size(); i++) {
-				to_duplicate.path = p_selected[i];
-				to_duplicate.is_file = !to_duplicate.path.ends_with("/");
-				if (to_duplicate.is_file) {
-					String name = to_duplicate.path.get_file();
-					duplicate_dialog->set_title(TTR("Duplicating file:") + " " + name);
-					duplicate_dialog_text->set_text(name);
-					duplicate_dialog_text->select(0, name.rfind("."));
-				} else {
-					String name = to_duplicate.path.substr(0, to_duplicate.path.length() - 1).get_file();
-					duplicate_dialog->set_title(TTR("Duplicating folder:") + " " + name);
-					duplicate_dialog_text->set_text(name);
-					duplicate_dialog_text->select(0, name.length());
-				}
-				duplicate_dialog->popup_centered(Size2(250, 80) * EDSCALE);
-				duplicate_dialog_text->grab_focus();
+			if (p_selected.size() != 1) {
+				return;
 			}
+
+			to_duplicate.path = p_selected[0];
+			to_duplicate.is_file = !to_duplicate.path.ends_with("/");
+			if (to_duplicate.is_file) {
+				String name = to_duplicate.path.get_file();
+				make_dir_dialog->config(to_duplicate.path.get_base_dir(), callable_mp(this, &FileSystemDock::_duplicate_operation_confirm),
+						DirectoryCreateDialog::MODE_FILE, TTR("Duplicating file:") + " " + name, name);
+			} else {
+				String name = to_duplicate.path.trim_suffix("/").get_file();
+				make_dir_dialog->config(to_duplicate.path.trim_suffix("/").get_base_dir(), callable_mp(this, &FileSystemDock::_duplicate_operation_confirm),
+						DirectoryCreateDialog::MODE_DIRECTORY, TTR("Duplicating folder:") + " " + name, name);
+			}
+			make_dir_dialog->popup_centered();
 		} break;
 
 		case FILE_INFO: {
@@ -2510,7 +2424,8 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 			if (!directory.ends_with("/")) {
 				directory = directory.get_base_dir();
 			}
-			make_dir_dialog->config(directory);
+			make_dir_dialog->config(directory, callable_mp(this, &FileSystemDock::create_directory).bind(directory),
+					DirectoryCreateDialog::MODE_DIRECTORY, TTR("Create Folder"), "new folder");
 			make_dir_dialog->popup_centered();
 		} break;
 
@@ -2684,6 +2599,16 @@ void FileSystemDock::fix_dependencies(const String &p_for_file) {
 	deps_editor->edit(p_for_file);
 }
 
+void FileSystemDock::update_all() {
+	if (tree->is_visible()) {
+		_update_tree(get_uncollapsed_paths());
+	}
+
+	if (file_list_vb->is_visible()) {
+		_update_file_list(true);
+	}
+}
+
 void FileSystemDock::focus_on_path() {
 	current_path_line_edit->grab_focus();
 	current_path_line_edit->select_all();
@@ -2700,6 +2625,13 @@ void FileSystemDock::focus_on_filter() {
 	if (current_search_box) {
 		current_search_box->grab_focus();
 		current_search_box->select_all();
+	}
+}
+
+void FileSystemDock::create_directory(const String &p_path, const String &p_base_dir) {
+	Error err = EditorFileSystem::get_singleton()->make_dir_recursive(p_path, p_base_dir);
+	if (err != OK) {
+		EditorNode::get_singleton()->show_warning(vformat(TTR("Could not create folder: %s"), error_names[err]));
 	}
 }
 
@@ -3105,9 +3037,7 @@ void FileSystemDock::_folder_color_index_pressed(int p_index, PopupMenu *p_menu)
 	}
 
 	_update_folder_colors_setting();
-
-	_update_tree(get_uncollapsed_paths());
-	_update_file_list(true);
+	update_all();
 
 	emit_signal(SNAME("folder_color_changed"));
 }
@@ -3759,8 +3689,7 @@ void FileSystemDock::set_file_sort(FileSortOption p_file_sort) {
 	file_sort = p_file_sort;
 
 	// Update everything needed.
-	_update_tree(get_uncollapsed_paths());
-	_update_file_list(true);
+	update_all();
 }
 
 void FileSystemDock::_file_sort_popup(int p_id) {
@@ -3960,22 +3889,25 @@ FileSystemDock::FileSystemDock() {
 	add_child(top_vbc);
 
 	HBoxContainer *toolbar_hbc = memnew(HBoxContainer);
-	toolbar_hbc->add_theme_constant_override("separation", 0);
 	top_vbc->add_child(toolbar_hbc);
+
+	HBoxContainer *nav_hbc = memnew(HBoxContainer);
+	nav_hbc->add_theme_constant_override("separation", 0);
+	toolbar_hbc->add_child(nav_hbc);
 
 	button_hist_prev = memnew(Button);
 	button_hist_prev->set_flat(true);
 	button_hist_prev->set_disabled(true);
 	button_hist_prev->set_focus_mode(FOCUS_NONE);
 	button_hist_prev->set_tooltip_text(TTR("Go to previous selected folder/file."));
-	toolbar_hbc->add_child(button_hist_prev);
+	nav_hbc->add_child(button_hist_prev);
 
 	button_hist_next = memnew(Button);
 	button_hist_next->set_flat(true);
 	button_hist_next->set_disabled(true);
 	button_hist_next->set_focus_mode(FOCUS_NONE);
 	button_hist_next->set_tooltip_text(TTR("Go to next selected folder/file."));
-	toolbar_hbc->add_child(button_hist_next);
+	nav_hbc->add_child(button_hist_next);
 
 	current_path_line_edit = memnew(LineEdit);
 	current_path_line_edit->set_structured_text_bidi_override(TextServer::STRUCTURED_TEXT_FILE);
@@ -3998,13 +3930,12 @@ FileSystemDock::FileSystemDock() {
 	toolbar_hbc->add_child(button_toggle_display_mode);
 
 	button_dock_placement = memnew(Button);
-	button_dock_placement->set_flat(true);
+	button_dock_placement->set_theme_type_variation("FlatMenuButton");
 	button_dock_placement->connect(SceneStringName(pressed), callable_mp(this, &FileSystemDock::_change_bottom_dock_placement));
 	button_dock_placement->hide();
 	toolbar_hbc->add_child(button_dock_placement);
 
 	toolbar2_hbc = memnew(HBoxContainer);
-	toolbar2_hbc->add_theme_constant_override("separation", 0);
 	top_vbc->add_child(toolbar2_hbc);
 
 	tree_search_box = memnew(LineEdit);
@@ -4070,7 +4001,7 @@ FileSystemDock::FileSystemDock() {
 	path_hb->add_child(file_list_button_sort);
 
 	button_file_list_display_mode = memnew(Button);
-	button_file_list_display_mode->set_flat(true);
+	button_file_list_display_mode->set_theme_type_variation("FlatMenuButton");
 	path_hb->add_child(button_file_list_display_mode);
 
 	files = memnew(FileSystemList);
@@ -4137,20 +4068,8 @@ FileSystemDock::FileSystemDock() {
 	overwrite_dialog_footer = memnew(Label);
 	overwrite_dialog_vb->add_child(overwrite_dialog_footer);
 
-	duplicate_dialog = memnew(ConfirmationDialog);
-	VBoxContainer *duplicate_dialog_vb = memnew(VBoxContainer);
-	duplicate_dialog->add_child(duplicate_dialog_vb);
-
-	duplicate_dialog_text = memnew(LineEdit);
-	duplicate_dialog_vb->add_margin_child(TTR("Name:"), duplicate_dialog_text);
-	duplicate_dialog->set_ok_button_text(TTR("Duplicate"));
-	add_child(duplicate_dialog);
-	duplicate_dialog->register_text_enter(duplicate_dialog_text);
-	duplicate_dialog->connect(SceneStringName(confirmed), callable_mp(this, &FileSystemDock::_duplicate_operation_confirm));
-
 	make_dir_dialog = memnew(DirectoryCreateDialog);
 	add_child(make_dir_dialog);
-	make_dir_dialog->connect("dir_created", callable_mp(this, &FileSystemDock::_directory_created));
 
 	make_scene_dialog = memnew(SceneCreateDialog);
 	add_child(make_scene_dialog);
