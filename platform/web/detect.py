@@ -197,7 +197,7 @@ def configure(env: "SConsEnvironment"):
 
     # Minimum emscripten requirements.
     if cc_semver < (3, 1, 62):
-        print_error("The minimum emscripten version to build Godot is 3.1.62, detected: %s.%s.%s" % cc_semver)
+        print_error("The minimum emscripten version to build Blazium is 3.1.62, detected: %s.%s.%s" % cc_semver)
         sys.exit(255)
 
     env.Prepend(CPPPATH=["#platform/web"])
