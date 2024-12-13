@@ -85,10 +85,10 @@ abstract class GodotActivity : FragmentActivity(), GodotHost {
 
 		val currentFragment = supportFragmentManager.findFragmentById(R.id.godot_fragment_container)
 		if (currentFragment is GodotFragment) {
-			Log.v(TAG, "Reusing existing Godot fragment instance.")
+			Log.v(TAG, "Reusing existing Blazium fragment instance.")
 			godotFragment = currentFragment
 		} else {
-			Log.v(TAG, "Creating new Godot fragment instance.")
+			Log.v(TAG, "Creating new Blazium fragment instance.")
 			godotFragment = initGodotInstance()
 			supportFragmentManager.beginTransaction().replace(R.id.godot_fragment_container, godotFragment!!).setPrimaryNavigationFragment(godotFragment).commitNowAllowingStateLoss()
 		}
@@ -132,7 +132,7 @@ abstract class GodotActivity : FragmentActivity(), GodotHost {
 	private fun terminateGodotInstance(instance: Godot) {
 		godotFragment?.let {
 			if (instance === it.godot) {
-				Log.v(TAG, "Force quitting Godot instance")
+				Log.v(TAG, "Force quitting Blazium instance")
 				ProcessPhoenix.forceQuit(this)
 			}
 		}
@@ -147,7 +147,7 @@ abstract class GodotActivity : FragmentActivity(), GodotHost {
 					//
 					// Restarting only the activity, wouldn't be enough unless it did proper cleanup (including
 					// releasing and reloading native libs or resetting their state somehow and clearing static data).
-					Log.v(TAG, "Restarting Godot instance...")
+					Log.v(TAG, "Restarting Blazium instance...")
 					ProcessPhoenix.triggerRebirth(this)
 				}
 			}
