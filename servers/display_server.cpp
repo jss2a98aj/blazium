@@ -1221,6 +1221,17 @@ void DisplayServer::_input_set_custom_mouse_cursor_func(const Ref<Resource> &p_i
 
 bool DisplayServer::can_create_rendering_device() {
 #if defined(RD_ENABLED)
+	RenderingDevice *device = RenderingDevice::get_singleton();
+	if (device) {
+		return true;
+	}
+
+	if (created_rendering_device == RenderingDeviceCreationStatus::SUCCESS) {
+		return true;
+	} else if (created_rendering_device == RenderingDeviceCreationStatus::FAILURE) {
+		return false;
+	}
+
 	Error err;
 	RenderingContextDriver *rcd = nullptr;
 
@@ -1241,7 +1252,14 @@ bool DisplayServer::can_create_rendering_device() {
 			memdelete(rd);
 			rd = nullptr;
 			if (err == OK) {
+				// Creating a RenderingDevice is quite slow.
+				// Cache the result for future usage, so that it's much faster on subsequent calls.
+				created_rendering_device = RenderingDeviceCreationStatus::SUCCESS;
+				memdelete(rcd);
+				rcd = nullptr;
 				return true;
+			} else {
+				created_rendering_device = RenderingDeviceCreationStatus::FAILURE;
 			}
 		}
 
