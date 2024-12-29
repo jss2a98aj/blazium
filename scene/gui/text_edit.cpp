@@ -1537,7 +1537,7 @@ void TextEdit::_notification(int p_what) {
 										carets.write[c].draw_pos.x = rect.position.x;
 									}
 								}
-								{
+								if (ime_selection.y > 0) {
 									// IME caret.
 									Vector<Vector2> sel = TS->shaped_text_get_selection(rid, get_caret_column(c) + ime_selection.x, get_caret_column(c) + ime_selection.x + ime_selection.y);
 									for (int j = 0; j < sel.size(); j++) {
@@ -1687,39 +1687,93 @@ void TextEdit::unhandled_key_input(const Ref<InputEvent> &p_event) {
 bool TextEdit::alt_input(const Ref<InputEvent> &p_gui_input) {
 	Ref<InputEventKey> k = p_gui_input;
 	if (k.is_valid()) {
-		if (!k->is_pressed()) {
-			if (alt_start && k->get_keycode() == Key::ALT) {
-				alt_start = false;
-				if ((alt_code > 0x31 && alt_code < 0xd800) || (alt_code > 0xdfff && alt_code <= 0x10ffff)) {
-					handle_unicode_input(alt_code);
-				}
-				return true;
+		// Start Unicode input (hold).
+		if (k->is_alt_pressed() && k->get_keycode() == Key::KP_ADD && !alt_start && !alt_start_no_hold) {
+			if (has_selection()) {
+				delete_selection();
 			}
-			return false;
+			alt_start = true;
+			alt_code = 0;
+			ime_text = "u";
+			ime_selection = Vector2i(0, -1);
+			_update_ime_text();
+			return true;
 		}
 
-		if (k->is_alt_pressed()) {
-			if (!alt_start) {
-				if (k->get_keycode() == Key::KP_ADD) {
-					alt_start = true;
-					alt_code = 0;
-					return true;
-				}
-			} else {
-				if (k->get_keycode() >= Key::KEY_0 && k->get_keycode() <= Key::KEY_9) {
-					alt_code = alt_code << 4;
-					alt_code += (uint32_t)(k->get_keycode() - Key::KEY_0);
-				}
-				if (k->get_keycode() >= Key::KP_0 && k->get_keycode() <= Key::KP_9) {
-					alt_code = alt_code << 4;
-					alt_code += (uint32_t)(k->get_keycode() - Key::KP_0);
-				}
-				if (k->get_keycode() >= Key::A && k->get_keycode() <= Key::F) {
-					alt_code = alt_code << 4;
-					alt_code += (uint32_t)(k->get_keycode() - Key::A) + 10;
-				}
-				return true;
+		// Start Unicode input (press).
+		if (k->is_action("ui_unicode_start", true) && !alt_start && !alt_start_no_hold) {
+			if (has_selection()) {
+				delete_selection();
 			}
+			alt_start_no_hold = true;
+			alt_code = 0;
+			ime_text = "u";
+			ime_selection = Vector2i(0, -1);
+			_update_ime_text();
+			return true;
+		}
+
+		// Update Unicode input.
+		if (k->is_pressed() && ((k->is_alt_pressed() && alt_start) || alt_start_no_hold)) {
+			if (k->get_keycode() >= Key::KEY_0 && k->get_keycode() <= Key::KEY_9) {
+				alt_code = alt_code << 4;
+				alt_code += (uint32_t)(k->get_keycode() - Key::KEY_0);
+			} else if (k->get_keycode() >= Key::KP_0 && k->get_keycode() <= Key::KP_9) {
+				alt_code = alt_code << 4;
+				alt_code += (uint32_t)(k->get_keycode() - Key::KP_0);
+			} else if (k->get_keycode() >= Key::A && k->get_keycode() <= Key::F) {
+				alt_code = alt_code << 4;
+				alt_code += (uint32_t)(k->get_keycode() - Key::A) + 10;
+			} else if ((Key)k->get_unicode() >= Key::KEY_0 && (Key)k->get_unicode() <= Key::KEY_9) {
+				alt_code = alt_code << 4;
+				alt_code += (uint32_t)((Key)k->get_unicode() - Key::KEY_0);
+			} else if ((Key)k->get_unicode() >= Key::A && (Key)k->get_unicode() <= Key::F) {
+				alt_code = alt_code << 4;
+				alt_code += (uint32_t)((Key)k->get_unicode() - Key::A) + 10;
+			} else if (k->get_physical_keycode() >= Key::KEY_0 && k->get_physical_keycode() <= Key::KEY_9) {
+				alt_code = alt_code << 4;
+				alt_code += (uint32_t)(k->get_physical_keycode() - Key::KEY_0);
+			}
+			if (k->get_keycode() == Key::BACKSPACE) {
+				alt_code = alt_code >> 4;
+			}
+			if (alt_code > 0x10ffff) {
+				alt_code = 0x10ffff;
+			}
+			if (alt_code > 0) {
+				ime_text = vformat("u%s", String::num_int64(alt_code, 16, true));
+			} else {
+				ime_text = "u";
+			}
+			ime_selection = Vector2i(0, -1);
+			_update_ime_text();
+			return true;
+		}
+
+		// Submit Unicode input.
+		if ((!k->is_pressed() && alt_start && k->get_keycode() == Key::ALT) || (alt_start_no_hold && (k->is_action("ui_text_submit", true) || k->is_action("ui_accept", true)))) {
+			alt_start = false;
+			alt_start_no_hold = false;
+			if ((alt_code > 0x31 && alt_code < 0xd800) || (alt_code > 0xdfff && alt_code <= 0x10ffff)) {
+				ime_text = String();
+				ime_selection = Vector2i();
+				handle_unicode_input(alt_code);
+			} else {
+				ime_text = String();
+				ime_selection = Vector2i();
+			}
+			_update_ime_text();
+			return true;
+		}
+
+		// Cancel Unicode input.
+		if (alt_start_no_hold && k->is_action("ui_cancel", true)) {
+			alt_start = false;
+			alt_start_no_hold = false;
+			ime_text = String();
+			ime_selection = Vector2i();
+			_update_ime_text();
+			return true;
 		}
 	}
 	return false;
@@ -2396,7 +2450,7 @@ void TextEdit::_move_caret_left(bool p_select, bool p_move_by_word) {
 			} else {
 				PackedInt32Array words = TS->shaped_text_get_word_breaks(text.get_line_data(get_caret_line(i))->get_rid());
 				if (words.is_empty() || cc <= words[0]) {
-					// This solves the scenario where there are no words but glyfs that can be ignored.
+					// Move to the start when there are no more words.
 					cc = 0;
 				} else {
 					for (int j = words.size() - 2; j >= 0; j = j - 2) {
@@ -2453,7 +2507,7 @@ void TextEdit::_move_caret_right(bool p_select, bool p_move_by_word) {
 			} else {
 				PackedInt32Array words = TS->shaped_text_get_word_breaks(text.get_line_data(get_caret_line(i))->get_rid());
 				if (words.is_empty() || cc >= words[words.size() - 1]) {
-					// This solves the scenario where there are no words but glyfs that can be ignored.
+					// Move to the end when there are no more words.
 					cc = text[get_caret_line(i)].length();
 				} else {
 					for (int j = 1; j < words.size(); j = j + 2) {
@@ -2669,7 +2723,7 @@ void TextEdit::_do_backspace(bool p_word, bool p_all_to_left) {
 			// Get a list with the indices of the word bounds of the given text line.
 			const PackedInt32Array words = TS->shaped_text_get_word_breaks(text.get_line_data(get_caret_line(caret_index))->get_rid());
 			if (words.is_empty() || column <= words[0]) {
-				// If "words" is empty, meaning no words are left, we can remove everything until the beginning of the line.
+				// Delete to the start when there are no more words.
 				column = 0;
 			} else {
 				// Otherwise search for the first word break that is smaller than the index from we're currently deleting.
@@ -2734,10 +2788,15 @@ void TextEdit::_delete(bool p_word, bool p_all_to_right) {
 			int column = get_caret_column(caret_index);
 
 			PackedInt32Array words = TS->shaped_text_get_word_breaks(text.get_line_data(line)->get_rid());
-			for (int j = 1; j < words.size(); j = j + 2) {
-				if (words[j] > column) {
-					column = words[j];
-					break;
+			if (words.is_empty() || column >= words[words.size() - 1]) {
+				// Delete to the end when there are no more words.
+				column = text[get_caret_line(i)].length();
+			} else {
+				for (int j = 1; j < words.size(); j = j + 2) {
+					if (words[j] > column) {
+						column = words[j];
+						break;
+					}
 				}
 			}
 
@@ -3083,22 +3142,34 @@ bool TextEdit::has_ime_text() const {
 
 void TextEdit::cancel_ime() {
 	if (!has_ime_text()) {
+		_close_ime_window();
 		return;
 	}
 	ime_text = String();
-	ime_selection = Point2();
+	ime_selection = Vector2i();
+	alt_start = false;
+	alt_start_no_hold = false;
 	_close_ime_window();
 	_update_ime_text();
 }
 
 void TextEdit::apply_ime() {
 	if (!has_ime_text()) {
+		_close_ime_window();
 		return;
 	}
+
 	// Force apply the current IME text.
-	String insert_ime_text = ime_text;
-	cancel_ime();
-	insert_text_at_caret(insert_ime_text);
+	if (alt_start || alt_start_no_hold) {
+		cancel_ime();
+		if ((alt_code > 0x31 && alt_code < 0xd800) || (alt_code > 0xdfff && alt_code <= 0x10ffff)) {
+			handle_unicode_input(alt_code);
+		}
+	} else {
+		String insert_ime_text = ime_text;
+		cancel_ime();
+		insert_text_at_caret(insert_ime_text);
+	}
 }
 
 void TextEdit::set_editable(const bool p_editable) {
@@ -5936,7 +6007,7 @@ void TextEdit::adjust_viewport_to_caret(int p_caret) {
 
 	// Get position of the end of caret.
 	if (has_ime_text()) {
-		if (ime_selection.y != 0) {
+		if (ime_selection.y > 0) {
 			caret_pos.y = _get_column_x_offset_for_line(get_caret_column(p_caret) + ime_selection.x + ime_selection.y, get_caret_line(p_caret), get_caret_column(p_caret));
 		} else {
 			caret_pos.y = _get_column_x_offset_for_line(get_caret_column(p_caret) + ime_text.size(), get_caret_line(p_caret), get_caret_column(p_caret));
@@ -5988,7 +6059,7 @@ void TextEdit::center_viewport_to_caret(int p_caret) {
 
 		// Get position of the end of caret.
 		if (has_ime_text()) {
-			if (ime_selection.y != 0) {
+			if (ime_selection.y > 0) {
 				caret_pos.y = _get_column_x_offset_for_line(get_caret_column(p_caret) + ime_selection.x + ime_selection.y, get_caret_line(p_caret), get_caret_column(p_caret));
 			} else {
 				caret_pos.y = _get_column_x_offset_for_line(get_caret_column(p_caret) + ime_text.size(), get_caret_line(p_caret), get_caret_column(p_caret));
