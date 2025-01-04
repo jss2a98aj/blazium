@@ -2225,6 +2225,7 @@ RDD::FenceID RenderingDeviceDriverD3D12::fence_create() {
 
 Error RenderingDeviceDriverD3D12::fence_wait(FenceID p_fence) {
 	FenceInfo *fence = (FenceInfo *)(p_fence.id);
+	fence->d3d_fence->SetEventOnCompletion(fence->fence_value, fence->event_handle);
 	DWORD res = WaitForSingleObjectEx(fence->event_handle, INFINITE, FALSE);
 #ifdef PIX_ENABLED
 	PIXNotifyWakeFromFenceSignal(fence->event_handle);
@@ -2319,7 +2320,6 @@ Error RenderingDeviceDriverD3D12::command_queue_execute_and_present(CommandQueue
 			FenceInfo *fence = (FenceInfo *)(p_cmd_fence.id);
 			fence->fence_value++;
 			command_queue->d3d_queue->Signal(fence->d3d_fence.Get(), fence->fence_value);
-			fence->d3d_fence->SetEventOnCompletion(fence->fence_value, fence->event_handle);
 		}
 	}
 
@@ -2525,8 +2525,6 @@ Error RenderingDeviceDriverD3D12::swap_chain_resize(CommandQueueID p_cmd_queue, 
 			present_flags = 0;
 			break;
 	}
-
-	print_verbose("Using swap chain flags: " + itos(creation_flags) + ", sync interval: " + itos(sync_interval) + ", present flags: " + itos(present_flags));
 
 	if (swap_chain->d3d_swap_chain != nullptr && creation_flags != swap_chain->creation_flags) {
 		// The swap chain must be recreated if the creation flags are different.

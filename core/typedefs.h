@@ -43,6 +43,7 @@
 // Should be available everywhere.
 #include "core/error/error_list.h"
 #include <cstdint>
+#include <utility>
 
 // Turn argument to string constant:
 // https://gcc.gnu.org/onlinedocs/cpp/Stringizing.html#Stringizing
@@ -126,13 +127,7 @@ constexpr auto CLAMP(const T m_a, const T2 m_min, const T3 m_max) {
 
 // Generic swap template.
 #ifndef SWAP
-#define SWAP(m_x, m_y) __swap_tmpl((m_x), (m_y))
-template <typename T>
-inline void __swap_tmpl(T &x, T &y) {
-	T aux = x;
-	x = y;
-	y = aux;
-}
+#define SWAP(m_x, m_y) std::swap((m_x), (m_y))
 #endif // SWAP
 
 /* Functions to handle powers of 2 and shifting. */
