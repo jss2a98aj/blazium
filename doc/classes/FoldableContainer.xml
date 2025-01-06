@@ -4,10 +4,193 @@
 		A container that can be expanded/collapsed.
 	</brief_description>
 	<description>
-		A container that can be expanded/collapsed.
+		A container that can be expanded/collapsed, with a title that can contain buttons.
+		The title can be positioned at the top or bottom of the container.
+		The container can be expanded or collapsed by clicking the title.
+		Buttons can be added with [method add_button].
+		Buttons can be toggled by setting the [code]toggle_mode[/code] property to [code]true[/code].
+		Buttons can be hidden or disabled with [method set_button_hidden] and [method set_button_disabled].
+		Buttons can have metadata associated with them, which can be retrieved with [method get_button_metadata] and set with [method set_button_metadata].
+		Buttons can have tooltips associated with them, which can be retrieved with [method get_button_tooltip] and set with [method set_button_tooltip].
+		Buttons can have an ID associated with them, which can be retrieved with [method get_button_id] and set with [method set_button_id].
+		Buttons only support icons not text, and it can be retrieved with [method get_button_icon] and changed with [method set_button_icon].
+		Buttons can be retrieved by their position with [method get_button_at_position] and by their ID with [method get_button_position].
 	</description>
 	<tutorials>
 	</tutorials>
+	<methods>
+		<method name="add_button">
+			<return type="void" />
+			<param index="0" name="icon" type="Texture2D" />
+			<param index="1" name="position" type="int" default="-1" />
+			<param index="2" name="id" type="int" default="-1" />
+			<description>
+				Adds a button to the title.
+			</description>
+		</method>
+		<method name="get_button_at_position" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="position" type="Vector2" />
+			<description>
+				Returns the button's ID at the given position.
+			</description>
+		</method>
+		<method name="get_button_count" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the total number of buttons.
+			</description>
+		</method>
+		<method name="get_button_icon" qualifiers="const">
+			<return type="Texture2D" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the icon of the button at the given index.
+			</description>
+		</method>
+		<method name="get_button_id" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the ID of the button at the given index.
+			</description>
+		</method>
+		<method name="get_button_metadata" qualifiers="const">
+			<return type="Variant" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the metadata for the button at the given index.
+			</description>
+		</method>
+		<method name="get_button_position" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="id" type="int" />
+			<description>
+				Returns the position of the button with the given ID.
+			</description>
+		</method>
+		<method name="get_button_rect" qualifiers="const">
+			<return type="Rect2" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the Rect2 which represents the position and size of the button.
+			</description>
+		</method>
+		<method name="get_button_toggle_mode" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns whether the button at the given index is a toggle button.
+			</description>
+		</method>
+		<method name="get_button_tooltip" qualifiers="const">
+			<return type="String" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns the tooltip for the button at the given index.
+			</description>
+		</method>
+		<method name="is_button_disabled" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns whether the button at the given index is disabled.
+			</description>
+		</method>
+		<method name="is_button_hidden" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns whether the button at the given index is hidden.
+			</description>
+		</method>
+		<method name="is_button_toggled" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Returns whether the button at the given index is toggled on/off.
+			</description>
+		</method>
+		<method name="remove_button">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Removes the button at the given index.
+			</description>
+		</method>
+		<method name="set_button_disabled">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<param index="1" name="disabled" type="bool" />
+			<description>
+				Disables the button at the given index.
+			</description>
+		</method>
+		<method name="set_button_hidden">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<param index="1" name="hidden" type="bool" />
+			<description>
+				Toggles the visibility of the button at the given index.
+			</description>
+		</method>
+		<method name="set_button_icon">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<param index="1" name="icon" type="Texture2D" />
+			<description>
+				Changes the icon of the button at the given index.
+			</description>
+		</method>
+		<method name="set_button_id">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<param index="1" name="id" type="int" />
+			<description>
+				Changes the ID of the button at the given index.
+			</description>
+		</method>
+		<method name="set_button_metadata">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<param index="1" name="metadata" type="Variant" />
+			<description>
+				Set the metadata for the button at the given index.
+			</description>
+		</method>
+		<method name="set_button_position">
+			<return type="int" />
+			<param index="0" name="index" type="int" />
+			<param index="1" name="position" type="int" />
+			<description>
+				Changes the button's position ie. index.
+			</description>
+		</method>
+		<method name="set_button_toggle_mode">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<param index="1" name="enabled" type="bool" />
+			<description>
+				Set the button at the given index to be a toggle button.
+			</description>
+		</method>
+		<method name="set_button_toggled">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<param index="1" name="toggled_on" type="bool" />
+			<description>
+				Set the button at the given index as toggled on/off.
+			</description>
+		</method>
+		<method name="set_button_tooltip">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<param index="1" name="tooltip" type="String" />
+			<description>
+				Sets the tooltip for the button at the given index.
+			</description>
+		</method>
+	</methods>
 	<members>
 		<member name="expanded" type="bool" setter="set_expanded" getter="is_expanded" default="true">
 			If [code]false[/code], the container will becomes folded and will hide all it's children.
@@ -20,14 +203,35 @@
 		<member name="text_direction" type="int" setter="set_text_direction" getter="get_text_direction" enum="Control.TextDirection" default="3">
 			Base text writing direction.
 		</member>
+		<member name="text_overrun_behavior" type="int" setter="set_text_overrun_behavior" getter="get_text_overrun_behavior" enum="TextServer.OverrunBehavior" default="3">
+			Defines the behavior of the [FoldableContainer] when the text is longer than the available space.
+		</member>
 		<member name="title" type="String" setter="set_title" getter="get_title" default="&quot;&quot;">
 			The Container's title text.
 		</member>
 		<member name="title_alignment" type="int" setter="set_title_alignment" getter="get_title_alignment" enum="HorizontalAlignment" default="0">
 			Title's text horizontal alignment as defined in the [enum HorizontalAlignment] enum.
 		</member>
+		<member name="title_position" type="int" setter="set_title_position" getter="get_title_position" enum="FoldableContainer.TitlePosition" default="0">
+			Title's position as defined in the [enum TitlePosition] enum.
+		</member>
 	</members>
 	<signals>
+		<signal name="button_pressed">
+			<param index="0" name="id" type="int" />
+			<param index="1" name="index" type="int" />
+			<description>
+				Emitted when a button is pressed.
+			</description>
+		</signal>
+		<signal name="button_toggled">
+			<param index="0" name="toggled_on" type="bool" />
+			<param index="1" name="id" type="int" />
+			<param index="2" name="index" type="int" />
+			<description>
+				Emitted when a button is toggled.
+			</description>
+		</signal>
 		<signal name="folding_changed">
 			<param index="0" name="is_folded" type="bool" />
 			<description>
@@ -35,7 +239,27 @@
 			</description>
 		</signal>
 	</signals>
+	<constants>
+		<constant name="POSITION_TOP" value="0" enum="TitlePosition">
+			Make the title appear at the top of the container.
+		</constant>
+		<constant name="POSITION_BOTTOM" value="1" enum="TitlePosition">
+			Make the title appear at the bottom of the container.
+		</constant>
+	</constants>
 	<theme_items>
+		<theme_item name="button_icon_disabled" data_type="color" type="Color" default="Color(0.875, 0.875, 0.875, 0.5)">
+			The title's icon color when disabled.
+		</theme_item>
+		<theme_item name="button_icon_hovered" data_type="color" type="Color" default="Color(0.95, 0.95, 0.95, 1)">
+			The title's icon color when hovered.
+		</theme_item>
+		<theme_item name="button_icon_normal" data_type="color" type="Color" default="Color(0.875, 0.875, 0.875, 1)">
+			The title's icon color when normal.
+		</theme_item>
+		<theme_item name="button_icon_pressed" data_type="color" type="Color" default="Color(1, 1, 1, 1)">
+			The title's icon color when pressed.
+		</theme_item>
 		<theme_item name="collapsed_font_color" data_type="color" type="Color" default="Color(1, 1, 1, 1)">
 			The title's font color when collapsed.
 		</theme_item>
@@ -68,6 +292,21 @@
 		</theme_item>
 		<theme_item name="arrow_collapsed_mirrored" data_type="icon" type="Texture2D">
 			The title's icon used when collapsed (for right-to-left layouts).
+		</theme_item>
+		<theme_item name="arrow_mirrored" data_type="icon" type="Texture2D">
+			The title's icon used when expanded (for bottom title).
+		</theme_item>
+		<theme_item name="button_disabled_style" data_type="style" type="StyleBox">
+			The title's button disabled style.
+		</theme_item>
+		<theme_item name="button_hovered_style" data_type="style" type="StyleBox">
+			The title's button hover style.
+		</theme_item>
+		<theme_item name="button_normal_style" data_type="style" type="StyleBox">
+			The title's button normal style.
+		</theme_item>
+		<theme_item name="button_pressed_style" data_type="style" type="StyleBox">
+			The title's button pressed style.
 		</theme_item>
 		<theme_item name="focus" data_type="style" type="StyleBox">
 			Background used when [FoldableContainer] has GUI focus. The [theme_item focus] [StyleBox] is displayed [i]over[/i] the base [StyleBox], so a partially transparent [StyleBox] should be used to ensure the base [StyleBox] remains visible. A [StyleBox] that represents an outline or an underline works well for this purpose. To disable the focus visual effect, assign a [StyleBoxEmpty] resource. Note that disabling the focus visual effect will harm keyboard/controller navigation usability, so this is not recommended for accessibility reasons.
