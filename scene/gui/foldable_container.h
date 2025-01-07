@@ -32,19 +32,45 @@
 #define FOLDABLE_CONTAINER_H
 
 #include "scene/gui/container.h"
-
-class TextLine;
+#include "scene/resources/text_line.h"
 
 class FoldableContainer : public Container {
-	GDCLASS(FoldableContainer, Container);
+	GDCLASS(FoldableContainer, Container)
+
+public:
+	enum TitlePosition {
+		POSITION_TOP,
+		POSITION_BOTTOM,
+		POSITION_MAX
+	};
 
 private:
+	struct Button {
+		int id = -1;
+		Ref<Texture2D> icon = nullptr;
+		String tooltip;
+
+		bool disabled = false;
+		bool hidden = false;
+		bool toggle_mode = false;
+		bool toggled_on = false;
+
+		Rect2 rect;
+
+		Variant metadata;
+	};
+
+	Vector<FoldableContainer::Button> buttons;
+	int _hovered = -1;
+	int _pressed = -1;
 	bool expanded = true;
 	String title;
 	Ref<TextLine> text_buf;
 	String language;
 	Control::TextDirection text_direction = Control::TEXT_DIRECTION_INHERITED;
 	HorizontalAlignment title_alignment = HORIZONTAL_ALIGNMENT_LEFT;
+	TextServer::OverrunBehavior overrun_behavior = TextServer::OVERRUN_TRIM_ELLIPSIS;
+	TitlePosition title_position = POSITION_TOP;
 
 	bool is_hovering = false;
 	int title_panel_height = 0;
@@ -57,16 +83,27 @@ private:
 		Ref<StyleBox> panel_style;
 		Ref<StyleBox> focus_style;
 
+		Ref<StyleBox> button_normal_style;
+		Ref<StyleBox> button_hovered_style;
+		Ref<StyleBox> button_pressed_style;
+		Ref<StyleBox> button_disabled_style;
+
+		Color button_icon_normal;
+		Color button_icon_hovered;
+		Color button_icon_pressed;
+		Color button_icon_disabled;
+
+		Color title_font_color;
+		Color title_hovered_font_color;
+		Color title_collapsed_font_color;
+		Color title_font_outline_color;
+
 		Ref<Font> title_font;
 		int title_font_size = 0;
 		int title_font_outline_size = 0;
 
-		Color title_font_color;
-		Color title_hover_font_color;
-		Color title_collapsed_font_color;
-		Color title_font_outline_color;
-
 		Ref<Texture2D> arrow;
+		Ref<Texture2D> arrow_mirrored;
 		Ref<Texture2D> arrow_collapsed;
 		Ref<Texture2D> arrow_collapsed_mirrored;
 
@@ -77,9 +114,11 @@ private:
 	Ref<Texture2D> _get_title_icon() const;
 	Size2 _get_title_panel_min_size() const;
 	void _shape();
+	HorizontalAlignment _get_actual_alignment() const;
 
 protected:
 	virtual void gui_input(const Ref<InputEvent> &p_event) override;
+	virtual String get_tooltip(const Point2 &p_pos) const override;
 	void _notification(int p_what);
 	static void _bind_methods();
 
@@ -99,6 +138,47 @@ public:
 	void set_text_direction(TextDirection p_text_direction);
 	TextDirection get_text_direction() const;
 
+	void set_text_overrun_behavior(TextServer::OverrunBehavior p_overrun_behavior);
+	TextServer::OverrunBehavior get_text_overrun_behavior() const;
+
+	void set_title_position(TitlePosition p_title_position);
+	TitlePosition get_title_position() const;
+
+	void add_button(const Ref<Texture2D> &p_icon, int p_position = -1, int p_id = -1);
+	void remove_button(int p_index);
+
+	int get_button_count() const;
+	Rect2 get_button_rect(int p_index) const;
+
+	void set_button_id(int p_index, int p_id);
+	int get_button_id(int p_index) const;
+
+	int set_button_position(int p_index, int p_position);
+	int get_button_position(int p_id) const;
+
+	void set_button_toggle_mode(int p_index, bool p_mode);
+	int get_button_toggle_mode(int p_index) const;
+
+	void set_button_toggled(int p_index, bool p_toggled_on);
+	bool is_button_toggled(int p_index) const;
+
+	void set_button_icon(int p_index, const Ref<Texture2D> &p_icon);
+	Ref<Texture2D> get_button_icon(int p_index) const;
+
+	void set_button_tooltip(int p_index, String p_tooltip);
+	String get_button_tooltip(int p_index) const;
+
+	void set_button_disabled(int p_index, bool p_disabled);
+	bool is_button_disabled(int p_index) const;
+
+	void set_button_hidden(int p_index, bool p_hidden);
+	bool is_button_hidden(int p_index) const;
+
+	void set_button_metadata(int p_index, Variant p_metadata);
+	Variant get_button_metadata(int p_index) const;
+
+	int get_button_at_position(const Point2 &p_pos) const;
+
 	virtual Size2 get_minimum_size() const override;
 
 	virtual Vector<int> get_allowed_size_flags_horizontal() const override;
@@ -106,5 +186,7 @@ public:
 
 	FoldableContainer(const String &p_title = String());
 };
+
+VARIANT_ENUM_CAST(FoldableContainer::TitlePosition);
 
 #endif // FOLDABLE_CONTAINER_H

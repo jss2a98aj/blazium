@@ -1223,6 +1223,11 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 	theme->set_stylebox(SceneStringName(panel), "FoldableContainer", foldable_container_panel);
 	theme->set_stylebox("focus", "FoldableContainer", focus);
 
+	theme->set_stylebox("button_normal_style", "FoldableContainer", make_flat_stylebox(style_hover_color));
+	theme->set_stylebox("button_hovered_style", "FoldableContainer", make_flat_stylebox(style_normal_color));
+	theme->set_stylebox("button_pressed_style", "FoldableContainer", make_flat_stylebox(style_pressed_color));
+	theme->set_stylebox("button_disabled_style", "FoldableContainer", make_flat_stylebox(style_disabled_color));
+
 	theme->set_font(SceneStringName(font), "FoldableContainer", Ref<Font>());
 	theme->set_font_size(SceneStringName(font_size), "FoldableContainer", default_font_size);
 
@@ -1230,8 +1235,13 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 	theme->set_color("hover_font_color", "FoldableContainer", control_font_hover_color);
 	theme->set_color("collapsed_font_color", "FoldableContainer", control_font_pressed_color);
 	theme->set_color("font_outline_color", "FoldableContainer", Color(1, 1, 1));
+	theme->set_color("button_icon_normal", "FoldableContainer", control_font_color);
+	theme->set_color("button_icon_hovered", "FoldableContainer", control_font_hover_color);
+	theme->set_color("button_icon_pressed", "FoldableContainer", control_font_pressed_color);
+	theme->set_color("button_icon_disabled", "FoldableContainer", control_font_disabled_color);
 
 	theme->set_icon("arrow", "FoldableContainer", icons["arrow_down"]);
+	theme->set_icon("arrow_mirrored", "FoldableContainer", icons["arrow_up"]);
 	theme->set_icon("arrow_collapsed", "FoldableContainer", icons["arrow_right"]);
 	theme->set_icon("arrow_collapsed_mirrored", "FoldableContainer", icons["arrow_left"]);
 
