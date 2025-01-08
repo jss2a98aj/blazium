@@ -14,7 +14,6 @@
 		Buttons can have tooltips associated with them, which can be retrieved with [method get_button_tooltip] and set with [method set_button_tooltip].
 		Buttons can have an ID associated with them, which can be retrieved with [method get_button_id] and set with [method set_button_id].
 		Buttons only support icons not text, and it can be retrieved with [method get_button_icon] and changed with [method set_button_icon].
-		Buttons can be retrieved by their position with [method get_button_at_position] and by their ID with [method get_button_position].
 	</description>
 	<tutorials>
 	</tutorials>
@@ -55,18 +54,18 @@
 				Returns the ID of the button at the given index.
 			</description>
 		</method>
+		<method name="get_button_index" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="id" type="int" />
+			<description>
+				Returns the position of the button with the given ID.
+			</description>
+		</method>
 		<method name="get_button_metadata" qualifiers="const">
 			<return type="Variant" />
 			<param index="0" name="index" type="int" />
 			<description>
 				Returns the metadata for the button at the given index.
-			</description>
-		</method>
-		<method name="get_button_position" qualifiers="const">
-			<return type="int" />
-			<param index="0" name="id" type="int" />
-			<description>
-				Returns the position of the button with the given ID.
 			</description>
 		</method>
 		<method name="get_button_rect" qualifiers="const">
@@ -109,6 +108,14 @@
 			<param index="0" name="index" type="int" />
 			<description>
 				Returns whether the button at the given index is toggled on/off.
+			</description>
+		</method>
+		<method name="move_button">
+			<return type="int" />
+			<param index="0" name="from" type="int" />
+			<param index="1" name="to" type="int" />
+			<description>
+				Changes the button's position ie. index.
 			</description>
 		</method>
 		<method name="remove_button">
@@ -156,14 +163,6 @@
 			<param index="1" name="metadata" type="Variant" />
 			<description>
 				Set the metadata for the button at the given index.
-			</description>
-		</method>
-		<method name="set_button_position">
-			<return type="int" />
-			<param index="0" name="index" type="int" />
-			<param index="1" name="position" type="int" />
-			<description>
-				Changes the button's position ie. index.
 			</description>
 		</method>
 		<method name="set_button_toggle_mode">

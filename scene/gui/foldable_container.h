@@ -153,8 +153,8 @@ public:
 	void set_button_id(int p_index, int p_id);
 	int get_button_id(int p_index) const;
 
-	int set_button_position(int p_index, int p_position);
-	int get_button_position(int p_id) const;
+	int move_button(int p_from, int p_to);
+	int get_button_index(int p_id) const;
 
 	void set_button_toggle_mode(int p_index, bool p_mode);
 	int get_button_toggle_mode(int p_index) const;
