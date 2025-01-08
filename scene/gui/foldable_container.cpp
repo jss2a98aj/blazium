@@ -226,22 +226,22 @@ int FoldableContainer::get_button_id(int p_index) const {
 	return buttons[p_index].id;
 }
 
-int FoldableContainer::set_button_position(int p_index, int p_position) {
+int FoldableContainer::move_button(int p_from, int p_to) {
 	int arr_size = buttons.size();
-	ERR_FAIL_INDEX_V(p_index, arr_size, -1);
+	ERR_FAIL_INDEX_V(p_from, arr_size, -1);
 	ERR_FAIL_COND_V(arr_size < 2, -1);
-	p_position = p_position == -1 ? arr_size - 1 : CLAMP(p_position, 0, arr_size - 1);
-	ERR_FAIL_COND_V(p_index == p_position, -1);
+	p_to = p_to == -1 ? arr_size - 1 : CLAMP(p_to, 0, arr_size - 1);
+	ERR_FAIL_COND_V(p_from == p_to, -1);
 
-	Button button = buttons[p_index];
-	buttons.remove_at(p_index);
+	Button button = buttons[p_from];
+	buttons.remove_at(p_from);
 	arr_size--;
-	p_position = CLAMP(p_position, 0, arr_size);
+	p_to = CLAMP(p_to, 0, arr_size);
 
-	return buttons.insert(p_position, button) == OK ? p_position : -1;
+	return buttons.insert(p_to, button) == OK ? p_to : -1;
 }
 
-int FoldableContainer::get_button_position(int p_id) const {
+int FoldableContainer::get_button_index(int p_id) const {
 	for (int i = 0; i < buttons.size(); i++) {
 		if (buttons[i].id == p_id) {
 			return i;
@@ -708,8 +708,8 @@ void FoldableContainer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_button_rect", "index"), &FoldableContainer::get_button_rect);
 	ClassDB::bind_method(D_METHOD("set_button_id", "index", "id"), &FoldableContainer::set_button_id);
 	ClassDB::bind_method(D_METHOD("get_button_id", "index"), &FoldableContainer::get_button_id);
-	ClassDB::bind_method(D_METHOD("set_button_position", "index", "position"), &FoldableContainer::set_button_position);
-	ClassDB::bind_method(D_METHOD("get_button_position", "id"), &FoldableContainer::get_button_position);
+	ClassDB::bind_method(D_METHOD("move_button", "from", "to"), &FoldableContainer::move_button);
+	ClassDB::bind_method(D_METHOD("get_button_index", "id"), &FoldableContainer::get_button_index);
 	ClassDB::bind_method(D_METHOD("set_button_toggle_mode", "index", "enabled"), &FoldableContainer::set_button_toggle_mode);
 	ClassDB::bind_method(D_METHOD("get_button_toggle_mode", "index"), &FoldableContainer::get_button_toggle_mode);
 	ClassDB::bind_method(D_METHOD("set_button_toggled", "index", "toggled_on"), &FoldableContainer::set_button_toggled);
