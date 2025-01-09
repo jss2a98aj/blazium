@@ -53,6 +53,8 @@ typedef interface IAudioClient3 IAudioClient3;
 #ifndef __IAudioClient3_INTERFACE_DEFINED__
 #define __IAudioClient3_INTERFACE_DEFINED__
 
+GODOT_GCC_WARNING_PUSH_AND_IGNORE("-Wnon-virtual-dtor") // Silence warning due to a COM API weirdness (GH-35194).
+
 // clang-format off
 MIDL_INTERFACE("7ED4EE07-8E67-4CD4-8C1A-2B7A5987AD42")
 IAudioClient3 : public IAudioClient2 {
@@ -87,6 +89,8 @@ public:
 };
 // clang-format on
 __CRT_UUID_DECL(IAudioClient3, 0x7ED4EE07, 0x8E67, 0x4CD4, 0x8C, 0x1A, 0x2B, 0x7A, 0x59, 0x87, 0xAD, 0x42)
+
+GODOT_GCC_WARNING_POP
 
 #endif // __IAudioClient3_INTERFACE_DEFINED__
 
