@@ -81,7 +81,7 @@ if lib_arch_dir != "":
     for mipmap_dir_name in ["mipmap", "mipmap-hdpi", "mipmap-mdpi", "mipmap-xhdpi", "mipmap-xxhdpi", "mipmap-xxxhdpi"]:
         env_android.Command(
             "#platform/android/java/lib/res/" + mipmap_dir_name,
-            "#platform/android/icons/" + env_android.version_info["status"] + "/" + mipmap_dir_name,
+            "#platform/android/icons/" + env_android.version_info["external_status"] + "/" + mipmap_dir_name,
             Copy("$TARGET", "$SOURCE"),
         )
 

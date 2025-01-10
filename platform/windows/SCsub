@@ -55,8 +55,8 @@ def rc_defs_builder(target, source, env):
     with methods.generated_wrapper(dst) as file:
         file.write(
             """\
-#define ICON_PATH platform/windows/icons/blazium_{status}.ico
-#define ICON_WRAP_PATH platform/windows/icons/blazium_console_{status}.ico
+#define ICON_PATH platform/windows/icons/blazium_{external_status}.ico
+#define ICON_WRAP_PATH platform/windows/icons/blazium_console_{external_status}.ico
 """.format(**env.version_info)
         )
 
