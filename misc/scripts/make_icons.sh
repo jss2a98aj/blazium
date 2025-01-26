@@ -13,6 +13,6 @@ done
 convert icon16.png icon16.tga
 
 # zip for Linux
-zip godot-icons.zip icon*.png
+zip blazium-icons.zip icon*.png
 
 rm -f icon*.png
