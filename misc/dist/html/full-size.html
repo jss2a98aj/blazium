@@ -103,6 +103,24 @@ body {
 			Your browser does not support JavaScript.
 		</noscript>
 
+		<script>
+const DiscordEmbed = {
+	isDiscordEmbed: () => {
+		// Check for the two meta elements in the head
+		const discordAutodetect = document.querySelector('meta[name="discord_autodetect"]')?.content === 'true';
+		const discordEmbed = document.querySelector('meta[name="discord_embed"]')?.content === 'true';
+
+		if (discordAutodetect) {
+			return DiscordEmbed.isDiscordURL(window.location.hostname);
+		}
+		return discordEmbed;
+	},
+	isDiscordURL: (url) => {
+		const arr = ['discord.com', 'discordapp.com', 'discordsays.com', 'discordapp.net', 'discordsez.com'];
+		return arr.some((substring) => url.toString().includes(substring));
+	},
+};
+		</script>
 		<div id="status">
 			<img id="status-splash" class="$GODOT_SPLASH_CLASSES" src="$GODOT_SPLASH" alt="">
 			<progress id="status-progress"></progress>
