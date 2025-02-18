@@ -308,7 +308,7 @@ const InternalConfig = function (initConfig) { // eslint-disable-line no-unused-
 			'locateFile': function (path) {
 				let locatedPath = path;
 				if (!path.startsWith('godot.')) {
-					return locatedPath;
+					locatedPath = path;
 				} else if (path.endsWith('.audio.worklet.js')) {
 					locatedPath = `${loadPath}.audio.worklet.js`;
 				} else if (path.endsWith('.audio.position.worklet.js')) {
@@ -316,14 +316,14 @@ const InternalConfig = function (initConfig) { // eslint-disable-line no-unused-
 				} else if (path.endsWith('.js')) {
 					locatedPath = `${loadPath}.js`;
 				} else if (path in gdext) {
-					return locatedPath;
+					locatedPath = path;
 				} else if (path.endsWith('.side.wasm')) {
 					locatedPath = `${loadPath}.side.wasm`;
-				} else if (path.endsWith('.wasm')) {
-					locatedPath = `${loadPath}.wasm`;
+				} else if (path.endsWith('.wasm.gz')) {
+					locatedPath = `${loadPath}.wasm.gz`;
 				}
 				// Prepend .proxy/ to the locatedPath value if needed
-				if (DiscordEmbed.isDiscordEmbed()) {
+				if (window.DiscordEmbed?.isDiscordEmbed()) {
 					locatedPath = `.proxy/${locatedPath}`;
 				}
 				return locatedPath;
