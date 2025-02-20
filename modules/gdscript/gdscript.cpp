@@ -58,8 +58,6 @@
 #include "editor/editor_paths.h"
 #endif
 
-#include <stdint.h>
-
 ///////////////////////////
 
 GDScriptNativeClass::GDScriptNativeClass(const StringName &p_name) {
