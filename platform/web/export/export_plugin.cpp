@@ -47,7 +47,7 @@
 
 #include "core/io/compression.h"
 
-Error EditorExportPlatformWeb::_extract_template(const String &p_template, const String &p_dir, const String &p_name, bool pwa) {
+Error EditorExportPlatformWeb::_extract_template(const String &p_template, const String &p_dir, const String &p_name, bool pwa, bool compress_base_wasm, bool keep_uncompressed_wasm) {
 	Ref<FileAccess> io_fa;
 	zlib_filefunc_def io = zipio_create_io(&io_fa);
 	unzFile pkg = unzOpen2(p_template.utf8().get_data(), &io);
@@ -90,38 +90,38 @@ Error EditorExportPlatformWeb::_extract_template(const String &p_template, const
 
 		//write
 		String dst = p_dir.path_join(file.replace("blazium", p_name));
-		if (dst.ends_with(".wasm")) {
-			// Add .gz to archive the engine wasm
-			dst += ".gz";
-		}
-		Ref<FileAccess> f = FileAccess::open(dst, FileAccess::WRITE);
-		if (f.is_null()) {
-			add_message(EXPORT_MESSAGE_ERROR, TTR("Prepare Templates"), vformat(TTR("Could not write file: \"%s\"."), dst));
-			unzClose(pkg);
-			return ERR_FILE_CANT_WRITE;
-		}
-		if (dst.ends_with(".wasm.gz")) {
-			// Archive the engine wasm
-			PackedByteArray compressedData;
-			compressedData.resize(Compression::get_max_compressed_buffer_size(data.size(), Compression::MODE_GZIP));
-			int size = Compression::compress(compressedData.ptrw(), data.ptr(), data.size(), Compression::MODE_GZIP);
-			f->store_buffer(compressedData.ptr(), size);
+		Error err;
+		if (dst.ends_with(".wasm") && compress_base_wasm) {
+			err = _write_or_error(data.ptr(), data.size(), dst + ".gz", "Prepare Templates", true);
+			if (err == OK && keep_uncompressed_wasm) {
+				err = _write_or_error(data.ptr(), data.size(), dst, "Prepare Templates", false);
+			}
 		} else {
-			f->store_buffer(data.ptr(), data.size());
+			err = _write_or_error(data.ptr(), data.size(), dst, "Prepare Templates", false);
 		}
-
+		if (err != OK) {
+			unzClose(pkg);
+			return err;
+		}
 	} while (unzGoToNextFile(pkg) == UNZ_OK);
 	unzClose(pkg);
 	return OK;
 }
 
-Error EditorExportPlatformWeb::_write_or_error(const uint8_t *p_content, int p_size, String p_path) {
+Error EditorExportPlatformWeb::_write_or_error(const uint8_t *p_content, int p_size, String p_path, String p_stage, bool p_compress) {
 	Ref<FileAccess> f = FileAccess::open(p_path, FileAccess::WRITE);
 	if (f.is_null()) {
-		add_message(EXPORT_MESSAGE_ERROR, TTR("Export"), vformat(TTR("Could not write file: \"%s\"."), p_path));
+		add_message(EXPORT_MESSAGE_ERROR, TTR(p_stage), vformat(TTR("Could not write file: \"%s\"."), p_path));
 		return ERR_FILE_CANT_WRITE;
 	}
-	f->store_buffer(p_content, p_size);
+	if (p_compress) {
+		PackedByteArray compressed_data;
+		compressed_data.resize(Compression::get_max_compressed_buffer_size(p_size, Compression::MODE_GZIP));
+		int compressed_size = Compression::compress(compressed_data.ptrw(), p_content, p_size, Compression::MODE_GZIP);
+		f->store_buffer(compressed_data.ptr(), compressed_size);
+	} else {
+		f->store_buffer(p_content, p_size);
+	}
 	return OK;
 }
 
@@ -356,7 +356,7 @@ Error EditorExportPlatformWeb::_build_pwa(const Ref<EditorExportPreset> &p_prese
 
 	// Heavy files that are cached on demand.
 	Array opt_cache_files = {
-		name + ".wasm.gz",
+		name + ".wasm",
 		name + ".pck"
 	};
 	if (extensions) {
@@ -379,7 +379,7 @@ Error EditorExportPlatformWeb::_build_pwa(const Ref<EditorExportPreset> &p_prese
 		f->get_buffer(sw.ptrw(), sw.size());
 	}
 	_replace_strings(replaces, sw);
-	Error err = _write_or_error(sw.ptr(), sw.size(), dir.path_join(name + ".service.worker.js"));
+	Error err = _write_or_error(sw.ptr(), sw.size(), dir.path_join(name + ".service.worker.js"), "Export", false);
 	if (err != OK) {
 		// Message is supplied by the subroutine method.
 		return err;
@@ -432,7 +432,7 @@ Error EditorExportPlatformWeb::_build_pwa(const Ref<EditorExportPreset> &p_prese
 	manifest["icons"] = icons_arr;
 
 	CharString cs = Variant(manifest).to_json_string().utf8();
-	err = _write_or_error((const uint8_t *)cs.get_data(), cs.length(), dir.path_join(name + ".manifest.json"));
+	err = _write_or_error((const uint8_t *)cs.get_data(), cs.length(), dir.path_join(name + ".manifest.json"), "Export", false);
 	if (err != OK) {
 		// Message is supplied by the subroutine method.
 		return err;
@@ -511,6 +511,9 @@ void EditorExportPlatformWeb::get_export_options(List<ExportOption> *r_options) 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "blazium/discord_embed/autodetect"), false));
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "blazium/youtube_playable/enabled"), false));
+
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "blazium/export_gzip_compressed_wasm/enabled"), false, true));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "blazium/export_gzip_compressed_wasm/keep_uncompressed_wasm"), false));
 }
 
 bool EditorExportPlatformWeb::get_export_option_visibility(const EditorExportPreset *p_preset, const String &p_option) const {
@@ -554,7 +557,7 @@ Ref<Texture2D> EditorExportPlatformWeb::get_logo() const {
 bool EditorExportPlatformWeb::has_valid_export_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates, bool p_debug) const {
 #ifdef MODULE_MONO_ENABLED
 	// Don't check for additional errors, as this particular error cannot be resolved.
-	r_error += TTR("Exporting to Web is currently not supported in Godot 4 when using C#/.NET. Use Godot 3 to target Web with C#/Mono instead.") + "\n";
+	r_error += TTR("Exporting to Web is currently not supported in Blazium when using C#/.NET.") + "\n";
 	r_error += TTR("If this project does not use C#, use a non-C# editor build to export the project.") + "\n";
 	return false;
 #else
@@ -671,7 +674,12 @@ Error EditorExportPlatformWeb::export_project(const Ref<EditorExportPreset> &p_p
 	}
 
 	// Extract templates.
-	error = _extract_template(template_path, base_dir, base_name, pwa);
+	bool compress_base_wasm = p_preset->get("blazium/export_gzip_compressed_wasm/enabled");
+	bool keep_uncompressed_wasm = false;
+	if (p_preset->has("blazium/export_gzip_compressed_wasm/keep_uncompressed_wasm")) {
+		keep_uncompressed_wasm = p_preset->get("blazium/export_gzip_compressed_wasm/keep_uncompressed_wasm");
+	}
+	error = _extract_template(template_path, base_dir, base_name, pwa, compress_base_wasm, keep_uncompressed_wasm);
 	if (error) {
 		// Message is supplied by the subroutine method.
 		return error;
@@ -683,9 +691,17 @@ Error EditorExportPlatformWeb::export_project(const Ref<EditorExportPreset> &p_p
 	if (f.is_valid()) {
 		file_sizes[pck_path.get_file()] = (uint64_t)f->get_length();
 	}
-	f = FileAccess::open(base_path + ".wasm.gz", FileAccess::READ);
+	String wasm_path;
+	// Don't count compressed wasm when keeping uncopressed wasm to skew the
+	// game loading bar to finish only when loading the uncompressed wasm.
+	if (compress_base_wasm && !keep_uncompressed_wasm) {
+		wasm_path = base_path + ".wasm.gz";
+	} else {
+		wasm_path = base_path + ".wasm";
+	}
+	f = FileAccess::open(wasm_path, FileAccess::READ);
 	if (f.is_valid()) {
-		file_sizes[base_name + ".wasm.gz"] = (uint64_t)f->get_length();
+		file_sizes[wasm_path] = (uint64_t)f->get_length();
 	}
 
 	// Read the HTML shell file (custom or from template).
@@ -702,7 +718,7 @@ Error EditorExportPlatformWeb::export_project(const Ref<EditorExportPreset> &p_p
 
 	// Generate HTML file with replaced strings.
 	_fix_html(html, p_preset, base_name, p_debug, p_flags, shared_objects, file_sizes);
-	Error err = _write_or_error(html.ptr(), html.size(), p_path);
+	Error err = _write_or_error(html.ptr(), html.size(), p_path, "Export", false);
 	if (err != OK) {
 		// Message is supplied by the subroutine method.
 		return err;
@@ -1007,9 +1023,22 @@ Error EditorExportPlatformWeb::_export_project(const Ref<EditorExportPreset> &p_
 		DirAccess::remove_file_or_error(basepath + ".pck");
 		DirAccess::remove_file_or_error(basepath + ".png");
 		DirAccess::remove_file_or_error(basepath + ".side.wasm");
-		DirAccess::remove_file_or_error(basepath + ".wasm.gz");
 		DirAccess::remove_file_or_error(basepath + ".icon.png");
 		DirAccess::remove_file_or_error(basepath + ".apple-touch-icon.png");
+
+		if (p_preset->get("blazium/export_gzip_compressed_wasm/enabled")) {
+			DirAccess::remove_file_or_error(basepath + ".wasm.gz");
+
+			bool keep_uncompressed_wasm = false;
+			if (p_preset->has("blazium/export_gzip_compressed_wasm/keep_uncompressed_wasm")) {
+				keep_uncompressed_wasm = p_preset->get("blazium/export_gzip_compressed_wasm/keep_uncompressed_wasm");
+			}
+			if (keep_uncompressed_wasm) {
+				DirAccess::remove_file_or_error(basepath + ".wasm");
+			}
+		} else {
+			DirAccess::remove_file_or_error(basepath + ".wasm");
+		}
 	}
 	return err;
 }
