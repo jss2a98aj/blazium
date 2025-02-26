@@ -746,11 +746,11 @@ void EditorPropertyArray::setup(Variant::Type p_array_type, const String &p_hint
 			String subtype_string = p_hint_string.substr(0, hint_subtype_separator);
 			int slash_pos = subtype_string.find_char('/');
 			if (slash_pos >= 0) {
-				subtype_hint = PropertyHint(subtype_string.substr(slash_pos + 1, subtype_string.size() - slash_pos - 1).to_int());
+				subtype_hint = PropertyHint(subtype_string.substr(slash_pos + 1).to_int());
 				subtype_string = subtype_string.substr(0, slash_pos);
 			}
 
-			subtype_hint_string = p_hint_string.substr(hint_subtype_separator + 1, p_hint_string.size() - hint_subtype_separator - 1);
+			subtype_hint_string = p_hint_string.substr(hint_subtype_separator + 1);
 			subtype = Variant::Type(subtype_string.to_int());
 		}
 	}
