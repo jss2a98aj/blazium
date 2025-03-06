@@ -166,7 +166,7 @@ module.exports = [
 		},
 	},
 
-	// javascript templates (service workers)
+	// javascript templates (engine starter, service workers and third party services)
 	{
 		files: ['misc/dist/html/**/*.js'],
 		languageOptions: {
@@ -175,6 +175,11 @@ module.exports = [
 				'___GODOT_CACHE___': true,
 				'___GODOT_ENSURE_CROSSORIGIN_ISOLATION_HEADERS___': true,
 				'___GODOT_OPT_CACHE___': true,
+				'Engine': true,
+				'$GODOT_CONFIG': true,
+				'$GODOT_THREADS_ENABLED': true,
+				'$BLAZIUM_DISCORD_AUTODETECT': true,
+				'ytgame': true,
 			},
 		},
 	},
@@ -191,9 +196,7 @@ module.exports = [
 			globals: {
 				...globals.browser,
 				'Engine': true,
-				'$GODOT_CONFIG': true,
 				'$GODOT_PROJECT_NAME': true,
-				'$GODOT_THREADS_ENABLED': true,
 				'___GODOT_THREADS_ENABLED___': true,
 			},
 		},
@@ -201,8 +204,6 @@ module.exports = [
 			...htmlPlugin.configs.recommended.rules,
 			'@html-eslint/indent': ['error', 'tab'],
 			'@html-eslint/require-closing-tags': ['error', { 'selfClosing': 'never' }],
-			'no-alert': 'off',
-			'no-console': 'off',
 		},
 	},
 
