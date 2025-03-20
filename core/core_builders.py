@@ -29,7 +29,13 @@ def version_info_builder(target, source, env):
 #define GODOT_VERSION_MODULE_CONFIG "{module_config}"
 #define GODOT_VERSION_WEBSITE "{website}"
 #define GODOT_VERSION_DOCS_BRANCH "{docs_branch}"
-#define GODOT_VERSION_DOCS_URL "https://docs.godotengine.org/en/" GODOT_VERSION_DOCS_BRANCH
+#define GODOT_VERSION_DOCS_URL "https://docs.blazium.app"
+#define BLAZIUM_VERSION_MAJOR {external_major}
+#define BLAZIUM_VERSION_MINOR {external_minor}
+#define BLAZIUM_VERSION_PATCH {external_patch}
+#define BLAZIUM_VERSION_STATUS "{external_status}"
+#define MIRROR_LIST_URL "{mirror_list}"
+#define VERSION_URL "{version_url}"
 """.format(**source[0].read())
         )
 
