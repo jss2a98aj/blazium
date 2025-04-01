@@ -245,6 +245,8 @@ private:
 
 	Error _file_dialog_with_options_show2(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback, bool p_options_in_cb, WindowID p_window_id, bool p_unsafe = false);
 
+	void initialize_tts() const;
+
 public:
 	void menu_callback(id p_sender);
 
