@@ -1939,7 +1939,7 @@ Error VariantParser::parse(Stream *p_stream, Variant &r_ret, String &r_err_str, 
 static String rtos_fix(float p_value, bool p_compat) {
 	if (p_value == 0.0f) {
 		return "0"; // Avoid negative zero (-0) being written, which may annoy git, svn, etc. for changes when they don't exist.
-	} else if (p_compat) {
+	} else {
 		// Write old inf_neg for compatibility.
 		if (std::isinf(p_value) && p_value < 0.0f) {
 			return "inf_neg";
@@ -1951,7 +1951,7 @@ static String rtos_fix(float p_value, bool p_compat) {
 static String rtos_fix(double p_value, bool p_compat) {
 	if (p_value == 0.0) {
 		return "0"; // Avoid negative zero (-0) being written, which may annoy git, svn, etc. for changes when they don't exist.
-	} else if (p_compat) {
+	} else {
 		// Write old inf_neg for compatibility.
 		if (std::isinf(p_value) && p_value < 0.0) {
 			return "inf_neg";
