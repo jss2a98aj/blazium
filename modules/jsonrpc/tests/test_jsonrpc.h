@@ -60,17 +60,20 @@ TEST_CASE("[JSONRPC] process_string invalid") {
 }
 
 class TestClassJSONRPC : public JSONRPC {
-public:
-	TestClassJSONRPC() {
-		set_method("something", callable_mp(this, &TestClassJSONRPC::something));
-	}
+	GDCLASS(TestClassJSONRPC, JSONRPC)
 
+public:
 	String something(const String &p_in);
+
+protected:
+	static void _bind_methods();
 };
 
 void test_process_action(const Variant &p_in, const Variant &p_expected, bool p_process_array_elements = false);
 
 TEST_CASE("[JSONRPC] process_action Dictionary") {
+	ClassDB::register_class<TestClassJSONRPC>();
+
 	Dictionary in_dict = Dictionary();
 	in_dict["method"] = "something";
 	in_dict["id"] = "ID";
