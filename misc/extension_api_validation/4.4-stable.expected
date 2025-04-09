@@ -26,13 +26,6 @@ Validate extension JSON: Error: Field 'classes/OpenXRAPIExtension/methods/unregi
 Switched from `OpenXRExtensionWrapperExtension` to parent `OpenXRExtensionWrapper`. Compatibility methods registered.
 
 
-GH-104890
----------
-Validate extension JSON: API was removed: classes/JSONRPC/methods/set_scope
-
-Replaced `set_scope` with `set_method`. Compatibility method registered for binary compatibility. Manual upgrade required by users to retain functionality.
-
-
 GH-76829
 --------
 Validate extension JSON: Error: Field 'classes/RichTextLabel/methods/add_image/arguments': size changed value in new API, from 6 to 11.
