@@ -1291,8 +1291,8 @@ void ColorPicker::_hsv_draw(int p_which, Control *c) {
 				points.set(2, c->get_size());
 				points.set(3, Vector2(0, c->get_size().y));
 			} else {
-				real_t ring_radius_x = Math_SQRT12 * c->get_size().width * WHEEL_RADIUS;
-				real_t ring_radius_y = Math_SQRT12 * c->get_size().height * WHEEL_RADIUS;
+				real_t ring_radius_x = Math::SQRT12 * c->get_size().width * WHEEL_RADIUS;
+				real_t ring_radius_y = Math::SQRT12 * c->get_size().height * WHEEL_RADIUS;
 
 				points.set(0, center - Vector2(ring_radius_x, ring_radius_y));
 				points.set(1, center + Vector2(ring_radius_x, -ring_radius_y));
@@ -1322,15 +1322,15 @@ void ColorPicker::_hsv_draw(int p_which, Control *c) {
 		if (current_shape == SHAPE_VHS_CIRCLE || current_shape == SHAPE_OKHSL_CIRCLE) {
 			Vector2 hue_offset;
 			if (current_shape == SHAPE_OKHSL_CIRCLE) {
-				hue_offset = center * Vector2(Math::cos(ok_hsl_h * Math_TAU), Math::sin(ok_hsl_h * Math_TAU)) * ok_hsl_s;
+				hue_offset = center * Vector2(Math::cos(ok_hsl_h * Math::TAU), Math::sin(ok_hsl_h * Math::TAU)) * ok_hsl_s;
 			} else {
-				hue_offset = center * Vector2(Math::cos(h * Math_TAU), Math::sin(h * Math_TAU)) * s;
+				hue_offset = center * Vector2(Math::cos(h * Math::TAU), Math::sin(h * Math::TAU)) * s;
 			}
 			x = center.x + hue_offset.x - (theme_cache.picker_cursor->get_width() / 2);
 			y = center.y + hue_offset.y - (theme_cache.picker_cursor->get_height() / 2);
 		} else {
-			real_t corner_x = (c == wheel_uv) ? center.x - Math_SQRT12 * c->get_size().width * WHEEL_RADIUS : 0;
-			real_t corner_y = (c == wheel_uv) ? center.y - Math_SQRT12 * c->get_size().height * WHEEL_RADIUS : 0;
+			real_t corner_x = (c == wheel_uv) ? center.x - Math::SQRT12 * c->get_size().width * WHEEL_RADIUS : 0;
+			real_t corner_y = (c == wheel_uv) ? center.y - Math::SQRT12 * c->get_size().height * WHEEL_RADIUS : 0;
 
 			Size2 real_size(c->get_size().x - corner_x * 2, c->get_size().y - corner_y * 2);
 			x = CLAMP(real_size.x * s, 0, real_size.x) + corner_x - (theme_cache.picker_cursor->get_width() / 2);
@@ -1344,13 +1344,13 @@ void ColorPicker::_hsv_draw(int p_which, Control *c) {
 		if (current_shape == SHAPE_HSV_WHEEL) {
 			float _radius = WHEEL_RADIUS * 2.0;
 			_radius += (1.0 - _radius) * 0.5;
-			Point2 pos = center - (theme_cache.picker_cursor->get_size() * 0.5) + Point2(center.x * Math::cos(h * Math_TAU) * _radius, center.y * Math::sin(h * Math_TAU) * _radius);
+			Point2 pos = center - (theme_cache.picker_cursor->get_size() * 0.5) + Point2(center.x * Math::cos(h * Math::TAU) * _radius, center.y * Math::sin(h * Math::TAU) * _radius);
 			c->draw_texture(theme_cache.picker_cursor, pos);
 		}
 
 	} else if (p_which == 1) {
 		if (current_shape == SHAPE_HSV_RECTANGLE) {
-			c->draw_set_transform(Point2(), -Math_PI / 2, Size2(c->get_size().x, -c->get_size().y));
+			c->draw_set_transform(Point2(), -Math::PI / 2, Size2(c->get_size().x, -c->get_size().y));
 			c->draw_texture_rect(theme_cache.color_hue, Rect2(Point2(), Size2(1, 1)));
 			c->draw_set_transform(Point2(), 0, Size2(1, 1));
 			int y = c->get_size().y - c->get_size().y * (1.0 - h);
@@ -1430,7 +1430,7 @@ void ColorPicker::_uv_input(const Ref<InputEvent> &p_event, Control *c) {
 				real_t dist = center.distance_to(bev->get_position());
 				if (dist <= center.x) {
 					real_t rad = center.angle_to_point(bev->get_position());
-					h = ((rad >= 0) ? rad : (Math_TAU + rad)) / Math_TAU;
+					h = ((rad >= 0) ? rad : (Math::TAU + rad)) / Math::TAU;
 					s = CLAMP(dist / center.x, 0, 1);
 					ok_hsl_h = h;
 					ok_hsl_s = s;
@@ -1438,8 +1438,8 @@ void ColorPicker::_uv_input(const Ref<InputEvent> &p_event, Control *c) {
 					return;
 				}
 			} else {
-				real_t corner_x = (c == wheel_uv) ? center.x - Math_SQRT12 * c->get_size().width * 0.42 : 0;
-				real_t corner_y = (c == wheel_uv) ? center.y - Math_SQRT12 * c->get_size().height * 0.42 : 0;
+				real_t corner_x = (c == wheel_uv) ? center.x - Math::SQRT12 * c->get_size().width * 0.42 : 0;
+				real_t corner_y = (c == wheel_uv) ? center.y - Math::SQRT12 * c->get_size().height * 0.42 : 0;
 				Size2 real_size(c->get_size().x - corner_x * 2, c->get_size().y - corner_y * 2);
 
 				if (bev->get_position().x < corner_x || bev->get_position().x > c->get_size().x - corner_x ||
@@ -1449,7 +1449,7 @@ void ColorPicker::_uv_input(const Ref<InputEvent> &p_event, Control *c) {
 
 						if (dist >= center.x * 0.84 && dist <= center.x) {
 							real_t rad = center.angle_to_point(bev->get_position());
-							h = ((rad >= 0) ? rad : (Math_TAU + rad)) / Math_TAU;
+							h = ((rad >= 0) ? rad : (Math::TAU + rad)) / Math::TAU;
 							spinning = true;
 						} else {
 							return;
@@ -1499,17 +1499,17 @@ void ColorPicker::_uv_input(const Ref<InputEvent> &p_event, Control *c) {
 		if (current_shape == SHAPE_VHS_CIRCLE || current_shape == SHAPE_OKHSL_CIRCLE) {
 			real_t dist = center.distance_to(mev->get_position());
 			real_t rad = center.angle_to_point(mev->get_position());
-			h = ((rad >= 0) ? rad : (Math_TAU + rad)) / Math_TAU;
+			h = ((rad >= 0) ? rad : (Math::TAU + rad)) / Math::TAU;
 			s = CLAMP(dist / center.x, 0, 1);
 			ok_hsl_h = h;
 			ok_hsl_s = s;
 		} else {
 			if (spinning) {
 				real_t rad = center.angle_to_point(mev->get_position());
-				h = ((rad >= 0) ? rad : (Math_TAU + rad)) / Math_TAU;
+				h = ((rad >= 0) ? rad : (Math::TAU + rad)) / Math::TAU;
 			} else {
-				real_t corner_x = (c == wheel_uv) ? center.x - Math_SQRT12 * c->get_size().width * 0.42 : 0;
-				real_t corner_y = (c == wheel_uv) ? center.y - Math_SQRT12 * c->get_size().height * 0.42 : 0;
+				real_t corner_x = (c == wheel_uv) ? center.x - Math::SQRT12 * c->get_size().width * 0.42 : 0;
+				real_t corner_y = (c == wheel_uv) ? center.y - Math::SQRT12 * c->get_size().height * 0.42 : 0;
 				Size2 real_size(c->get_size().x - corner_x * 2, c->get_size().y - corner_y * 2);
 
 				real_t x = CLAMP(mev->get_position().x - corner_x, 0, real_size.x);
