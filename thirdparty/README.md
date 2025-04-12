@@ -934,6 +934,14 @@ and solve conflicts and also enrich the feature set originally
 proposed by these libraries and better integrate them with Godot.
 
 
+## six-way lighting
+- Upstream: https://github.com/TheAenema/Godot-Six-Way-Volumetric-Shader
+- Version: Modified for direct Blazium integration
+- License: Creative Commons Attribution 4.0 International License (CC BY 4.0) with exception for use with Blazium
+
+See /modules/sixway_mtl/LICENSE.md for information on the exception for use with Blazium.
+
+
 ## spirv-cross
 
 - Upstream: https://github.com/KhronosGroup/SPIRV-Cross
