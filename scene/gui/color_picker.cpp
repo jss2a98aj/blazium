@@ -53,6 +53,12 @@
 #include "scene/theme/theme_db.h"
 #include "thirdparty/misc/ok_color_shader.h"
 
+void ColorPicker::_validate_property(PropertyInfo &p_property) const {
+	if (p_property.name == "color") {
+		p_property.hint = edit_alpha ? PROPERTY_HINT_NONE : PROPERTY_HINT_COLOR_NO_ALPHA;
+	}
+}
+
 void ColorPicker::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ACCESSIBILITY_UPDATE: {
@@ -2307,6 +2313,12 @@ void ColorPickerButton::pressed() {
 		callable_mp(picker, &ColorPicker::set_focus_on_picker_shape).call_deferred();
 	} else if (DisplayServer::get_singleton()->has_hardware_keyboard()) {
 		picker->set_focus_on_line_edit();
+	}
+}
+
+void ColorPickerButton::_validate_property(PropertyInfo &p_property) const {
+	if (p_property.name == "color") {
+		p_property.hint = edit_alpha ? PROPERTY_HINT_NONE : PROPERTY_HINT_COLOR_NO_ALPHA;
 	}
 }
 
