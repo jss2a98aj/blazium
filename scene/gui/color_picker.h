@@ -415,6 +415,7 @@ private:
 	void _ensure_file_dialog();
 
 protected:
+	void _validate_property(PropertyInfo &p_property) const;
 	virtual void _update_theme_item_cache() override;
 
 	void _notification(int);
@@ -538,6 +539,7 @@ class ColorPickerButton : public Button {
 	void _update_picker();
 
 protected:
+	void _validate_property(PropertyInfo &p_property) const;
 	void _notification(int);
 	static void _bind_methods();
 

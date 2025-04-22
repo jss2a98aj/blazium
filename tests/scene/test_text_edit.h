@@ -6586,7 +6586,11 @@ TEST_CASE("[SceneTree][TextEdit] mouse") {
 	TextEdit *text_edit = memnew(TextEdit);
 	SceneTree::get_singleton()->get_root()->add_child(text_edit);
 
+#ifdef USE_LEGACY_THEME
 	text_edit->set_size(Size2(800, 200));
+#else
+	text_edit->set_size(Size2(804, 200));
+#endif //USE_LEGACY_THEME
 
 	CHECK(text_edit->get_rect_at_line_column(0, 0).get_position() == Point2i(0, 0));
 
@@ -6617,7 +6621,11 @@ TEST_CASE("[SceneTree][TextEdit] mouse") {
 
 	// Add method to get drawn column count?
 	Point2i start_pos = text_edit->get_pos_at_line_column(0, 0);
+#ifdef USE_LEGACY_THEME
+	Point2i end_pos = text_edit->get_pos_at_line_column(0, 104);
+#else
 	Point2i end_pos = text_edit->get_pos_at_line_column(0, 105);
+#endif // USE_LEGACY_THEME
 
 	CHECK(text_edit->get_line_column_at_pos(Point2i(start_pos.x, start_pos.y)) == Point2i(0, 0));
 	CHECK(text_edit->get_line_column_at_pos(Point2i(end_pos.x, end_pos.y)) == Point2i(104, 0));
@@ -7309,7 +7317,13 @@ TEST_CASE("[SceneTree][TextEdit] multicaret") {
 		CHECK(text_edit->get_caret_column(1) == 0);
 
 		text_edit->set_line_wrapping_mode(TextEdit::LineWrappingMode::LINE_WRAPPING_BOUNDARY);
+
+#ifdef USE_LEGACY_THEME
 		text_edit->set_size(Size2(50, 100));
+#else
+		text_edit->set_size(Size2(54, 104));
+#endif //USE_LEGACY_THEME
+
 		// Line wraps: `\t,this, is\nso,me\n\t,test, ,text`.
 		CHECK(text_edit->is_line_wrapped(0));
 		MessageQueue::get_singleton()->flush();
@@ -7472,7 +7486,12 @@ TEST_CASE("[SceneTree][TextEdit] viewport") {
 	SceneTree::get_singleton()->get_root()->add_child(text_edit);
 
 	// No subcases here for performance.
+#ifdef USE_LEGACY_THEME
 	text_edit->set_size(Size2(800, 600));
+#else
+	text_edit->set_size(Size2(804, 604));
+#endif // USE_LEGACY_THEME
+
 	for (int i = 0; i < 50; i++) {
 		text_edit->insert_line_at(0, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vasius mattis leo, sed porta ex lacinia bibendum. Nunc bibendum pellentesque.");
 	}
@@ -8235,52 +8254,53 @@ TEST_CASE("[SceneTree][TextEdit] gutters") {
 		CHECK(DS->get_cursor_shape() == DisplayServer::CURSOR_ARROW);
 
 		// Hover over gutter.
-		SEND_GUI_MOUSE_MOTION_EVENT(Point2(5, line_height + line_height / 2), MouseButtonMask::NONE, Key::NONE);
+		const int margin_left = text_edit->get_theme_stylebox(CoreStringName(normal), SNAME("TextEdit"))->get_margin(SIDE_LEFT);
+		SEND_GUI_MOUSE_MOTION_EVENT(Point2(5 + margin_left, line_height + line_height / 2), MouseButtonMask::NONE, Key::NONE);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(0, 1));
 		SIGNAL_CHECK_FALSE("gutter_clicked");
 		CHECK(DS->get_cursor_shape() == DisplayServer::CURSOR_POINTING_HAND);
 
 		// Click on gutter.
-		SEND_GUI_MOUSE_BUTTON_EVENT(Point2(5, line_height / 2), MouseButton::LEFT, MouseButtonMask::LEFT, Key::NONE);
+		SEND_GUI_MOUSE_BUTTON_EVENT(Point2(5 + margin_left, line_height / 2), MouseButton::LEFT, MouseButtonMask::LEFT, Key::NONE);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(0, 0));
 		SIGNAL_CHECK("gutter_clicked", Array({ { 0, 0 } }));
 
 		// Click on gutter on another line.
-		SEND_GUI_MOUSE_BUTTON_EVENT(Point2(5, line_height * 3 + line_height / 2), MouseButton::LEFT, MouseButtonMask::LEFT, Key::NONE);
+		SEND_GUI_MOUSE_BUTTON_EVENT(Point2(5 + margin_left, line_height * 3 + line_height / 2), MouseButton::LEFT, MouseButtonMask::LEFT, Key::NONE);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(0, 3));
 		SIGNAL_CHECK("gutter_clicked", Array({ { 3, 0 } }));
 
 		// Unclickable gutter can be hovered.
-		SEND_GUI_MOUSE_MOTION_EVENT(Point2(15, line_height + line_height / 2), MouseButtonMask::NONE, Key::NONE);
+		SEND_GUI_MOUSE_MOTION_EVENT(Point2(15 + margin_left, line_height + line_height / 2), MouseButtonMask::NONE, Key::NONE);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(1, 1));
 		SIGNAL_CHECK_FALSE("gutter_clicked");
 		CHECK(DS->get_cursor_shape() == DisplayServer::CURSOR_ARROW);
 
 		// Unclickable gutter can be clicked.
-		SEND_GUI_MOUSE_BUTTON_EVENT(Point2(15, line_height * 2 + line_height / 2), MouseButton::LEFT, MouseButtonMask::LEFT, Key::NONE);
+		SEND_GUI_MOUSE_BUTTON_EVENT(Point2(15 + margin_left, line_height * 2 + line_height / 2), MouseButton::LEFT, MouseButtonMask::LEFT, Key::NONE);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(1, 2));
 		SIGNAL_CHECK("gutter_clicked", Array({ { 2, 1 } }));
 		CHECK(DS->get_cursor_shape() == DisplayServer::CURSOR_ARROW);
 
 		// Hover past last line.
-		SEND_GUI_MOUSE_MOTION_EVENT(Point2(5, line_height * 5), MouseButtonMask::NONE, Key::NONE);
+		SEND_GUI_MOUSE_MOTION_EVENT(Point2(5 + margin_left, line_height * 5), MouseButtonMask::NONE, Key::NONE);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(-1, -1));
 		SIGNAL_CHECK_FALSE("gutter_clicked");
 		CHECK(DS->get_cursor_shape() == DisplayServer::CURSOR_ARROW);
 
 		// Click on gutter past last line.
-		SEND_GUI_MOUSE_BUTTON_EVENT(Point2(5, line_height * 5), MouseButton::LEFT, MouseButtonMask::LEFT, Key::NONE);
+		SEND_GUI_MOUSE_BUTTON_EVENT(Point2(5 + margin_left, line_height * 5), MouseButton::LEFT, MouseButtonMask::LEFT, Key::NONE);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(-1, -1));
 		SIGNAL_CHECK_FALSE("gutter_clicked");
 
 		// Mouse exit resets hover.
-		SEND_GUI_MOUSE_MOTION_EVENT(Point2(5, line_height + line_height / 2), MouseButtonMask::NONE, Key::NONE);
+		SEND_GUI_MOUSE_MOTION_EVENT(Point2(5 + margin_left, line_height + line_height / 2), MouseButtonMask::NONE, Key::NONE);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(0, 1));
 		SEND_GUI_MOUSE_MOTION_EVENT(Point2(-1, -1), MouseButtonMask::NONE, Key::NONE);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(-1, -1));
 
 		// Removing gutter updates hover.
-		SEND_GUI_MOUSE_MOTION_EVENT(Point2(25, line_height + line_height / 2), MouseButtonMask::NONE, Key::NONE);
+		SEND_GUI_MOUSE_MOTION_EVENT(Point2(25 + margin_left, line_height + line_height / 2), MouseButtonMask::NONE, Key::NONE);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(2, 1));
 		text_edit->remove_gutter(2);
 		CHECK(text_edit->get_hovered_gutter() == Vector2i(-1, -1));

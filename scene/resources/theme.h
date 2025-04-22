@@ -228,6 +228,12 @@ public:
 	void get_type_list(List<StringName> *p_list) const;
 	void get_type_dependencies(const StringName &p_base_type, const StringName &p_type_variant, Vector<StringName> &r_result);
 
+#ifndef USE_LEGACY_THEME
+	void freeze_change_propagation();
+	bool is_frozen() const;
+	void unfreeze_and_propagate_changes();
+#endif // !USE_LEGACY_THEME
+
 	void merge_with(const Ref<Theme> &p_other);
 	void clear();
 
