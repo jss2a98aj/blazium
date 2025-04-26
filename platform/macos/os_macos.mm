@@ -46,6 +46,9 @@
 #include <os/log.h>
 #include <sys/sysctl.h>
 
+#include <pwd.h>
+#include <unistd.h>
+
 void OS_MacOS::pre_wait_observer_cb(CFRunLoopObserverRef p_observer, CFRunLoopActivity p_activiy, void *p_context) {
 	OS_MacOS *os = static_cast<OS_MacOS *>(OS::get_singleton());
 
@@ -410,6 +413,16 @@ String OS_MacOS::get_system_dir(SystemDir p_dir, bool p_shared_storage) const {
 	}
 
 	String ret;
+#ifdef TOOLS_ENABLED
+	// If the editor is sandboxed, return the real path
+	if (p_dir == SYSTEM_DIR_DOCUMENTS && is_sandboxed() && Engine::get_singleton()->is_editor_hint()) {
+		struct passwd *pw = getpwuid(getuid());
+		if (pw && pw->pw_name) {
+			ret.append_utf8(pw->pw_name);
+			return String("/Users/") + ret + String("/Documents");
+		}
+	}
+#endif
 	if (found) {
 		NSArray *paths = NSSearchPathForDirectoriesInDomains(id, NSUserDomainMask, YES);
 		if (paths && [paths count] >= 1) {
