@@ -1695,6 +1695,8 @@ ProjectSettings::ProjectSettings() {
 #endif // !defined(NAVIGATION_2D_DISABLED) || !defined(NAVIGATION_3D_DISABLED)
 
 	ProjectSettings::get_singleton()->add_hidden_prefix("input/");
+
+	GLOBAL_DEF_BASIC("filesystem/import/json/always_parse_numbers_as_double", true);
 }
 
 ProjectSettings::ProjectSettings(const String &p_path) {

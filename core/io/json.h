@@ -104,6 +104,8 @@ public:
 
 	_FORCE_INLINE_ int get_error_line() const { return err_line; }
 	_FORCE_INLINE_ String get_error_message() const { return err_str; }
+
+	JSON();
 };
 
 class ResourceFormatLoaderJSON : public ResourceFormatLoader {
