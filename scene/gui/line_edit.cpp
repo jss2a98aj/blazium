@@ -33,6 +33,7 @@
 #include "core/input/input_map.h"
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
+#include "core/string/alt_codes.h"
 #include "scene/gui/label.h"
 #include "scene/gui/popup_menu.h"
 #include "scene/main/window.h"
