@@ -1,5 +1,5 @@
 # Basic GDScript module architecture
-This provides some basic information in how GDScript is implemented and integrates with the rest of the engine. You can learn more about GDScript in the [documentation](https://docs.godotengine.org/en/latest/tutorials/scripting/gdscript/index.html). It describes the syntax and user facing systems and concepts, and can be used as a reference for what user expectations are.
+This provides some basic information in how GDScript is implemented and integrates with the rest of the engine. You can learn more about GDScript in the [documentation](https://docs.blazium.app/tutorials/scripting/gdscript/index.html). It describes the syntax and user facing systems and concepts, and can be used as a reference for what user expectations are.
 
 
 ## General design
@@ -19,7 +19,7 @@ The GDScript module interfaces with Godot's codebase by inheriting from the engi
 
 To access Godot's internal classes, GDScript uses [`ClassDB`](/core/object/class_db.h). `ClassDB` is where Godot registers classes, methods and properties that it wants exposed to its scripting system. This is how GDScript understands that `Node2D` is a class it can use, and that it has a `get_parent()` method.
 
-[Built-in GDScript methods](https://docs.godotengine.org/en/latest/classes/class_@gdscript.html#methods) are defined and exported by [`GDScriptUtilityFunctions`](gdscript_utility_functions.h), whereas [global scope methods](https://docs.godotengine.org/en/latest/classes/class_%2540globalscope.html) are registered in [`Variant::_register_variant_utility_functions()`](/core/variant/variant_utility.cpp).
+[Built-in GDScript methods](https://docs.blazium.app/classes/class_@gdscript.html#methods) are defined and exported by [`GDScriptUtilityFunctions`](gdscript_utility_functions.h), whereas [global scope methods](https://docs.blazium.app/classes/class_%2540globalscope.html) are registered in [`Variant::_register_variant_utility_functions()`](/core/variant/variant_utility.cpp).
 
 
 ## Compilation
