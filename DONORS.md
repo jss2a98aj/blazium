@@ -1,3 +1,7 @@
+# Blazium Engine does not accept donations
+
+Please send your support to Godot or a charity of your choice instead.
+
 # Donors to the Godot Engine project
 
 Godot Engine is a non-profit project developed by a community of voluntary
