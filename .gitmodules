@@ -1,0 +1,4 @@
+[submodule "modules/blazium_sdk"]
+	path = modules/blazium_sdk
+	url = https://github.com/blazium-engine/blazium-sdk-module.git
+	branch = 4.4
