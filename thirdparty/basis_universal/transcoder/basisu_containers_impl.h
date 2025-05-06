@@ -2,6 +2,7 @@
 // Do not include directly
 
 #ifdef _MSC_VER
+#include <ctype.h>
 #pragma warning (disable:4127) // warning C4127: conditional expression is constant
 #endif
 
