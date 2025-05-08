@@ -265,8 +265,7 @@ bool OpenXRMetalExtension::get_swapchain_image_data(XrSwapchain p_swapchain, int
 				p_width,
 				p_height,
 				1,
-				p_array_size,
-				1);
+				p_array_size);
 
 		texture_rids.push_back(image_rid);
 	}
