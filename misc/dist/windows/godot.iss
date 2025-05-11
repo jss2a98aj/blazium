@@ -1,8 +1,8 @@
 #define MyAppName "Godot Engine"
 #define MyAppVersion "4.6.1"
-#define MyAppPublisher "Godot Engine contributors"
-#define MyAppURL "https://godotengine.org/"
-#define MyAppExeName "godot.exe"
+#define MyAppPublisher "Blazium Engine contributors"
+#define MyAppURL "https://blazium.app/"
+#define MyAppExeName "blazium.exe"
 
 [Setup]
 AppId={{60D07AAA-400E-40F5-B073-A796C34D9D78}
@@ -15,10 +15,10 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-AppComments=Godot Engine editor
+AppComments=Blazium Engine editor
 ChangesEnvironment=yes
-DefaultDirName={localappdata}\Godot
-DefaultGroupName=Godot Engine
+DefaultDirName={localappdata}\Blazium
+DefaultGroupName=Blazium Engine
 AllowNoIcons=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
 #ifdef App32Bit
