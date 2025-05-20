@@ -144,14 +144,11 @@ public:
 		return occurrences;
 	}
 
-	void reverse() {
+	void invert() {
 		for (U i = 0; i < count / 2; i++) {
 			SWAP(data[i], data[count - i - 1]);
 		}
 	}
-#ifndef DISABLE_DEPRECATED
-	[[deprecated("Use reverse() instead")]] void invert() { reverse(); }
-#endif
 
 	_FORCE_INLINE_ void clear() { resize(0); }
 	_FORCE_INLINE_ void reset() {
