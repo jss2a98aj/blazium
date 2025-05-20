@@ -846,7 +846,7 @@ void FileDialog::update_file_list() {
 	}
 
 	if (file_sort == FileSortOption::NAME_REVERSE || file_sort == FileSortOption::MODIFIED_TIME_REVERSE) {
-		filtered_dirs.reverse();
+		filtered_dirs.invert();
 	}
 
 	for (const DirInfo &info : filtered_dirs) {
@@ -908,7 +908,7 @@ void FileDialog::update_file_list() {
 	}
 
 	if (file_sort == FileSortOption::NAME_REVERSE || file_sort == FileSortOption::TYPE_REVERSE || file_sort == FileSortOption::MODIFIED_TIME_REVERSE) {
-		filtered_files.reverse();
+		filtered_files.invert();
 	}
 
 	for (const FileInfo &info : filtered_files) {
