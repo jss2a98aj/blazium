@@ -68,9 +68,11 @@ bool ColorPickerShape::can_handle(const Ref<InputEvent> &p_event, Vector2 &r_pos
 }
 
 void ColorPickerShape::apply_color() {
-	color_picker->_copy_hsv_to_color();
-	color_picker->last_color = color_picker->color;
-	color_picker->set_pick_color(color_picker->color);
+	color_picker->_copy_hsv_okhsl_to_normalized();
+	color_picker->_normalized_apply_intensity_to_color();
+	color_picker->hsv_cached = true;
+	color_picker->okhsl_cached = true;
+	color_picker->_set_pick_color(color_picker->color, true, false);
 
 	if (!color_picker->deferred_mode_enabled) {
 		_emit_color_changed();
@@ -122,10 +124,8 @@ void ColorPickerShape::draw_sv_square(Control *p_control, const Rect2 &p_square,
 		Vector2(p_square.position.x, end.y),
 	};
 
-	Color color1 = color_picker->color;
-	color1.set_hsv(color_picker->h, 1, 1);
-	Color color2 = color1;
-	color2.set_hsv(color_picker->h, 1, 0);
+	Color color1 = Color::from_hsv(color_picker->h, 1, 1);
+	Color color2 = Color::from_hsv(color_picker->h, 1, 0);
 
 	PackedColorArray colors = {
 		Color(1, 1, 1, 1),
@@ -322,6 +322,7 @@ void ColorPickerShapeRectangle::_hue_slider_draw() {
 
 void ColorPickerShapeRectangle::_initialize_controls() {
 	sv_square = memnew(Control);
+	sv_square->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	color_picker->shape_container->add_child(sv_square);
 	sv_square->connect(SceneStringName(gui_input), callable_mp(this, &ColorPickerShapeRectangle::_sv_square_input));
 	sv_square->connect(SceneStringName(draw), callable_mp(this, &ColorPickerShapeRectangle::_sv_square_draw));

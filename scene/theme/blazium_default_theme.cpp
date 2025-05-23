@@ -421,7 +421,7 @@ void update_theme_icons(Ref<Theme> &p_theme, const Color &p_font_color, const Co
 	p_theme->set_icon("picker_cursor", "ColorPicker", icons["color_picker_cursor"]);
 	p_theme->set_icon("picker_cursor_bg", "ColorPicker", icons["color_picker_cursor_bg"]);
 	p_theme->set_icon("hex_icon", "ColorPicker", icons["color_picker_hex"]);
-	p_theme->set_icon("hex_code_icon", "ColorPicker", icons["color_picker_hex_code"]);
+	p_theme->set_icon("code_icon", "ColorPicker", icons["color_picker_hex_code"]);
 
 	p_theme->set_icon("bg", "ColorPickerButton", icons["mini_checkerboard"]);
 	p_theme->set_icon("overbright_indicator", "ColorPickerButton", icons["color_picker_overbright"]);
@@ -1155,6 +1155,7 @@ void update_theme_scale(Ref<Theme> &p_theme) {
 	p_theme->set_constant("preset_size", "ColorPicker", 30 * base_scale);
 	p_theme->set_constant("sv_width", "ColorPicker", 256 * base_scale);
 	p_theme->set_constant("sv_height", "ColorPicker", 256 * base_scale);
+	p_theme->set_constant("label_width", "ColorPicker", 14 * base_scale);
 
 	color_button_focus_style->set_border_width_all(x2_scale);
 	focus_rect_style->set_border_width_all(x2_scale);
@@ -1669,7 +1670,6 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_constant("minimum_character_width", "LineEdit", 4);
 	t->set_constant("completion_scroll_width", "CodeEdit", 6);
 	t->set_constant("completion_lines", "CodeEdit", 7);
-	t->set_constant("label_width", "ColorPicker", 10);
 
 	t->set_color("font_shadow_color", "Label", Color(0, 0, 0, 0));
 	t->set_color("font_shadow_color", "GraphNodeTitleLabel", Color(0, 0, 0, 0));

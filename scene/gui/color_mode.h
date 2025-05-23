@@ -48,9 +48,13 @@ public:
 	virtual bool get_allow_greater() const { return false; }
 	virtual float get_slider_value(int idx) const = 0;
 
+	virtual float get_alpha_slider_max() const { return 255.0; }
+	virtual float get_alpha_slider_value() const { return color_picker->get_pick_color().a * 255.0; }
+
 	virtual Color get_color() const = 0;
 
 	virtual void _value_changed() {}
+	virtual void _greater_value_inputted() {}
 
 	virtual void slider_draw(int p_which) = 0;
 
@@ -86,6 +90,7 @@ class ColorModeRGB : public ColorMode {
 public:
 	String labels[3] = { "R", "G", "B" };
 	float slider_max[4] = { 255, 255, 255, 255 };
+	Ref<GradientTexture2D> rgb_texture[3];
 
 	virtual String get_name() const override { return "RGB"; }
 
@@ -97,18 +102,21 @@ public:
 
 	virtual Color get_color() const override;
 
+	virtual void _greater_value_inputted() override;
+
 	virtual void slider_draw(int p_which) override;
 
 	ColorModeRGB(ColorPicker *p_color_picker) :
 			ColorMode(p_color_picker) {}
 };
 
-class ColorModeRAW : public ColorMode {
+class ColorModeLinear : public ColorMode {
 public:
 	String labels[3] = { "R", "G", "B" };
 	float slider_max[4] = { 1, 1, 1, 1 };
+	Ref<GradientTexture2D> rgb_texture[3];
 
-	virtual String get_name() const override { return "RAW"; }
+	virtual String get_name() const override { return "LINEAR"; }
 
 	virtual float get_slider_step() const override { return 1.0 / 255.0; }
 	virtual String get_slider_label(int idx) const override;
@@ -116,11 +124,15 @@ public:
 	virtual bool get_allow_greater() const override { return true; }
 	virtual float get_slider_value(int idx) const override;
 
+	virtual float get_alpha_slider_max() const override;
+	virtual float get_alpha_slider_value() const override;
+
 	virtual Color get_color() const override;
 
 	virtual void slider_draw(int p_which) override;
+	virtual void _greater_value_inputted() override;
 
-	ColorModeRAW(ColorPicker *p_color_picker) :
+	ColorModeLinear(ColorPicker *p_color_picker) :
 			ColorMode(p_color_picker) {}
 };
 
