@@ -774,8 +774,6 @@ _FORCE_INLINE_ String ETRN(const String &p_text, const String &p_text_plural, in
 	return p_text_plural;
 }
 
-bool select_word(const String &p_s, int p_col, int &r_beg, int &r_end);
-
 _FORCE_INLINE_ void sarray_add_str(Vector<String> &arr) {
 }
 
