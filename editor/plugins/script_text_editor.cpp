@@ -2852,7 +2852,7 @@ ScriptTextEditor::ScriptTextEditor() {
 	inline_color_options->set_text_overrun_behavior(TextServer::OVERRUN_TRIM_ELLIPSIS);
 	inline_color_options->set_fit_to_longest_item(false);
 	inline_color_options->connect("item_selected", callable_mp(this, &ScriptTextEditor::_update_color_text).unbind(1));
-	inline_color_picker->get_child(0)->get_child(0)->get_child(2)->add_child(inline_color_options);
+	inline_color_picker->get_color_mode_vbox()->add_child(inline_color_options);
 
 	connection_info_dialog = memnew(ConnectionInfoDialog);
 

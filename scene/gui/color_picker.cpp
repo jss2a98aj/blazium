@@ -147,10 +147,10 @@ void ColorPicker::_notification(int p_what) {
 			}
 
 			if (current_shape != SHAPE_NONE) {
-				btn_shape->set_button_icon(shape_popup->get_item_icon(current_shape));
+				btn_shape->set_button_icon(shape_popup->get_item_icon(get_current_shape_index()));
 			}
 
-			for (int i = 0; i < SLIDER_COUNT; i++) {
+			for (int i = 0; i < MODE_SLIDER_COUNT; i++) {
 				labels[i]->set_custom_minimum_size(Size2(theme_cache.label_width, 0));
 				sliders[i]->add_theme_constant_override(SNAME("center_grabber"), theme_cache.center_slider_grabbers);
 			}
@@ -196,7 +196,7 @@ void ColorPicker::_notification(int p_what) {
 			}
 			slider_arrow_size = (slider_arrow_size * 0.5).round();
 
-			for (int i = 0; i < SLIDER_COUNT; i++) {
+			for (int i = 0; i < MODE_SLIDER_COUNT; i++) {
 				sliders[i]->begin_bulk_theme_override();
 				sliders[i]->add_theme_icon_override(SNAME("grabber"), theme_cache.bar_arrow);
 				sliders[i]->add_theme_icon_override(SNAME("grabber_highlight"), theme_cache.bar_arrow);
@@ -242,7 +242,7 @@ void ColorPicker::_notification(int p_what) {
 		case NOTIFICATION_FOCUS_ENTER:
 		case NOTIFICATION_FOCUS_EXIT: {
 			if (current_shape != SHAPE_NONE) {
-				shapes[current_shape]->cursor_editing = false;
+				shapes[get_current_shape_index()]->cursor_editing = false;
 			}
 		} break;
 
@@ -255,7 +255,7 @@ void ColorPicker::_notification(int p_what) {
 						input->is_action_just_released("ui_down")) {
 					gamepad_event_delay_ms = DEFAULT_GAMEPAD_EVENT_DELAY_MS;
 					if (current_shape == SHAPE_NONE) {
-						shapes[current_shape]->echo_multiplier = 1;
+						shapes[get_current_shape_index()]->echo_multiplier = 1;
 					}
 					accept_event();
 					set_process_internal(false);
@@ -274,7 +274,7 @@ void ColorPicker::_notification(int p_what) {
 							input->is_action_pressed("ui_right") - input->is_action_pressed("ui_left"),
 							input->is_action_pressed("ui_down") - input->is_action_pressed("ui_up"));
 
-					shapes[current_shape]->update_cursor(color_change_vector, true);
+					shapes[get_current_shape_index()]->update_cursor(color_change_vector, true);
 					accept_event();
 				}
 				return;
@@ -366,7 +366,7 @@ void fragment() {
 
 	circle_ok_color_shader.instantiate();
 	circle_ok_color_shader->set_code(OK_COLOR_SHADER + R"(
-// ColorPicker ok color hsv circle shader.
+// ColorPicker ok color hsl circle shader.
 
 uniform float ok_hsl_l = 1.0;
 
@@ -387,12 +387,40 @@ void fragment() {
 	float b4 = float(sqrt(x * x + y * y) < 0.5);
 	COLOR = vec4(col, (b + b2 + b3 + b4) / 4.00);
 })");
+
+	rectangle_ok_color_hs_shader.instantiate();
+	rectangle_ok_color_hs_shader->set_code(OK_COLOR_SHADER + R"(
+// ColorPicker ok color hs rectangle shader.
+
+uniform float ok_hsl_l = 0.0;
+
+void fragment() {
+	float h = UV.x;
+	float s = 1.0 - UV.y;
+	vec3 col = okhsl_to_srgb(vec3(h, s, ok_hsl_l));
+	COLOR = vec4(col, 1.0);
+})");
+
+	rectangle_ok_color_hl_shader.instantiate();
+	rectangle_ok_color_hl_shader->set_code(OK_COLOR_SHADER + R"(
+// ColorPicker ok color hl rectangle shader.
+
+uniform float ok_hsl_s = 0.0;
+
+void fragment() {
+	float h = UV.x;
+	float l = 1.0 - UV.y;
+	vec3 col = okhsl_to_srgb(vec3(h, ok_hsl_s, l));
+	COLOR = vec4(col, 1.0);
+})");
 }
 
 void ColorPicker::finish_shaders() {
 	wheel_shader.unref();
 	circle_shader.unref();
 	circle_ok_color_shader.unref();
+	rectangle_ok_color_hs_shader.unref();
+	rectangle_ok_color_hl_shader.unref();
 }
 
 void ColorPicker::set_focus_on_line_edit() {
@@ -400,7 +428,7 @@ void ColorPicker::set_focus_on_line_edit() {
 }
 
 void ColorPicker::set_focus_on_picker_shape() {
-	shapes[current_shape]->grab_focus();
+	shapes[get_current_shape_index()]->grab_focus();
 }
 
 void ColorPicker::_update_controls() {
@@ -435,7 +463,7 @@ void ColorPicker::_update_controls() {
 
 	int i = 0;
 	for (ColorPickerShape *shape : shapes) {
-		bool is_active = current_shape == i;
+		bool is_active = get_current_shape_index() == i;
 		i++;
 
 		if (!shape->is_initialized) {
@@ -604,14 +632,14 @@ void ColorPicker::create_slider(GridContainer *gc, int idx) {
 	slider->connect("drag_started", callable_mp(this, &ColorPicker::_slider_drag_started));
 	slider->connect(SceneStringName(value_changed), callable_mp(this, &ColorPicker::_slider_value_changed).unbind(1));
 	slider->connect("drag_ended", callable_mp(this, &ColorPicker::_slider_drag_ended).unbind(1));
-	if (idx < SLIDER_COUNT) {
+	if (idx < MODE_SLIDER_COUNT) {
 		slider->connect(SceneStringName(draw), callable_mp(this, &ColorPicker::_slider_draw).bind(idx));
 	} else if (idx == SLIDER_ALPHA) {
 		slider->connect(SceneStringName(draw), callable_mp(this, &ColorPicker::_alpha_slider_draw));
 	}
 	slider->connect(SceneStringName(gui_input), callable_mp(this, &ColorPicker::_slider_or_spin_input));
 
-	if (idx < SLIDER_COUNT) {
+	if (idx < MODE_SLIDER_COUNT) {
 		sliders[idx] = slider;
 		values[idx] = val;
 		labels[idx] = lbl;
@@ -669,10 +697,8 @@ void ColorPicker::set_palette_saved_callback(const Callable &p_palette_saved) {
 #endif // TOOLS_ENABLED
 
 HSlider *ColorPicker::get_slider(int p_idx) {
-	if (p_idx < SLIDER_COUNT) {
-		return sliders[p_idx];
-	}
-	return alpha_slider;
+	ERR_FAIL_INDEX_V(p_idx, MODE_MAX, nullptr);
+	return sliders[p_idx];
 }
 
 Vector<float> ColorPicker::get_active_slider_values() {
@@ -700,7 +726,7 @@ void ColorPicker::_copy_normalized_to_hsv_okhsl() {
 }
 
 void ColorPicker::_copy_hsv_okhsl_to_normalized() {
-	if (current_shape != SHAPE_NONE && shapes[current_shape]->is_ok_hsl()) {
+	if (current_shape != SHAPE_NONE && shapes[get_current_shape_index()]->is_ok_hsl()) {
 		color_normalized.set_ok_hsl(ok_hsl_h, ok_hsl_s, ok_hsl_l, color_normalized.a);
 	} else {
 		color_normalized.set_hsv(h, s, v, color_normalized.a);
@@ -843,7 +869,7 @@ void ColorPicker::_update_color(bool p_update_sliders) {
 	_update_text_value();
 
 	if (current_shape != SHAPE_NONE) {
-		for (Control *control : shapes[current_shape]->controls) {
+		for (Control *control : shapes[get_current_shape_index()]->controls) {
 			control->queue_redraw();
 		}
 	}
@@ -935,11 +961,11 @@ void ColorPicker::set_picker_shape(PickerShapeType p_shape) {
 		return;
 	}
 	if (current_shape != SHAPE_NONE) {
-		shape_popup->set_item_checked(current_shape, false);
+		shape_popup->set_item_checked(get_current_shape_index(), false);
 	}
 	if (p_shape != SHAPE_NONE) {
-		shape_popup->set_item_checked(p_shape, true);
-		btn_shape->set_button_icon(shape_popup->get_item_icon(p_shape));
+		shape_popup->set_item_checked(shape_to_index(p_shape), true);
+		btn_shape->set_button_icon(shape_popup->get_item_icon(shape_to_index(p_shape)));
 	}
 
 	current_shape = p_shape;
@@ -1029,7 +1055,7 @@ void ColorPicker::_quick_open_palette_file_selected(const String &p_path) {
 	file_dialog->set_file_mode(FileDialog::FILE_MODE_OPEN_FILE);
 	_palette_file_selected(p_path);
 }
-#endif // ifdef TOOLS_ENABLED
+#endif // TOOLS_ENABLED
 
 void ColorPicker::_palette_file_selected(const String &p_path) {
 	switch (file_dialog->get_file_mode()) {
@@ -1928,7 +1954,7 @@ void ColorPicker::set_sliders_visible(bool p_visible) {
 		return;
 	}
 	sliders_visible = p_visible;
-	slider_vbc->set_visible(p_visible);
+	color_mode_vbc->set_visible(p_visible);
 }
 
 bool ColorPicker::are_sliders_visible() const {
@@ -1987,7 +2013,7 @@ void ColorPicker::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "edit_intensity"), "set_edit_intensity", "is_editing_intensity");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "color_mode", PROPERTY_HINT_ENUM, "RGB,HSV,LINEAR,OKHSL"), "set_color_mode", "get_color_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "deferred_mode"), "set_deferred_mode", "is_deferred_mode");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "picker_shape", PROPERTY_HINT_ENUM, "HSV Rectangle,HSV Rectangle Wheel,VHS Circle,OKHSL Circle,None"), "set_picker_shape", "get_picker_shape");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "picker_shape", PROPERTY_HINT_ENUM, "HSV Rectangle,HSV Rectangle Wheel,VHS Circle,OKHSL Circle,OK HS Rectangle:5,OK HL Rectangle,None:4"), "set_picker_shape", "get_picker_shape");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "can_add_swatches"), "set_can_add_swatches", "are_swatches_enabled");
 	ADD_GROUP("Customization", "");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "sampler_visible"), "set_sampler_visible", "is_sampler_visible");
@@ -2013,6 +2039,8 @@ void ColorPicker::_bind_methods() {
 	BIND_ENUM_CONSTANT(SHAPE_VHS_CIRCLE);
 	BIND_ENUM_CONSTANT(SHAPE_OKHSL_CIRCLE);
 	BIND_ENUM_CONSTANT(SHAPE_NONE);
+	BIND_ENUM_CONSTANT(SHAPE_OK_HS_RECTANGLE);
+	BIND_ENUM_CONSTANT(SHAPE_OK_HL_RECTANGLE);
 
 	BIND_THEME_ITEM(Theme::DATA_TYPE_COLOR, ColorPicker, focused_not_editing_cursor_color);
 
@@ -2100,16 +2128,18 @@ ColorPicker::ColorPicker() {
 	add_shape(memnew(ColorPickerShapeWheel(this)));
 	add_shape(memnew(ColorPickerShapeVHSCircle(this)));
 	add_shape(memnew(ColorPickerShapeOKHSLCircle(this)));
+	add_shape(memnew(ColorPickerShapeOKHSRectangle(this)));
+	add_shape(memnew(ColorPickerShapeOKHLRectangle(this)));
 
 	shape_popup = btn_shape->get_popup();
 	{
 		int i = 0;
 		for (const ColorPickerShape *shape : shapes) {
-			shape_popup->add_radio_check_item(shape->get_name(), i);
+			shape_popup->add_radio_check_item(shape->get_name(), index_to_shape(i));
 			i++;
 		}
 	}
-	shape_popup->set_item_checked(current_shape, true);
+	shape_popup->set_item_checked(get_current_shape_index(), true);
 	shape_popup->connect(SceneStringName(id_pressed), callable_mp(this, &ColorPicker::set_picker_shape));
 	shape_popup->connect("about_to_popup", callable_mp(this, &ColorPicker::_block_input_on_popup_show));
 	shape_popup->connect(SNAME("popup_hide"), callable_mp(this, &ColorPicker::_enable_input_on_popup_hide));
@@ -2119,13 +2149,13 @@ ColorPicker::ColorPicker() {
 	add_mode(memnew(ColorModeLinear(this)));
 	add_mode(memnew(ColorModeOKHSL(this)));
 
-	slider_vbc = memnew(VBoxContainer);
-	slider_vbc->add_theme_constant_override("separation", 0);
-	real_vbox->add_child(slider_vbc);
+	color_mode_vbc = memnew(VBoxContainer);
+	color_mode_vbc->add_theme_constant_override("separation", 0);
+	real_vbox->add_child(color_mode_vbc);
 
 	mode_hbc = memnew(HBoxContainer);
 	mode_hbc->add_theme_constant_override("separation", 0);
-	slider_vbc->add_child(mode_hbc);
+	color_mode_vbc->add_child(mode_hbc);
 
 	mode_group.instantiate();
 
@@ -2143,7 +2173,7 @@ ColorPicker::ColorPicker() {
 
 	sliders_panel = memnew(PanelContainer);
 	sliders_panel->set_h_size_flags(SIZE_EXPAND_FILL);
-	slider_vbc->add_child(sliders_panel);
+	color_mode_vbc->add_child(sliders_panel);
 
 	slider_gc = memnew(GridContainer);
 	sliders_panel->add_child(slider_gc);
