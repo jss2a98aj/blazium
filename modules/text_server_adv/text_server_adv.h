@@ -161,6 +161,16 @@ class TextServerAdvanced : public TextServerExtension {
 	HashMap<StringName, int32_t> feature_sets;
 	HashMap<int32_t, FeatureInfo> feature_sets_inv;
 
+	enum LineBreakStrictness {
+		LB_AUTO,
+		LB_LOOSE,
+		LB_NORMAL,
+		LB_STRICT,
+	};
+
+	LineBreakStrictness lb_strictness = LB_AUTO;
+	void _update_settings();
+
 	void _insert_num_systems_lang();
 	void _insert_feature_sets();
 	_FORCE_INLINE_ void _insert_feature(const StringName &p_name, int32_t p_tag, Variant::Type p_vtype = Variant::INT, bool p_hidden = false);

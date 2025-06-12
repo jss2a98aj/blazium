@@ -35,6 +35,7 @@
 
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/os.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/translation_server.hpp>
 #include <godot_cpp/core/error_macros.hpp>
@@ -44,6 +45,7 @@ using namespace godot;
 #elif defined(GODOT_MODULE)
 // Headers for building as built-in module.
 
+#include "core/config/project_settings.h"
 #include "core/error/error_macros.h"
 #include "core/object/worker_thread_pool.h"
 #include "core/string/translation_server.h"
@@ -6173,7 +6175,17 @@ UBreakIterator *TextServerAdvanced::_create_line_break_iterator_for_locale(const
 	// Creating UBreakIterator (ubrk_open) is surprisingly costly.
 	// However, cloning (ubrk_clone) is cheaper, so we keep around blueprints to accelerate creating new ones.
 
-	const String language = p_language.is_empty() ? TranslationServer::get_singleton()->get_tool_locale() : p_language;
+	String language = p_language.is_empty() ? TranslationServer::get_singleton()->get_tool_locale() : p_language;
+	if (!language.contains("@")) {
+		if (lb_strictness == LB_LOOSE) {
+			language += "@lb=loose";
+		} else if (lb_strictness == LB_NORMAL) {
+			language += "@lb=normal";
+		} else if (lb_strictness == LB_STRICT) {
+			language += "@lb=strict";
+		}
+	}
+
 	_THREAD_SAFE_METHOD_
 	const HashMap<String, UBreakIterator *>::Iterator key_value = line_break_iterators_per_language.find(language);
 	if (key_value) {
@@ -7727,10 +7739,16 @@ bool TextServerAdvanced::_is_valid_letter(uint64_t p_unicode) const {
 	return u_isalpha(p_unicode);
 }
 
+void TextServerAdvanced::_update_settings() {
+	lb_strictness = (LineBreakStrictness)(int)GLOBAL_GET("internationalization/locale/line_breaking_strictness");
+}
+
 TextServerAdvanced::TextServerAdvanced() {
 	_insert_num_systems_lang();
 	_insert_feature_sets();
 	_bmp_create_font_funcs();
+	_update_settings();
+	ProjectSettings::get_singleton()->connect("settings_changed", callable_mp(this, &TextServerAdvanced::_update_settings));
 }
 
 void TextServerAdvanced::_cleanup() {
