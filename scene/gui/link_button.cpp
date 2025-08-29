@@ -191,12 +191,7 @@ void LinkButton::pressed() {
 }
 
 Size2 LinkButton::get_minimum_size() const {
-	Size2 minsize = text_buf->get_size();
-	if (overrun_behavior != TextServer::OVERRUN_NO_TRIMMING) {
-		minsize.width = 0;
-	}
-
-	return minsize;
+	return _get_final_minimum_size(text_buf->get_size());
 }
 
 Control::CursorShape LinkButton::get_cursor_shape(const Point2 &p_pos) const {
