@@ -359,6 +359,7 @@ void ColorPickerShapeRectangle::grab_focus() {
 
 void ColorPickerShapeOKHSRectangle::_initialize_controls() {
 	rectangle_margin = memnew(MarginContainer);
+	rectangle_margin->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	color_picker->shape_container->add_child(rectangle_margin);
 
 	Ref<ShaderMaterial> material;
