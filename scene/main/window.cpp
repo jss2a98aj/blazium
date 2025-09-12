@@ -989,7 +989,7 @@ void Window::set_visible(bool p_visible) {
 	}
 
 	if (visible) {
-		if (get_tree() && get_tree()->is_accessibility_supported()) {
+		if (_is_accessibility_supported()) {
 			get_tree()->_accessibility_force_update();
 			_accessibility_notify_enter(this);
 			if (!embedder_vp) {
@@ -997,7 +997,7 @@ void Window::set_visible(bool p_visible) {
 			}
 		}
 	} else {
-		if (get_tree() && get_tree()->is_accessibility_supported()) {
+		if (_is_accessibility_supported()) {
 			_accessibility_notify_exit(this);
 			if (!embedder_vp) {
 				DisplayServer::get_singleton()->accessibility_window_deactivation_completed(get_window_id());
@@ -1603,7 +1603,7 @@ void Window::_notification(int p_what) {
 				_make_transient();
 			}
 			if (visible) {
-				if (window_id != DisplayServer::MAIN_WINDOW_ID && get_tree() && get_tree()->is_accessibility_supported()) {
+				if (window_id != DisplayServer::MAIN_WINDOW_ID && _is_accessibility_supported()) {
 					get_tree()->_accessibility_force_update();
 					_accessibility_notify_enter(this);
 					if (!embedder) {
@@ -1661,7 +1661,7 @@ void Window::_notification(int p_what) {
 			set_theme_context(nullptr, false);
 
 			if (visible && window_id != DisplayServer::MAIN_WINDOW_ID) {
-				if (get_tree() && get_tree()->is_accessibility_supported()) {
+				if (_is_accessibility_supported()) {
 					_accessibility_notify_exit(this);
 					if (!embedder) {
 						DisplayServer::get_singleton()->accessibility_window_deactivation_completed(get_window_id());
