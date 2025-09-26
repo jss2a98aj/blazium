@@ -6290,11 +6290,11 @@ TextServer::StructuredTextParser RichTextLabel::get_structured_text_bidi_overrid
 	return st_parser;
 }
 
-void RichTextLabel::set_structured_text_bidi_override_options(Array p_args) {
+void RichTextLabel::set_structured_text_bidi_override_options(const Array &p_args) {
 	if (st_args != p_args) {
 		_stop_thread();
 
-		st_args = p_args;
+		st_args = Array(p_args);
 		main->first_invalid_line.store(0); // Invalidate all lines.
 		_validate_line_caches();
 		queue_redraw();
@@ -6302,7 +6302,7 @@ void RichTextLabel::set_structured_text_bidi_override_options(Array p_args) {
 }
 
 Array RichTextLabel::get_structured_text_bidi_override_options() const {
-	return st_args;
+	return Array(st_args);
 }
 
 void RichTextLabel::set_language(const String &p_language) {
@@ -6366,7 +6366,7 @@ float RichTextLabel::get_visible_ratio() const {
 	return visible_ratio;
 }
 
-void RichTextLabel::set_effects(Array p_effects) {
+void RichTextLabel::set_effects(const Array &p_effects) {
 	custom_effects = p_effects;
 	if (!stack_externally_modified && use_bbcode) {
 		parse_bbcode(atr(text));
@@ -6374,7 +6374,7 @@ void RichTextLabel::set_effects(Array p_effects) {
 }
 
 Array RichTextLabel::get_effects() {
-	return custom_effects;
+	return Array(custom_effects);
 }
 
 void RichTextLabel::install_effect(const Variant effect) {
