@@ -1347,10 +1347,12 @@ void ColorPicker::_update_text_value() {
 		text_type->set_button_icon(theme_cache.code_icon);
 		text_type->set_disabled(!is_color_valid_hex(color));
 		c_text->set_text(t);
+		c_text->set_tooltip_text(RTR("Execute an expression as a color."));
 	} else {
 		text_type->set_button_icon(theme_cache.hex_icon);
 		text_type->set_disabled(false);
 		c_text->set_text(color.to_html(edit_alpha && color.a < 1));
+		c_text->set_tooltip_text(ETR("Enter a hex code (\"#ff0000\") or named color (\"red\")."));
 	}
 }
 
