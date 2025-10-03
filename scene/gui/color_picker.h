@@ -229,6 +229,7 @@ private:
 
 	Button *text_type = nullptr;
 	LineEdit *c_text = nullptr;
+	Button *text_copy = nullptr;
 
 	HSlider *alpha_slider = nullptr;
 	SpinBox *alpha_value = nullptr;
@@ -325,6 +326,7 @@ private:
 
 		Ref<Texture2D> hex_icon;
 		Ref<Texture2D> code_icon;
+		Ref<Texture2D> color_copy;
 
 		Ref<StyleBox> sample_focus;
 		Ref<StyleBox> picker_focus_rectangle;
@@ -355,6 +357,7 @@ private:
 	void _update_color(bool p_update_sliders = true);
 	void _update_text_value();
 	void _text_type_toggled();
+	void _text_copy_pressed();
 	void _sample_input(const Ref<InputEvent> &p_event);
 	void _sample_draw();
 	void _slider_draw(int p_which);

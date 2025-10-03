@@ -179,6 +179,8 @@ void ColorPicker::_notification(int p_what) {
 				text_type->set_button_icon(theme_cache.hex_icon);
 			}
 
+			text_copy->set_button_icon(theme_cache.color_copy);
+
 			int margin = MAX(theme_cache.content_margin, 0);
 			internal_margin->begin_bulk_theme_override();
 			internal_margin->add_theme_constant_override(SNAME("margin_bottom"), margin);
@@ -839,6 +841,10 @@ void ColorPicker::_text_type_toggled() {
 	}
 
 	_update_color();
+}
+
+void ColorPicker::_text_copy_pressed() {
+	DisplayServer::get_singleton()->clipboard_set(c_text->get_text());
 }
 
 Color ColorPicker::get_pick_color() const {
@@ -1973,6 +1979,7 @@ void ColorPicker::_bind_methods() {
 	BIND_THEME_ITEM(Theme::DATA_TYPE_ICON, ColorPicker, color_hue);
 	BIND_THEME_ITEM(Theme::DATA_TYPE_ICON, ColorPicker, hex_icon);
 	BIND_THEME_ITEM(Theme::DATA_TYPE_ICON, ColorPicker, code_icon);
+	BIND_THEME_ITEM(Theme::DATA_TYPE_ICON, ColorPicker, color_copy);
 
 	BIND_THEME_ITEM(Theme::DATA_TYPE_STYLEBOX, ColorPicker, sample_focus);
 	BIND_THEME_ITEM(Theme::DATA_TYPE_STYLEBOX, ColorPicker, picker_focus_rectangle);
@@ -2099,9 +2106,8 @@ ColorPicker::ColorPicker() {
 	text_type->set_icon_alignment(HORIZONTAL_ALIGNMENT_CENTER);
 	text_type->set_size_mode(BaseButton::SIZE_MODE_FIT_HEIGHT);
 	text_type->set_tooltip_text(RTR("Switch between hexadecimal and code values."));
-	hex_hbc->add_child(text_type);
-	text_type->set_tooltip_text(RTR("Switch between hexadecimal and code values."));
 	text_type->set_tooltip_auto_translate_mode(AUTO_TRANSLATE_MODE_ALWAYS);
+	hex_hbc->add_child(text_type);
 	text_type->connect(SceneStringName(pressed), callable_mp(this, &ColorPicker::_text_type_toggled));
 
 	c_text = memnew(LineEdit);
@@ -2113,6 +2119,13 @@ ColorPicker::ColorPicker() {
 	c_text->connect(SceneStringName(text_submitted), callable_mp(this, &ColorPicker::_html_submitted));
 	c_text->connect(SceneStringName(text_changed), callable_mp(this, &ColorPicker::_text_changed));
 	c_text->connect(SceneStringName(focus_exited), callable_mp(this, &ColorPicker::_html_focus_exit));
+
+	text_copy = memnew(Button);
+	text_copy->set_icon_alignment(HORIZONTAL_ALIGNMENT_CENTER);
+	text_copy->set_size_mode(BaseButton::SIZE_MODE_FIT_HEIGHT);
+	text_copy->set_tooltip_text(ETR("Copy the color value."));
+	hex_hbc->add_child(text_copy);
+	text_copy->connect(SceneStringName(pressed), callable_mp(this, &ColorPicker::_text_copy_pressed));
 
 	_update_controls();
 	updating = false;
