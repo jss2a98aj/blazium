@@ -3723,12 +3723,8 @@ void TextEdit::_clear() {
 	emit_signal(SNAME("lines_edited_from"), old_text_size, 0);
 }
 
-void TextEdit::set_text(const String &p_text) {
+void TextEdit::_set_text(const String &p_text, bool p_emit_signal) {
 	setting_text = true;
-	if (!undo_enabled) {
-		_clear();
-		insert_text_at_caret(p_text);
-	}
 
 	if (undo_enabled) {
 		remove_secondary_carets();
@@ -3738,7 +3734,22 @@ void TextEdit::set_text(const String &p_text) {
 		begin_complex_operation();
 		deselect();
 		_remove_text(0, 0, MAX(0, get_line_count() - 1), MAX(get_line(MAX(get_line_count() - 1, 0)).size() - 1, 0));
-		insert_text_at_caret(p_text);
+	} else {
+		_clear();
+	}
+
+	String previous_text;
+	if (p_emit_signal) {
+		previous_text = get_text();
+	}
+
+	insert_text_at_caret(p_text);
+
+	if (p_emit_signal && get_text() != previous_text) {
+		_text_changed();
+	}
+
+	if (undo_enabled) {
 		end_complex_operation();
 	}
 
@@ -3748,6 +3759,10 @@ void TextEdit::set_text(const String &p_text) {
 	queue_redraw();
 	setting_text = false;
 	emit_signal(SNAME("text_set"));
+}
+
+void TextEdit::set_text(const String &p_text) {
+	_set_text(p_text, false);
 }
 
 String TextEdit::get_text() const {
@@ -6814,6 +6829,11 @@ Color TextEdit::get_font_color() const {
 }
 
 void TextEdit::_bind_methods() {
+	// Private API.
+	ClassDB::bind_method(D_METHOD("_set_text", "text", "emit_signal"), &TextEdit::_set_text, DEFVAL(false));
+
+	// Public API.
+
 	/* Text */
 	// Text properties
 	ClassDB::bind_method(D_METHOD("has_ime_text"), &TextEdit::has_ime_text);
