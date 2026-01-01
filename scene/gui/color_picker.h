@@ -336,6 +336,7 @@ private:
 		Ref<StyleBox> mode_button_normal;
 		Ref<StyleBox> mode_button_pressed;
 		Ref<StyleBox> mode_button_hover;
+		Ref<StyleBox> mode_button_hover_pressed;
 		Ref<StyleBox> mode_button_focus;
 
 		Ref<StyleBox> sliders_panel;
