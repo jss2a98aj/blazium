@@ -1665,9 +1665,6 @@
 		<member name="SocketIOClient" type="SocketIOClient" setter="" getter="">
 			The [SocketIOClient] singleton.
 		</member>
-		<member name="Steam" type="Steam" setter="" getter="">
-			The [Steam] singleton.
-		</member>
 		<member name="TextServerManager" type="TextServerManager" setter="" getter="">
 			The [TextServerManager] singleton.
 		</member>
