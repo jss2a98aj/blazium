@@ -3481,8 +3481,9 @@ void TextEdit::set_editable(bool p_editable) {
 	}
 
 	editable = p_editable;
-
-	queue_redraw();
+	if (editable) {
+		draw_caret = true;
+	}
 	update_minimum_size();
 }
 
