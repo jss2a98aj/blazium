@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-package org.godotengine.editor.buildprovider
+package app.blazium.editor.buildprovider
 
 import android.content.ComponentName
 import android.content.Context

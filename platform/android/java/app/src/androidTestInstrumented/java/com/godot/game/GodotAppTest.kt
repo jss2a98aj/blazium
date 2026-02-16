@@ -36,8 +36,8 @@ import android.util.Log
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.godot.game.test.GodotAppInstrumentedTestPlugin
-import org.godotengine.godot.GodotActivity.Companion.EXTRA_COMMAND_LINE_PARAMS
-import org.godotengine.godot.plugin.GodotPluginRegistry
+import app.blazium.godot.GodotActivity.Companion.EXTRA_COMMAND_LINE_PARAMS
+import app.blazium.godot.plugin.GodotPluginRegistry
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
