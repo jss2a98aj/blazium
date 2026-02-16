@@ -71,43 +71,29 @@ afterEvaluate {
                 // Mostly self-explanatory metadata
                 pom {
                     name = PUBLISH_ARTIFACT_ID
-                    description = 'Godot Engine Android Library - Template Build'
-                    url = 'https://godotengine.org/'
+                    description = 'Blazium Engine Android Library - Template Build'
+                    url = 'https://blazium.app/'
                     licenses {
                         license {
                             name = 'MIT License'
-                            url = 'https://github.com/godotengine/godot/blob/master/LICENSE.txt'
+                            url = 'https://github.com/blazium-games/blazium/blob/blazium-dev/LICENSE.txt'
                         }
                     }
                     developers {
                         developer {
-                            id = 'm4gr3d'
-                            name = 'Fredia Huya-Kouadio'
-                            email = 'fhuyakou@gmail.com'
+                            id = 'bioblaze'
+                            name = 'Bioblaze Payne'
+                            email = 'bioblazepayne@gmail.com'
                         }
-                        developer {
-                            id = 'reduz'
-                            name = 'Juan Linietsky'
-                            email = 'reduzio@gmail.com'
-                        }
-                        developer {
-                            id = 'akien-mga'
-                            name = 'Rémi Verschelde'
-                            email = 'rverschelde@gmail.com'
-                        }
-                        developer {
-                            id = 'godotengine'
-                            name = 'Godot Engine contributors'
-                            email = 'contact@godotengine.org'
-                        }
+                        // Add all other devs here...
                     }
 
                     // Version control info - if you're using GitHub, follow the
                     // format as seen here
                     scm {
-                        connection = 'scm:git:github.com/godotengine/godot.git'
-                        developerConnection = 'scm:git:ssh://github.com/godotengine/godot.git'
-                        url = 'https://github.com/godotengine/godot/tree/master'
+                        connection = 'scm:git:github.com/blazium-games/blazium.git'
+                        developerConnection = 'scm:git:ssh://github.com/blazium-games/blazium.git'
+                        url = 'https://github.com/blazium-games/blazium/tree/blazium-dev'
                     }
                 }
             }
@@ -123,43 +109,29 @@ afterEvaluate {
                 // Mostly self-explanatory metadata
                 pom {
                     name = TOOLS_PUBLISH_ARTIFACT_ID
-                    description = 'Godot Engine Tools Android Library - Editor Build'
-                    url = 'https://godotengine.org/'
+                    description = 'Blazium Engine Tools Android Library - Editor Build'
+                    url = 'https://blazium.app/'
                     licenses {
                         license {
                             name = 'MIT License'
-                            url = 'https://github.com/godotengine/godot/blob/master/LICENSE.txt'
+                            url = 'https://github.com/blazium-games/blazium/blob/master/LICENSE.txt'
                         }
                     }
                     developers {
                         developer {
-                            id = 'm4gr3d'
-                            name = 'Fredia Huya-Kouadio'
-                            email = 'fhuyakou@gmail.com'
+                            id = 'bioblaze'
+                            name = 'Bioblaze Payne'
+                            email = 'bioblazepayne@gmail.com'
                         }
-                        developer {
-                            id = 'reduz'
-                            name = 'Juan Linietsky'
-                            email = 'reduzio@gmail.com'
-                        }
-                        developer {
-                            id = 'akien-mga'
-                            name = 'Rémi Verschelde'
-                            email = 'rverschelde@gmail.com'
-                        }
-                        developer {
-                            id = 'godotengine'
-                            name = 'Godot Engine contributors'
-                            email = 'contact@godotengine.org'
-                        }
+                        // Add all other devs here...
                     }
 
                     // Version control info - if you're using GitHub, follow the
                     // format as seen here
                     scm {
-                        connection = 'scm:git:github.com/godotengine/godot.git'
-                        developerConnection = 'scm:git:ssh://github.com/godotengine/godot.git'
-                        url = 'https://github.com/godotengine/godot/tree/master'
+                        connection = 'scm:git:github.com/blazium-games/blazium.git'
+                        developerConnection = 'scm:git:ssh://github.com/blazium-games/blazium.git'
+                        url = 'https://github.com/blazium-games/blazium/tree/blazium-dev'
                     }
                 }
             }
