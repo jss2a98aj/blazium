@@ -738,8 +738,8 @@ void TextEdit::_notification(int p_what) {
 
 			int left_margin = Math::ceil(style->get_margin(SIDE_LEFT));
 			int xmargin_beg = left_margin + gutters_width + gutter_padding;
-			int xmargin_end = size.width - Math::ceil(style->get_margin(SIDE_RIGHT));
 
+			int xmargin_end = size.width - Math::floor(style->get_margin(SIDE_RIGHT));
 			if (draw_minimap) {
 				xmargin_end -= minimap_width;
 			}
