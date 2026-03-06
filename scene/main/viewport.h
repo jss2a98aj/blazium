@@ -186,6 +186,7 @@ public:
 		DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_LINEAR,
 		DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_LINEAR_WITH_MIPMAPS,
 		DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST_WITH_MIPMAPS,
+		DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_PARENT_NODE,
 		DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_MAX
 	};
 
@@ -193,6 +194,7 @@ public:
 		DEFAULT_CANVAS_ITEM_TEXTURE_REPEAT_DISABLED,
 		DEFAULT_CANVAS_ITEM_TEXTURE_REPEAT_ENABLED,
 		DEFAULT_CANVAS_ITEM_TEXTURE_REPEAT_MIRROR,
+		DEFAULT_CANVAS_ITEM_TEXTURE_REPEAT_PARENT_NODE,
 		DEFAULT_CANVAS_ITEM_TEXTURE_REPEAT_MAX,
 	};
 
@@ -407,7 +409,12 @@ private:
 	} gui;
 
 	DefaultCanvasItemTextureFilter default_canvas_item_texture_filter = DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_LINEAR;
+	mutable RenderingServer::CanvasItemTextureFilter default_canvas_item_texture_filter_cache = RenderingServer::CANVAS_ITEM_TEXTURE_FILTER_LINEAR;
+	void _refresh_texture_filter_cache() const;
+
 	DefaultCanvasItemTextureRepeat default_canvas_item_texture_repeat = DEFAULT_CANVAS_ITEM_TEXTURE_REPEAT_DISABLED;
+	mutable RenderingServer::CanvasItemTextureRepeat default_canvas_item_texture_repeat_cache = RenderingServer::CANVAS_ITEM_TEXTURE_REPEAT_DISABLED;
+	void _refresh_texture_repeat_cache() const;
 
 	bool disable_input = false;
 	bool disable_input_override = false;
@@ -659,8 +666,14 @@ public:
 	void set_default_canvas_item_texture_filter(DefaultCanvasItemTextureFilter p_filter);
 	DefaultCanvasItemTextureFilter get_default_canvas_item_texture_filter() const;
 
+	void _update_texture_filter_changed(bool p_propagate);
+	RenderingServer::CanvasItemTextureFilter get_texture_filter_in_tree() const;
+
 	void set_default_canvas_item_texture_repeat(DefaultCanvasItemTextureRepeat p_repeat);
 	DefaultCanvasItemTextureRepeat get_default_canvas_item_texture_repeat() const;
+
+	void _update_texture_repeat_changed(bool p_propagate);
+	RenderingServer::CanvasItemTextureRepeat get_texture_repeat_in_tree() const;
 
 	// VRS
 

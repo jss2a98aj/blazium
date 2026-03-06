@@ -719,7 +719,7 @@
 			Represents the size of the [enum TextureFilter] enum.
 		</constant>
 		<constant name="TEXTURE_REPEAT_PARENT_NODE" value="0" enum="TextureRepeat">
-			The [CanvasItem] will inherit the filter from its parent.
+			The [CanvasItem] will inherit the repeat mode from its parent.
 		</constant>
 		<constant name="TEXTURE_REPEAT_DISABLED" value="1" enum="TextureRepeat">
 			Texture will not repeat.
