@@ -5,6 +5,8 @@ Import("env")
 
 import main_builders
 
+from methods import get_version_info
+
 env.main_sources = []
 
 env_main = env.Clone()
@@ -30,9 +32,11 @@ if env_main.editor_build and not env_main["no_editor_splash"]:
         env.Run(main_builders.make_splash_editor),
     )
 
+icon_png_path = "#main/icons/app_icon_" + get_version_info(env.module_version_string)["external_status"] + ".png"
+env_main.Depends("#main/app_icon.gen.h", icon_png_path)
 env_main.CommandNoCache(
     "#main/app_icon.gen.h",
-    "#main/app_icon.png",
+    icon_png_path,
     env.Run(main_builders.make_app_icon),
 )
 

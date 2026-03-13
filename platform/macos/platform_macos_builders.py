@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 
+from methods import get_version_info
 from platform_methods import get_build_version, lipo
 
 
@@ -26,6 +27,16 @@ def generate_bundle(target, source, env):
             "#bin/" + (prefix + env.extra_suffix + env.module_version_string).replace(".", "_") + ".app"
         ).abspath
         templ = env.Dir("#misc/dist/macos_tools.app").abspath
+
+        shutil.copy(
+            File(
+                "#platform/macos/icons/Blazium_"
+                + get_version_info(env.module_version_string)["external_status"]
+                + ".icns"
+            ).abspath,
+            templ + "/Contents/Resources/Blazium.icns",
+        )
+
         if os.path.exists(app_dir):
             shutil.rmtree(app_dir)
 
