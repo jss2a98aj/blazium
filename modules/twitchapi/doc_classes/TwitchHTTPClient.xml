@@ -94,5 +94,11 @@
 				Sets the callback function invoked when HTTP responses are received. Used internally by [TwitchAPI].
 			</description>
 		</method>
+		<method name="set_tls_options">
+			<return type="void" />
+			<param index="0" name="options" type="TLSOptions" />
+			<description>
+			</description>
+		</method>
 	</methods>
 </class>

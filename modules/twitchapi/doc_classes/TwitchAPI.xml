@@ -76,6 +76,11 @@
 				Returns the Games API category handler for accessing game information and top games by viewer count.
 			</description>
 		</method>
+		<method name="get_http_client" qualifiers="const">
+			<return type="TwitchHTTPClient" />
+			<description>
+			</description>
+		</method>
 		<method name="get_moderation">
 			<return type="TwitchModerationRequests" />
 			<description>
