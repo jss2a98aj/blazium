@@ -298,10 +298,8 @@ void HTTPServer::_parse_and_dispatch_request(int p_client_id, ClientConnection &
 
 	// Parse headers
 	Dictionary headers;
-	int body_start = 1;
 	for (int i = 1; i < lines.size(); i++) {
 		if (lines[i].is_empty()) {
-			body_start = i + 1;
 			break;
 		}
 
