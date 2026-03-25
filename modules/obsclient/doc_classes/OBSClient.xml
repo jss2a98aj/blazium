@@ -1096,6 +1096,15 @@
 		</method>
 	</methods>
 	<signals>
+		<signal name="connected">
+			<description>
+			</description>
+		</signal>
+		<signal name="connection_error">
+			<param index="0" name="error_message" type="String" />
+			<description>
+			</description>
+		</signal>
 		<signal name="current_preview_scene_changed">
 			<param index="0" name="scene_name" type="String" />
 			<param index="1" name="scene_uuid" type="String" />
@@ -1151,6 +1160,11 @@
 			<param index="0" name="event_data" type="Dictionary" />
 			<description>
 				Emitted when a custom event is received from OBS or another WebSocket client. The [param event_data] contains the event payload.
+			</description>
+		</signal>
+		<signal name="disconnected">
+			<param index="0" name="reason" type="String" />
+			<description>
 			</description>
 		</signal>
 		<signal name="exit_started">
