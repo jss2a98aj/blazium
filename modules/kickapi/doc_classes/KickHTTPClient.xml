@@ -104,5 +104,11 @@
 				Sets the callback function that will be called when a response is received.
 			</description>
 		</method>
+		<method name="set_tls_options">
+			<return type="void" />
+			<param index="0" name="tls_options" type="TLSOptions" />
+			<description>
+			</description>
+		</method>
 	</methods>
 </class>
