@@ -81,6 +81,11 @@
 				Returns the events request handler for managing event subscriptions (webhooks).
 			</description>
 		</method>
+		<method name="get_http_client" qualifiers="const">
+			<return type="KickHTTPClient" />
+			<description>
+			</description>
+		</method>
 		<method name="get_livestreams">
 			<return type="KickLivestreamsRequests" />
 			<description>
