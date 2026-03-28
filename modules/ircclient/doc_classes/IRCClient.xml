@@ -45,7 +45,7 @@
 		[b]Note:[/b] You must call [method poll] regularly to process messages. For automatic polling, use [IRCClientNode] instead.
 	</description>
 	<tutorials>
-		<link title="IRC Client README">https://github.com/blazium-engine/blazium/blob/main/modules/ircclient/README.md</link>
+		<link title="IRC Client README">https://github.com/blazium-games/blazium/blob/main/modules/ircclient/README.md</link>
 	</tutorials>
 	<methods>
 		<method name="accept_dcc_transfer">
