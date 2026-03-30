@@ -1808,9 +1808,9 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const Ref<Reso
 
 		String s = "[ext_resource type=\"" + sorted_er[i].resource->get_save_class() + "\"";
 
-		ResourceUID::ID uid = ResourceSaver::get_resource_id_for_path(p, false);
-		if (uid != ResourceUID::INVALID_ID) {
-			s += " uid=\"" + ResourceUID::get_singleton()->id_to_text(uid) + "\"";
+		ResourceUID::ID ext_uid = ResourceSaver::get_resource_id_for_path(p, false);
+		if (ext_uid != ResourceUID::INVALID_ID) {
+			s += " uid=\"" + ResourceUID::get_singleton()->id_to_text(ext_uid) + "\"";
 		}
 		s += " path=\"" + p + "\" id=\"" + sorted_er[i].id + "\"]\n";
 		f->store_string(s); // Bundled.
