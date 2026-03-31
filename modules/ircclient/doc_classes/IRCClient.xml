@@ -535,6 +535,9 @@
 			<param index="1" name="password" type="String" />
 			<description>
 				Disconnects a ghost session using NickServ GHOST command. [param nick] - Nick. [param password] - Password.
+				[codeblock]
+				irc.ghost_nick("MyNick", "secret_password")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="group_nick">
@@ -571,6 +574,9 @@
 			<param index="0" name="mask" type="String" />
 			<description>
 				Adds user/mask to client-side ignore list. Supports wildcards (* and ?). Ignored users' PRIVMSG are automatically filtered. [param mask] - Mask.
+				[codeblock]
+				irc.ignore_user("*!*@spam.host.com")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="invite_user">
@@ -632,6 +638,9 @@
 			<param index="2" name="reason" type="String" default="&quot;&quot;" />
 			<description>
 				Kicks a user from a channel. Requires channel operator status. [param reason] is the optional kick message.
+				[codeblock]
+				irc.kick_user("#blazium", "SpammerNick", "No spamming allowed")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="kickban_user">
@@ -704,6 +713,9 @@
 			<param index="1" name="nick" type="String" />
 			<description>
 				Gives channel operator status (+o) to a user. Requires channel operator status yourself.
+				[codeblock]
+				irc.op_user("#blazium", "TrustedUser")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="parse_formatting">
@@ -719,6 +731,9 @@
 			<param index="1" name="message" type="String" default="&quot;&quot;" />
 			<description>
 				Leaves an IRC channel with an optional part message. Emits [signal parted] when successful.
+				[codeblock]
+				irc.part_channel("#blazium", "Goodbye everyone!")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="poll">
@@ -757,6 +772,9 @@
 			<param index="1" name="password" type="String" />
 			<description>
 				Registers your nickname with NickServ. [param email] and [param password] are registration credentials.
+				[codeblock]
+				irc.register_nick("email@example.com", "secure_password")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="reject_dcc_transfer">
@@ -912,6 +930,9 @@
 			<param index="1" name="message" type="String" />
 			<description>
 				Sends a NOTICE message to a channel or user. NOTICEs should not trigger automated responses.
+				[codeblock]
+				irc.send_notice("TargetUser", "This is an automated notice")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_oper">
@@ -928,6 +949,9 @@
 			<param index="1" name="message" type="String" />
 			<description>
 				Sends a PRIVMSG to a channel or user. Messages are automatically queued and flood-protected. For multi-line messages, see [method send_multiline_privmsg].
+				[codeblock]
+				irc.send_privmsg("#blazium", "Hello world!")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_raw">
@@ -1006,12 +1030,18 @@
 			<param index="0" name="message" type="String" />
 			<description>
 				Sets away status with a message using AWAY command. [param message] - Message.
+				[codeblock]
+				irc.set_away("Currently away for testing")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="set_back">
 			<return type="void" />
 			<description>
 				Removes away status by sending AWAY with no message.
+				[codeblock]
+				irc.set_back()
+				[/codeblock]
 			</description>
 		</method>
 		<method name="set_ban">
@@ -1027,6 +1057,9 @@
 			<param index="0" name="enabled" type="bool" />
 			<description>
 				Sets bot mode (+B) to identify client as a bot (IRCv3). Automatically sends MODE command after connection if enabled. [param enabled] - Enabled.
+				[codeblock]
+				irc.set_bot_mode(true)
+				[/codeblock]
 			</description>
 		</method>
 		<method name="set_channel_key">

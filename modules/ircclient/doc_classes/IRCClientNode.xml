@@ -287,6 +287,9 @@
 			<param index="1" name="message" type="String" default="&quot;&quot;" />
 			<description>
 				Leaves an IRC channel with an optional part message.
+				[codeblock]
+				$IRCClientNode.part_channel("#blazium", "Goodbye everyone!")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="reject_dcc_transfer">
