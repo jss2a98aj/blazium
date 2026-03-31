@@ -8,28 +8,28 @@
 		The client must be connected to an OBS instance running obs-websocket 5.x or later. Use [method connect_to_obs] to establish a connection, and call [method poll] regularly (typically in [code]_process[/code]) to receive and process messages.
 		[codeblocks]
 		[gdscript]
-        func _ready():
-            # Connect to OBS with password
-            var error = OBSClient.connect_to_obs("ws://localhost:4455", "my_password")
-            if error != OK:
-        print("Failed to connect to OBS")
-                return
+		        func _ready():
+		            # Connect to OBS with password
+		            var error = OBSClient.connect_to_obs("ws://localhost:4455", "my_password")
+		            if error != OK:
+		        print("Failed to connect to OBS")
+		                return
 
-            # Subscribe to scene change events
-OBSClient.current_program_scene_changed.connect(_on_scene_changed)
+		            # Subscribe to scene change events
+		OBSClient.current_program_scene_changed.connect(_on_scene_changed)
 
-            # Get OBS version
-OBSClient.get_version(func(status, data):
-    if status.result:
-        print("OBS Version: ", data.obsVersion)
-)
+		            # Get OBS version
+		OBSClient.get_version(func(status, data):
+		    if status.result:
+		        print("OBS Version: ", data.obsVersion)
+		)
 
-        func _process(delta):
-            # Poll must be called regularly to receive messages
-OBSClient.poll()
+		        func _process(delta):
+		            # Poll must be called regularly to receive messages
+		OBSClient.poll()
 
-        func _on_scene_changed(scene_name: String, scene_uuid: String):
-        print("Scene changed to: ", scene_name)
+		        func _on_scene_changed(scene_name: String, scene_uuid: String):
+		        print("Scene changed to: ", scene_name)
 		[/gdscript]
 		[/codeblocks]
 	</description>
@@ -44,7 +44,7 @@ OBSClient.poll()
 				Broadcasts a custom event to all connected WebSocket clients. The event will be received by other clients subscribed to custom events.
 
 				[codeblock]
-OBSClient.broadcast_custom_event({})
+				OBSClient.broadcast_custom_event({})
 				[/codeblock]
 			</description>
 		</method>
@@ -57,15 +57,15 @@ OBSClient.broadcast_custom_event({})
 				Connects to an OBS WebSocket server at the specified [param url]. If the server requires authentication, provide the [param password]. The [param event_subscriptions] parameter controls which event categories to subscribe to using [code]OBSEventSubscription[/code] flags.
 				Returns [constant OK] if the connection was initiated successfully. You must call [method poll] regularly after connecting to complete the handshake and receive messages.
 				[codeblock]
-                # Connect without password
-OBSClient.connect_to_obs("ws://localhost:4455")
+				                # Connect without password
+				OBSClient.connect_to_obs("ws://localhost:4455")
 
-                # Connect with password
-OBSClient.connect_to_obs("ws://localhost:4455", "my_password")
+				                # Connect with password
+				OBSClient.connect_to_obs("ws://localhost:4455", "my_password")
 
-                # Connect with specific event subscriptions
-OBSClient.connect_to_obs("ws://localhost:4455", "",
-                    OBSEventSubscription.SCENES | OBSEventSubscription.OUTPUTS)
+				                # Connect with specific event subscriptions
+				OBSClient.connect_to_obs("ws://localhost:4455", "",
+				                    OBSEventSubscription.SCENES | OBSEventSubscription.OUTPUTS)
 				[/codeblock]
 			</description>
 		</method>
@@ -81,10 +81,10 @@ OBSClient.connect_to_obs("ws://localhost:4455", "",
 				Creates a new input source in the specified scene. The [param input_kind] specifies the type of input (e.g., "browser_source", "image_source"). The [param input_settings] dictionary contains input-specific configuration. If [param scene_item_enabled] is [code]true[/code], the input will be visible immediately. The [param callback] receives the input UUID and scene item ID.
 
 				[codeblock]
-OBSClient.create_input("scene_name_value", "input_name_value", "input_kind_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.create_input("scene_name_value", "input_name_value", "input_kind_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -95,7 +95,7 @@ OBSClient.create_input("scene_name_value", "input_name_value", "input_kind_value
 				Creates a new profile with the specified name. Profiles contain OBS configuration settings like output, audio, and video settings.
 
 				[codeblock]
-OBSClient.create_profile("profile_name_value")
+				OBSClient.create_profile("profile_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -106,7 +106,7 @@ OBSClient.create_profile("profile_name_value")
 				Creates a chapter marker in the current recording at the current timestamp. If [param chapter_name] is empty, OBS will use a default name. Chapters are useful for marking important moments during long recordings.
 
 				[codeblock]
-OBSClient.create_record_chapter()
+				OBSClient.create_record_chapter()
 				[/codeblock]
 			</description>
 		</method>
@@ -118,10 +118,10 @@ OBSClient.create_record_chapter()
 				Creates a new scene in OBS with the specified [param scene_name]. If provided, [param callback] will be called with the response containing the new scene's UUID.
 
 				[codeblock]
-OBSClient.create_scene("scene_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.create_scene("scene_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -132,7 +132,7 @@ OBSClient.create_scene("scene_name_value", func(status, data):
 				Creates a new scene collection with the specified name. Scene collections are complete sets of scenes, sources, and their configurations.
 
 				[codeblock]
-OBSClient.create_scene_collection("scene_collection_name_value")
+				OBSClient.create_scene_collection("scene_collection_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -146,10 +146,10 @@ OBSClient.create_scene_collection("scene_collection_name_value")
 				Adds an existing source to a scene as a scene item. The [param source_name] must reference an existing input or scene. If [param scene_item_enabled] is [code]true[/code], the item will be visible. The [param callback] receives the new scene item ID.
 
 				[codeblock]
-OBSClient.create_scene_item("scene_name_value", "source_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.create_scene_item("scene_name_value", "source_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -163,7 +163,7 @@ OBSClient.create_scene_item("scene_name_value", "source_name_value", func(status
 				Creates a new filter on the specified source. The [param filter_kind] specifies the type of filter (e.g., "color_correction", "sharpness_filter"). The [param filter_settings] dictionary contains filter-specific configuration.
 
 				[codeblock]
-OBSClient.create_source_filter("source_name_value", "filter_name_value", "filter_kind_value")
+				OBSClient.create_source_filter("source_name_value", "filter_name_value", "filter_kind_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -173,7 +173,7 @@ OBSClient.create_source_filter("source_name_value", "filter_name_value", "filter
 				Disconnects from the OBS WebSocket server and cleans up all connection resources. Any pending requests will be cancelled.
 
 				[codeblock]
-OBSClient.disconnect_from_obs()
+				OBSClient.disconnect_from_obs()
 				[/codeblock]
 			</description>
 		</method>
@@ -187,10 +187,10 @@ OBSClient.disconnect_from_obs()
 				Duplicates a scene item to the same scene or a different scene. If [param destination_scene_name] is empty, the item is duplicated in the same scene. The [param callback] receives the new scene item ID.
 
 				[codeblock]
-OBSClient.duplicate_scene_item("scene_name_value", 0, func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.duplicate_scene_item("scene_name_value", 0, func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -204,7 +204,7 @@ OBSClient.duplicate_scene_item("scene_name_value", 0, func(status, data):
 				- [constant STATE_CONNECTED]: Fully connected and ready
 
 				[codeblock]
-OBSClient.get_connection_state()
+				OBSClient.get_connection_state()
 				[/codeblock]
 			</description>
 		</method>
@@ -215,10 +215,10 @@ OBSClient.get_connection_state()
 				Gets the current preview scene when studio mode is enabled. The [param callback] receives the scene name and UUID. Returns an error if studio mode is not active.
 
 				[codeblock]
-OBSClient.get_current_preview_scene(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_current_preview_scene(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -229,10 +229,10 @@ OBSClient.get_current_preview_scene(func(status, data):
 				Gets the current program scene. The [param callback] receives the scene name and UUID.
 
 				[codeblock]
-OBSClient.get_current_program_scene(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_current_program_scene(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -243,10 +243,10 @@ OBSClient.get_current_program_scene(func(status, data):
 				Gets the current scene transition. The [param callback] receives the transition name, UUID, kind, whether it's fixed, and its settings.
 
 				[codeblock]
-OBSClient.get_current_scene_transition(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_current_scene_transition(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -257,10 +257,10 @@ OBSClient.get_current_scene_transition(func(status, data):
 				Gets a list of all groups in OBS. Groups are special scenes that can be nested within other scenes. The [param callback] receives an array of group names.
 
 				[codeblock]
-OBSClient.get_group_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_group_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -272,10 +272,10 @@ OBSClient.get_group_list(func(status, data):
 				Gets the list of scene items within a group. The [param callback] receives an array of scene item objects containing their IDs, source names, and other properties.
 
 				[codeblock]
-OBSClient.get_group_scene_item_list("scene_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_group_scene_item_list("scene_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -286,10 +286,10 @@ OBSClient.get_group_scene_item_list("scene_name_value", func(status, data):
 				Gets a list of all available hotkeys in OBS. The [param callback] receives an array of hotkey names that can be triggered using [method trigger_hotkey_by_name].
 
 				[codeblock]
-OBSClient.get_hotkey_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_hotkey_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -301,10 +301,10 @@ OBSClient.get_hotkey_list(func(status, data):
 				Gets the default settings for a specific input kind. The [param callback] receives a dictionary containing the default configuration values for that input type.
 
 				[codeblock]
-OBSClient.get_input_default_settings("input_kind_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_input_default_settings("input_kind_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -316,10 +316,10 @@ OBSClient.get_input_default_settings("input_kind_value", func(status, data):
 				Gets a list of all available input kinds. If [param unversioned] is [code]true[/code], returns input kinds without version suffixes. The [param callback] receives an array of input kind strings like "browser_source", "image_source", etc.
 
 				[codeblock]
-OBSClient.get_input_kind_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_input_kind_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -331,10 +331,10 @@ OBSClient.get_input_kind_list(func(status, data):
 				Gets a list of all inputs (sources). If [param input_kind] is specified, only returns inputs of that type. The [param callback] receives an array of input objects containing names, UUIDs, kinds, and other properties.
 
 				[codeblock]
-OBSClient.get_input_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_input_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -346,10 +346,10 @@ OBSClient.get_input_list(func(status, data):
 				Gets the mute state of an input. The [param callback] receives a boolean indicating whether the input is muted.
 
 				[codeblock]
-OBSClient.get_input_mute("input_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_input_mute("input_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -361,10 +361,10 @@ OBSClient.get_input_mute("input_name_value", func(status, data):
 				Gets the settings dictionary for an input. The [param callback] receives the input's kind, settings dictionary, and default settings.
 
 				[codeblock]
-OBSClient.get_input_settings("input_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_input_settings("input_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -376,10 +376,10 @@ OBSClient.get_input_settings("input_name_value", func(status, data):
 				Gets the volume level of an input. The [param callback] receives the volume as a multiplier (0.0 to 1.0+) and in decibels.
 
 				[codeblock]
-OBSClient.get_input_volume("input_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_input_volume("input_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -390,10 +390,10 @@ OBSClient.get_input_volume("input_name_value", func(status, data):
 				Gets the file path of the last saved replay buffer. The [param callback] receives the saved replay path string.
 
 				[codeblock]
-OBSClient.get_last_replay_buffer_replay(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_last_replay_buffer_replay(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -405,10 +405,10 @@ OBSClient.get_last_replay_buffer_replay(func(status, data):
 				Gets the status of a media input (video/audio file playback). The [param callback] receives playback state, current time, duration, and other media properties.
 
 				[codeblock]
-OBSClient.get_media_input_status("input_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_media_input_status("input_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -419,10 +419,10 @@ OBSClient.get_media_input_status("input_name_value", func(status, data):
 				Gets a list of all monitors/displays available on the system. The [param callback] receives an array of monitor information for use with projector functions.
 
 				[codeblock]
-OBSClient.get_monitor_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_monitor_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -432,7 +432,7 @@ OBSClient.get_monitor_list(func(status, data):
 				Returns the RPC version negotiated with the server during connection. Returns 0 if not connected.
 
 				[codeblock]
-OBSClient.get_negotiated_rpc_version()
+				OBSClient.get_negotiated_rpc_version()
 				[/codeblock]
 			</description>
 		</method>
@@ -445,10 +445,10 @@ OBSClient.get_negotiated_rpc_version()
 				Gets persistent data stored in OBS. The [param realm] defines the storage namespace (e.g., "OBS_WEBSOCKET_DATA_REALM_GLOBAL"). The [param callback] receives the stored value.
 
 				[codeblock]
-OBSClient.get_persistent_data("example_string", "slot_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_persistent_data("example_string", "slot_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -459,10 +459,10 @@ OBSClient.get_persistent_data("example_string", "slot_name_value", func(status, 
 				Gets a list of all available profiles. The [param callback] receives an array of profile names and the current profile name.
 
 				[codeblock]
-OBSClient.get_profile_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_profile_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -475,10 +475,10 @@ OBSClient.get_profile_list(func(status, data):
 				Gets a specific parameter value from the current profile's configuration file. The [param parameter_category] is the INI section name. The [param callback] receives the parameter value and default value.
 
 				[codeblock]
-OBSClient.get_profile_parameter("example_string", "parameter_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_profile_parameter("example_string", "parameter_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -489,10 +489,10 @@ OBSClient.get_profile_parameter("example_string", "parameter_name_value", func(s
 				Gets the directory path where recordings are saved. The [param callback] receives the record directory path string.
 
 				[codeblock]
-OBSClient.get_record_directory(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_record_directory(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -503,10 +503,10 @@ OBSClient.get_record_directory(func(status, data):
 				Gets the current status of the record output. The [param callback] receives information about whether recording is active, paused, and the current timecode.
 
 				[codeblock]
-OBSClient.get_record_status(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_record_status(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -517,10 +517,10 @@ OBSClient.get_record_status(func(status, data):
 				Gets the current status of the replay buffer output. The [param callback] receives information about whether the replay buffer is active.
 
 				[codeblock]
-OBSClient.get_replay_buffer_status(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_replay_buffer_status(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -531,10 +531,10 @@ OBSClient.get_replay_buffer_status(func(status, data):
 				Gets a list of all available scene collections. The [param callback] receives an array of scene collection names and the current scene collection name.
 
 				[codeblock]
-OBSClient.get_scene_collection_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_collection_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -547,10 +547,10 @@ OBSClient.get_scene_collection_list(func(status, data):
 				Gets the blend mode of a scene item. The [param callback] receives the blend mode string (e.g., "OBS_BLEND_NORMAL", "OBS_BLEND_ADDITIVE").
 
 				[codeblock]
-OBSClient.get_scene_item_blend_mode("scene_name_value", 0, func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_item_blend_mode("scene_name_value", 0, func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -563,10 +563,10 @@ OBSClient.get_scene_item_blend_mode("scene_name_value", 0, func(status, data):
 				Gets whether a scene item is enabled (visible). The [param callback] receives a boolean indicating the enabled state.
 
 				[codeblock]
-OBSClient.get_scene_item_enabled("scene_name_value", 0, func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_item_enabled("scene_name_value", 0, func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -580,10 +580,10 @@ OBSClient.get_scene_item_enabled("scene_name_value", 0, func(status, data):
 				Gets the scene item ID for a source in a scene. Use [param search_offset] to find subsequent items if the same source appears multiple times. The [param callback] receives the scene item ID.
 
 				[codeblock]
-OBSClient.get_scene_item_id("scene_name_value", "source_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_item_id("scene_name_value", "source_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -596,10 +596,10 @@ OBSClient.get_scene_item_id("scene_name_value", "source_name_value", func(status
 				Gets the index (z-order position) of a scene item. The [param callback] receives the item's index in the scene's layer stack.
 
 				[codeblock]
-OBSClient.get_scene_item_index("scene_name_value", 0, func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_item_index("scene_name_value", 0, func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -611,10 +611,10 @@ OBSClient.get_scene_item_index("scene_name_value", 0, func(status, data):
 				Gets a list of all scene items in a scene. The [param callback] receives an array of scene item objects containing their IDs, source names, transforms, and other properties.
 
 				[codeblock]
-OBSClient.get_scene_item_list("scene_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_item_list("scene_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -627,10 +627,10 @@ OBSClient.get_scene_item_list("scene_name_value", func(status, data):
 				Gets whether a scene item is locked (cannot be moved or resized in the OBS UI). The [param callback] receives a boolean indicating the locked state.
 
 				[codeblock]
-OBSClient.get_scene_item_locked("scene_name_value", 0, func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_item_locked("scene_name_value", 0, func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -643,10 +643,10 @@ OBSClient.get_scene_item_locked("scene_name_value", 0, func(status, data):
 				Gets the transform properties of a scene item including position, scale, rotation, crop, and alignment. The [param callback] receives a dictionary with all transform values.
 
 				[codeblock]
-OBSClient.get_scene_item_transform("scene_name_value", 0, func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_item_transform("scene_name_value", 0, func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -657,10 +657,10 @@ OBSClient.get_scene_item_transform("scene_name_value", 0, func(status, data):
 				Gets a list of all scenes in OBS. The [param callback] receives an array of scene objects, the current program scene, and current preview scene (if in studio mode).
 
 				[codeblock]
-OBSClient.get_scene_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -672,10 +672,10 @@ OBSClient.get_scene_list(func(status, data):
 				Gets the transition override settings for a specific scene. The [param callback] receives the override transition name and duration if set.
 
 				[codeblock]
-OBSClient.get_scene_scene_transition_override("scene_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_scene_transition_override("scene_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -686,10 +686,10 @@ OBSClient.get_scene_scene_transition_override("scene_name_value", func(status, d
 				Gets a list of all available scene transitions. The [param callback] receives an array of transition objects with their names, kinds, and whether they are fixed.
 
 				[codeblock]
-OBSClient.get_scene_transition_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_scene_transition_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -699,7 +699,7 @@ OBSClient.get_scene_transition_list(func(status, data):
 				Returns information about the connected OBS server, including OBS version, obs-websocket version, and RPC version. Returns an empty dictionary if not connected.
 
 				[codeblock]
-OBSClient.get_server_info()
+				OBSClient.get_server_info()
 				[/codeblock]
 			</description>
 		</method>
@@ -711,10 +711,10 @@ OBSClient.get_server_info()
 				Gets whether a source is currently active (visible in the program output). The [param callback] receives boolean values for video active and showing state.
 
 				[codeblock]
-OBSClient.get_source_active("source_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_source_active("source_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -727,10 +727,10 @@ OBSClient.get_source_active("source_name_value", func(status, data):
 				Gets information about a specific filter on a source. The [param callback] receives the filter's enabled state, index, kind, and settings.
 
 				[codeblock]
-OBSClient.get_source_filter("source_name_value", "filter_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_source_filter("source_name_value", "filter_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -742,10 +742,10 @@ OBSClient.get_source_filter("source_name_value", "filter_name_value", func(statu
 				Gets the default settings for a specific filter kind. The [param callback] receives a dictionary containing the default configuration values for that filter type.
 
 				[codeblock]
-OBSClient.get_source_filter_default_settings("filter_kind_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_source_filter_default_settings("filter_kind_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -756,10 +756,10 @@ OBSClient.get_source_filter_default_settings("filter_kind_value", func(status, d
 				Gets a list of all available filter kinds. The [param callback] receives an array of filter kind strings like "color_correction", "sharpness_filter", etc.
 
 				[codeblock]
-OBSClient.get_source_filter_kind_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_source_filter_kind_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -771,10 +771,10 @@ OBSClient.get_source_filter_kind_list(func(status, data):
 				Gets a list of all filters applied to a source. The [param callback] receives an array of filter objects containing their names, kinds, enabled states, and settings.
 
 				[codeblock]
-OBSClient.get_source_filter_list("source_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_source_filter_list("source_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -790,10 +790,10 @@ OBSClient.get_source_filter_list("source_name_value", func(status, data):
 				Takes a screenshot of a source and returns it as a base64-encoded image. The [param image_format] can be "png", "jpg", etc. Optional parameters control the dimensions and quality. The [param callback] receives the base64-encoded image data.
 
 				[codeblock]
-OBSClient.get_source_screenshot("source_name_value", "example_string", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_source_screenshot("source_name_value", "example_string", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -804,10 +804,10 @@ OBSClient.get_source_screenshot("source_name_value", "example_string", func(stat
 				Gets the names of special inputs like Desktop Audio, Mic/Aux, and others. The [param callback] receives a dictionary with the special input names.
 
 				[codeblock]
-OBSClient.get_special_inputs(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_special_inputs(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -818,10 +818,10 @@ OBSClient.get_special_inputs(func(status, data):
 				Gets statistics about OBS performance including CPU usage, memory usage, FPS, and frame counts.
 
 				[codeblock]
-OBSClient.get_stats(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_stats(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -832,10 +832,10 @@ OBSClient.get_stats(func(status, data):
 				Gets the current streaming service settings including service type and configuration. The [param callback] receives the stream service type and settings dictionary.
 
 				[codeblock]
-OBSClient.get_stream_service_settings(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_stream_service_settings(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -846,10 +846,10 @@ OBSClient.get_stream_service_settings(func(status, data):
 				Gets the current status of the stream output. The [param callback] receives information about whether streaming is active, the timecode, bitrate, and other streaming metrics.
 
 				[codeblock]
-OBSClient.get_stream_status(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_stream_status(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -860,10 +860,10 @@ OBSClient.get_stream_status(func(status, data):
 				Gets whether studio mode is currently enabled. Studio mode allows previewing scenes before transitioning them to program. The [param callback] receives a boolean indicating studio mode state.
 
 				[codeblock]
-OBSClient.get_studio_mode_enabled(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_studio_mode_enabled(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -874,10 +874,10 @@ OBSClient.get_studio_mode_enabled(func(status, data):
 				Gets a list of all available transition kinds. The [param callback] receives an array of transition kind strings like "fade_transition", "cut_transition", etc.
 
 				[codeblock]
-OBSClient.get_transition_kind_list(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_transition_kind_list(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -888,10 +888,10 @@ OBSClient.get_transition_kind_list(func(status, data):
 				Gets version information about OBS and obs-websocket. The [param callback] receives the OBS version, obs-websocket version, RPC version, available requests, and platform information.
 
 				[codeblock]
-OBSClient.get_version(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_version(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -902,10 +902,10 @@ OBSClient.get_version(func(status, data):
 				Gets the current video settings including base and output resolution, FPS, and video format. The [param callback] receives a dictionary with all video configuration values.
 
 				[codeblock]
-OBSClient.get_video_settings(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_video_settings(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -916,10 +916,10 @@ OBSClient.get_video_settings(func(status, data):
 				Gets the current status of the virtual camera output.
 
 				[codeblock]
-OBSClient.get_virtual_cam_status(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.get_virtual_cam_status(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -929,7 +929,7 @@ OBSClient.get_virtual_cam_status(func(status, data):
 				Returns [code]true[/code] if currently connected and authenticated with an OBS WebSocket server.
 
 				[codeblock]
-OBSClient.is_obs_connected()
+				OBSClient.is_obs_connected()
 				[/codeblock]
 			</description>
 		</method>
@@ -941,7 +941,7 @@ OBSClient.is_obs_connected()
 				Offsets the current playback position of a media input by the specified number of milliseconds. Use negative values to seek backwards.
 
 				[codeblock]
-OBSClient.offset_media_input_cursor("input_name_value", 0)
+				OBSClient.offset_media_input_cursor("input_name_value", 0)
 				[/codeblock]
 			</description>
 		</method>
@@ -952,7 +952,7 @@ OBSClient.offset_media_input_cursor("input_name_value", 0)
 				Opens the filters dialog for the specified input in the OBS user interface.
 
 				[codeblock]
-OBSClient.open_input_filters_dialog("input_name_value")
+				OBSClient.open_input_filters_dialog("input_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -963,7 +963,7 @@ OBSClient.open_input_filters_dialog("input_name_value")
 				Opens the interact dialog for the specified input in the OBS user interface. This is useful for sources like browser sources that support interaction.
 
 				[codeblock]
-OBSClient.open_input_interact_dialog("input_name_value")
+				OBSClient.open_input_interact_dialog("input_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -974,7 +974,7 @@ OBSClient.open_input_interact_dialog("input_name_value")
 				Opens the properties dialog for the specified input in the OBS user interface.
 
 				[codeblock]
-OBSClient.open_input_properties_dialog("input_name_value")
+				OBSClient.open_input_properties_dialog("input_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -987,7 +987,7 @@ OBSClient.open_input_properties_dialog("input_name_value")
 				Opens a projector window displaying the specified source. Use [param monitor_index] to open on a specific monitor, or provide [param projector_geometry] as a string in the format "X,Y,Width,Height" for custom positioning.
 
 				[codeblock]
-OBSClient.open_source_projector("source_name_value")
+				OBSClient.open_source_projector("source_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1000,7 +1000,7 @@ OBSClient.open_source_projector("source_name_value")
 				Opens a projector window displaying a video mix. The [param video_mix_type] can be "OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW" or "OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM". Use [param monitor_index] to open on a specific monitor, or provide [param projector_geometry] for custom positioning.
 
 				[codeblock]
-OBSClient.open_video_mix_projector("example_string")
+				OBSClient.open_video_mix_projector("example_string")
 				[/codeblock]
 			</description>
 		</method>
@@ -1010,7 +1010,7 @@ OBSClient.open_video_mix_projector("example_string")
 				Pauses the record output. The recording will remain active but stop writing to the file.
 
 				[codeblock]
-OBSClient.pause_record()
+				OBSClient.pause_record()
 				[/codeblock]
 			</description>
 		</method>
@@ -1019,8 +1019,8 @@ OBSClient.pause_record()
 			<description>
 				Polls the WebSocket connection to process incoming and outgoing messages. This method must be called regularly (typically in [code]_process[/code]) for the client to function properly. Without regular polling, messages will not be received and the connection will not complete its handshake.
 				[codeblock]
-                func _process(delta):
-OBSClient.poll()
+				                func _process(delta):
+				OBSClient.poll()
 				[/codeblock]
 			</description>
 		</method>
@@ -1030,10 +1030,10 @@ OBSClient.poll()
 			<description>
 				Updates the event subscription mask without disconnecting. Use this to change which event categories you want to receive.
 				[codeblock]
-                # Change to only receive scene and output events
-OBSClient.reidentify(
-                    OBSEventSubscription.SCENES | OBSEventSubscription.OUTPUTS
-)
+				                # Change to only receive scene and output events
+				OBSClient.reidentify(
+				                    OBSEventSubscription.SCENES | OBSEventSubscription.OUTPUTS
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -1044,7 +1044,7 @@ OBSClient.reidentify(
 				Removes an input (source) from OBS. This will also remove all scene items referencing this input.
 
 				[codeblock]
-OBSClient.remove_input("input_name_value")
+				OBSClient.remove_input("input_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1055,7 +1055,7 @@ OBSClient.remove_input("input_name_value")
 				Removes a profile from OBS. The profile cannot be the currently active profile.
 
 				[codeblock]
-OBSClient.remove_profile("profile_name_value")
+				OBSClient.remove_profile("profile_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1066,7 +1066,7 @@ OBSClient.remove_profile("profile_name_value")
 				Removes a scene from OBS. The scene cannot be the currently active program or preview scene.
 
 				[codeblock]
-OBSClient.remove_scene("scene_name_value")
+				OBSClient.remove_scene("scene_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1078,7 +1078,7 @@ OBSClient.remove_scene("scene_name_value")
 				Removes a scene item from a scene. This does not delete the underlying source, only the reference to it in this scene.
 
 				[codeblock]
-OBSClient.remove_scene_item("scene_name_value", 0)
+				OBSClient.remove_scene_item("scene_name_value", 0)
 				[/codeblock]
 			</description>
 		</method>
@@ -1090,7 +1090,7 @@ OBSClient.remove_scene_item("scene_name_value", 0)
 				Removes a filter from a source.
 
 				[codeblock]
-OBSClient.remove_source_filter("source_name_value", "filter_name_value")
+				OBSClient.remove_source_filter("source_name_value", "filter_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1100,7 +1100,7 @@ OBSClient.remove_source_filter("source_name_value", "filter_name_value")
 				Resumes the record output after it has been paused.
 
 				[codeblock]
-OBSClient.resume_record()
+				OBSClient.resume_record()
 				[/codeblock]
 			</description>
 		</method>
@@ -1110,7 +1110,7 @@ OBSClient.resume_record()
 				Saves the current replay buffer to disk. The replay buffer must be active for this to work.
 
 				[codeblock]
-OBSClient.save_replay_buffer()
+				OBSClient.save_replay_buffer()
 				[/codeblock]
 			</description>
 		</method>
@@ -1126,7 +1126,7 @@ OBSClient.save_replay_buffer()
 				Takes a screenshot of a source and saves it to a file. The [param image_format] can be "png", "jpg", etc. The [param image_file_path] specifies where to save the file. Optional parameters control the dimensions and quality.
 
 				[codeblock]
-OBSClient.save_source_screenshot("source_name_value", "example_string", "example_string")
+				OBSClient.save_source_screenshot("source_name_value", "example_string", "example_string")
 				[/codeblock]
 			</description>
 		</method>
@@ -1138,11 +1138,11 @@ OBSClient.save_source_screenshot("source_name_value", "example_string", "example
 			<description>
 				Sends a generic request to OBS. This is a low-level method that can be used for any request type. Returns the request ID string. If [param callback] is provided, it will be called when the response is received with the request status and response data.
 				[codeblock]
-OBSClient.send_request("GetInputList", {"inputKind": "browser_source"},
-                    func(status, data):
-    if status.result:
-        print("Browser sources: ", data.inputs)
-)
+				OBSClient.send_request("GetInputList", {"inputKind": "browser_source"},
+				                    func(status, data):
+				    if status.result:
+				        print("Browser sources: ", data.inputs)
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -1156,10 +1156,10 @@ OBSClient.send_request("GetInputList", {"inputKind": "browser_source"},
 				Sends a batch of requests to OBS. If [param halt_on_failure] is [code]true[/code], processing stops at the first failed request. The [param execution_type] determines how requests are processed (serial realtime, serial frame, or parallel).
 
 				[codeblock]
-OBSClient.send_request_batch([], func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.send_request_batch([], func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -1170,7 +1170,7 @@ OBSClient.send_request_batch([], func(status, data):
 				Sends CEA-608 caption text over the stream output.
 
 				[codeblock]
-OBSClient.send_stream_caption("example_string")
+				OBSClient.send_stream_caption("example_string")
 				[/codeblock]
 			</description>
 		</method>
@@ -1181,7 +1181,7 @@ OBSClient.send_stream_caption("example_string")
 				Sets the current preview scene when studio mode is enabled. Returns an error if studio mode is not active.
 
 				[codeblock]
-OBSClient.set_current_preview_scene("scene_name_value")
+				OBSClient.set_current_preview_scene("scene_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1192,7 +1192,7 @@ OBSClient.set_current_preview_scene("scene_name_value")
 				Switches to the specified profile. This will reload OBS configuration with the settings from that profile.
 
 				[codeblock]
-OBSClient.set_current_profile("profile_name_value")
+				OBSClient.set_current_profile("profile_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1203,7 +1203,7 @@ OBSClient.set_current_profile("profile_name_value")
 				Switches to the specified scene in the program output.
 
 				[codeblock]
-OBSClient.set_current_program_scene("scene_name_value")
+				OBSClient.set_current_program_scene("scene_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1214,7 +1214,7 @@ OBSClient.set_current_program_scene("scene_name_value")
 				Switches to the specified scene collection. Note: This will block until the collection has finished changing.
 
 				[codeblock]
-OBSClient.set_current_scene_collection("scene_collection_name_value")
+				OBSClient.set_current_scene_collection("scene_collection_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1225,7 +1225,7 @@ OBSClient.set_current_scene_collection("scene_collection_name_value")
 				Sets the current scene transition by name.
 
 				[codeblock]
-OBSClient.set_current_scene_transition("transition_name_value")
+				OBSClient.set_current_scene_transition("transition_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1236,7 +1236,7 @@ OBSClient.set_current_scene_transition("transition_name_value")
 				Sets the duration of the current scene transition in milliseconds.
 
 				[codeblock]
-OBSClient.set_current_scene_transition_duration(0)
+				OBSClient.set_current_scene_transition_duration(0)
 				[/codeblock]
 			</description>
 		</method>
@@ -1248,7 +1248,7 @@ OBSClient.set_current_scene_transition_duration(0)
 				Sets the settings of the current scene transition. If [param overlay] is [code]true[/code], only the provided settings are changed; if [code]false[/code], all settings are replaced.
 
 				[codeblock]
-OBSClient.set_current_scene_transition_settings({})
+				OBSClient.set_current_scene_transition_settings({})
 				[/codeblock]
 			</description>
 		</method>
@@ -1260,7 +1260,7 @@ OBSClient.set_current_scene_transition_settings({})
 				Sets the mute state of an input. If [code]true[/code], the input will be muted.
 
 				[codeblock]
-OBSClient.set_input_mute("input_name_value", true)
+				OBSClient.set_input_mute("input_name_value", true)
 				[/codeblock]
 			</description>
 		</method>
@@ -1272,7 +1272,7 @@ OBSClient.set_input_mute("input_name_value", true)
 				Renames an input to a new name. The new name must not already exist.
 
 				[codeblock]
-OBSClient.set_input_name("input_name_value", "new_input_name_value")
+				OBSClient.set_input_name("input_name_value", "new_input_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1285,7 +1285,7 @@ OBSClient.set_input_name("input_name_value", "new_input_name_value")
 				Sets the settings of an input. If [param overlay] is [code]true[/code], only the provided settings are changed; if [code]false[/code], all settings are replaced.
 
 				[codeblock]
-OBSClient.set_input_settings("input_name_value", {})
+				OBSClient.set_input_settings("input_name_value", {})
 				[/codeblock]
 			</description>
 		</method>
@@ -1298,7 +1298,7 @@ OBSClient.set_input_settings("input_name_value", {})
 				Sets the volume of an input. Provide either [param input_volume_mul] (multiplier 0.0 to 1.0+) or [param input_volume_db] (decibels). If [param input_volume_mul] is -1.0, the decibel value is used.
 
 				[codeblock]
-OBSClient.set_input_volume("input_name_value")
+				OBSClient.set_input_volume("input_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1310,7 +1310,7 @@ OBSClient.set_input_volume("input_name_value")
 				Sets the absolute playback position of a media input in milliseconds.
 
 				[codeblock]
-OBSClient.set_media_input_cursor("input_name_value", 0)
+				OBSClient.set_media_input_cursor("input_name_value", 0)
 				[/codeblock]
 			</description>
 		</method>
@@ -1323,7 +1323,7 @@ OBSClient.set_media_input_cursor("input_name_value", 0)
 				Sets persistent data in OBS. The [param realm] defines the storage namespace (e.g., "OBS_WEBSOCKET_DATA_REALM_GLOBAL"). The [param slot_value] can be any JSON-serializable type.
 
 				[codeblock]
-OBSClient.set_persistent_data("example_string", "slot_name_value", null)
+				OBSClient.set_persistent_data("example_string", "slot_name_value", null)
 				[/codeblock]
 			</description>
 		</method>
@@ -1336,7 +1336,7 @@ OBSClient.set_persistent_data("example_string", "slot_name_value", null)
 				Sets a specific parameter value in the current profile's configuration file. The [param parameter_category] is the INI section name.
 
 				[codeblock]
-OBSClient.set_profile_parameter("example_string", "parameter_name_value", "example_string")
+				OBSClient.set_profile_parameter("example_string", "parameter_name_value", "example_string")
 				[/codeblock]
 			</description>
 		</method>
@@ -1347,7 +1347,7 @@ OBSClient.set_profile_parameter("example_string", "parameter_name_value", "examp
 				Sets the directory path where recordings will be saved.
 
 				[codeblock]
-OBSClient.set_record_directory("example_string")
+				OBSClient.set_record_directory("example_string")
 				[/codeblock]
 			</description>
 		</method>
@@ -1360,7 +1360,7 @@ OBSClient.set_record_directory("example_string")
 				Sets the blend mode of a scene item. The [param scene_item_blend_mode] should be a string like "OBS_BLEND_NORMAL", "OBS_BLEND_ADDITIVE", etc.
 
 				[codeblock]
-OBSClient.set_scene_item_blend_mode("scene_name_value", 0, "example_string")
+				OBSClient.set_scene_item_blend_mode("scene_name_value", 0, "example_string")
 				[/codeblock]
 			</description>
 		</method>
@@ -1373,7 +1373,7 @@ OBSClient.set_scene_item_blend_mode("scene_name_value", 0, "example_string")
 				Sets whether a scene item is enabled (visible). If [code]false[/code], the item will be hidden.
 
 				[codeblock]
-OBSClient.set_scene_item_enabled("scene_name_value", 0, true)
+				OBSClient.set_scene_item_enabled("scene_name_value", 0, true)
 				[/codeblock]
 			</description>
 		</method>
@@ -1386,7 +1386,7 @@ OBSClient.set_scene_item_enabled("scene_name_value", 0, true)
 				Sets the index (z-order position) of a scene item. Lower indices are rendered first (behind higher indices).
 
 				[codeblock]
-OBSClient.set_scene_item_index("scene_name_value", 0, 0)
+				OBSClient.set_scene_item_index("scene_name_value", 0, 0)
 				[/codeblock]
 			</description>
 		</method>
@@ -1399,7 +1399,7 @@ OBSClient.set_scene_item_index("scene_name_value", 0, 0)
 				Sets whether a scene item is locked. Locked items cannot be moved or resized in the OBS user interface.
 
 				[codeblock]
-OBSClient.set_scene_item_locked("scene_name_value", 0, true)
+				OBSClient.set_scene_item_locked("scene_name_value", 0, true)
 				[/codeblock]
 			</description>
 		</method>
@@ -1412,7 +1412,7 @@ OBSClient.set_scene_item_locked("scene_name_value", 0, true)
 				Sets the transform properties of a scene item. The [param scene_item_transform] dictionary can include position, scale, rotation, crop, bounds, and alignment values.
 
 				[codeblock]
-OBSClient.set_scene_item_transform("scene_name_value", 0, {})
+				OBSClient.set_scene_item_transform("scene_name_value", 0, {})
 				[/codeblock]
 			</description>
 		</method>
@@ -1424,7 +1424,7 @@ OBSClient.set_scene_item_transform("scene_name_value", 0, {})
 				Renames a scene to a new name. The new name must not already exist.
 
 				[codeblock]
-OBSClient.set_scene_name("scene_name_value", "new_scene_name_value")
+				OBSClient.set_scene_name("scene_name_value", "new_scene_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1437,7 +1437,7 @@ OBSClient.set_scene_name("scene_name_value", "new_scene_name_value")
 				Sets a transition override for a specific scene. When switching to this scene, the specified transition will be used instead of the default. If [param transition_duration] is provided and not -1, it overrides the transition's default duration.
 
 				[codeblock]
-OBSClient.set_scene_scene_transition_override("scene_name_value", "transition_name_value")
+				OBSClient.set_scene_scene_transition_override("scene_name_value", "transition_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1450,7 +1450,7 @@ OBSClient.set_scene_scene_transition_override("scene_name_value", "transition_na
 				Sets whether a filter is enabled. Disabled filters remain on the source but don't affect the output.
 
 				[codeblock]
-OBSClient.set_source_filter_enabled("source_name_value", "filter_name_value", true)
+				OBSClient.set_source_filter_enabled("source_name_value", "filter_name_value", true)
 				[/codeblock]
 			</description>
 		</method>
@@ -1463,7 +1463,7 @@ OBSClient.set_source_filter_enabled("source_name_value", "filter_name_value", tr
 				Sets the index (order) of a filter in the filter chain. Filters are applied in order from index 0 upward.
 
 				[codeblock]
-OBSClient.set_source_filter_index("source_name_value", "filter_name_value", 0)
+				OBSClient.set_source_filter_index("source_name_value", "filter_name_value", 0)
 				[/codeblock]
 			</description>
 		</method>
@@ -1476,7 +1476,7 @@ OBSClient.set_source_filter_index("source_name_value", "filter_name_value", 0)
 				Renames a filter to a new name. The new name must not already exist on the source.
 
 				[codeblock]
-OBSClient.set_source_filter_name("source_name_value", "filter_name_value", "new_filter_name_value")
+				OBSClient.set_source_filter_name("source_name_value", "filter_name_value", "new_filter_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1490,7 +1490,7 @@ OBSClient.set_source_filter_name("source_name_value", "filter_name_value", "new_
 				Sets the settings of a filter. If [param overlay] is [code]true[/code], only the provided settings are changed; if [code]false[/code], all settings are replaced.
 
 				[codeblock]
-OBSClient.set_source_filter_settings("source_name_value", "filter_name_value", {})
+				OBSClient.set_source_filter_settings("source_name_value", "filter_name_value", {})
 				[/codeblock]
 			</description>
 		</method>
@@ -1502,7 +1502,7 @@ OBSClient.set_source_filter_settings("source_name_value", "filter_name_value", {
 				Sets the streaming service configuration. The [param stream_service_type] specifies the service (e.g., "rtmp_custom"), and [param stream_service_settings] contains the service-specific configuration like server and key.
 
 				[codeblock]
-OBSClient.set_stream_service_settings("example_string", {})
+				OBSClient.set_stream_service_settings("example_string", {})
 				[/codeblock]
 			</description>
 		</method>
@@ -1513,7 +1513,7 @@ OBSClient.set_stream_service_settings("example_string", {})
 				Enables or disables studio mode. When enabled, studio mode allows previewing scenes before transitioning them to program output.
 
 				[codeblock]
-OBSClient.set_studio_mode_enabled(true)
+				OBSClient.set_studio_mode_enabled(true)
 				[/codeblock]
 			</description>
 		</method>
@@ -1525,7 +1525,7 @@ OBSClient.set_studio_mode_enabled(true)
 				Sets the T-bar position for manual transition control in studio mode. The [param position] ranges from 0.0 to 1.0. If [param release] is [code]true[/code], the transition completes automatically; if [code]false[/code], it stays at the specified position.
 
 				[codeblock]
-OBSClient.set_tbar_position(0)
+				OBSClient.set_tbar_position(0)
 				[/codeblock]
 			</description>
 		</method>
@@ -1536,7 +1536,7 @@ OBSClient.set_tbar_position(0)
 				Sets the video settings including base and output resolution, FPS numerator and denominator.
 
 				[codeblock]
-OBSClient.set_video_settings({})
+				OBSClient.set_video_settings({})
 				[/codeblock]
 			</description>
 		</method>
@@ -1546,7 +1546,7 @@ OBSClient.set_video_settings({})
 				Splits the current recording file. The recording continues but starts writing to a new file. This is useful for creating segment breaks in long recordings.
 
 				[codeblock]
-OBSClient.split_record_file()
+				OBSClient.split_record_file()
 				[/codeblock]
 			</description>
 		</method>
@@ -1556,7 +1556,7 @@ OBSClient.split_record_file()
 				Starts the record output.
 
 				[codeblock]
-OBSClient.start_record()
+				OBSClient.start_record()
 				[/codeblock]
 			</description>
 		</method>
@@ -1566,7 +1566,7 @@ OBSClient.start_record()
 				Starts the replay buffer output. The replay buffer continuously records recent video which can be saved on demand using [method save_replay_buffer].
 
 				[codeblock]
-OBSClient.start_replay_buffer()
+				OBSClient.start_replay_buffer()
 				[/codeblock]
 			</description>
 		</method>
@@ -1576,7 +1576,7 @@ OBSClient.start_replay_buffer()
 				Starts the stream output.
 
 				[codeblock]
-OBSClient.start_stream()
+				OBSClient.start_stream()
 				[/codeblock]
 			</description>
 		</method>
@@ -1586,7 +1586,7 @@ OBSClient.start_stream()
 				Starts the virtual camera output.
 
 				[codeblock]
-OBSClient.start_virtual_cam()
+				OBSClient.start_virtual_cam()
 				[/codeblock]
 			</description>
 		</method>
@@ -1597,10 +1597,10 @@ OBSClient.start_virtual_cam()
 				Stops the record output. The [param callback] receives the file path where the recording was saved.
 
 				[codeblock]
-OBSClient.stop_record(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.stop_record(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -1610,7 +1610,7 @@ OBSClient.stop_record(func(status, data):
 				Stops the replay buffer output.
 
 				[codeblock]
-OBSClient.stop_replay_buffer()
+				OBSClient.stop_replay_buffer()
 				[/codeblock]
 			</description>
 		</method>
@@ -1620,7 +1620,7 @@ OBSClient.stop_replay_buffer()
 				Stops the stream output.
 
 				[codeblock]
-OBSClient.stop_stream()
+				OBSClient.stop_stream()
 				[/codeblock]
 			</description>
 		</method>
@@ -1630,7 +1630,7 @@ OBSClient.stop_stream()
 				Stops the virtual camera output.
 
 				[codeblock]
-OBSClient.stop_virtual_cam()
+				OBSClient.stop_virtual_cam()
 				[/codeblock]
 			</description>
 		</method>
@@ -1641,12 +1641,12 @@ OBSClient.stop_virtual_cam()
 			<description>
 				Subscribes to specific event categories using a callback function. The [param event_mask] is a bitmask of [code]OBSEventSubscription[/code] flags. The [param callback] will be called for matching events with the event type and event data.
 				[codeblock]
-OBSClient.subscribe_to_events(
-                    OBSEventSubscription.SCENES | OBSEventSubscription.OUTPUTS,
-                    func(event_type, event_data):
-        print("Event: ", event_type)
-        print("Data: ", event_data)
-)
+				OBSClient.subscribe_to_events(
+				                    OBSEventSubscription.SCENES | OBSEventSubscription.OUTPUTS,
+				                    func(event_type, event_data):
+				        print("Event: ", event_type)
+				        print("Data: ", event_data)
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -1658,10 +1658,10 @@ OBSClient.subscribe_to_events(
 				Toggles the mute state of an input. If muted, it will be unmuted and vice versa. The [param callback] receives the new mute state.
 
 				[codeblock]
-OBSClient.toggle_input_mute("input_name_value", func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.toggle_input_mute("input_name_value", func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -1672,10 +1672,10 @@ OBSClient.toggle_input_mute("input_name_value", func(status, data):
 				Toggles the record output state (starts if stopped, stops if started).
 
 				[codeblock]
-OBSClient.toggle_record(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.toggle_record(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -1685,7 +1685,7 @@ OBSClient.toggle_record(func(status, data):
 				Toggles the pause state of the recording. If paused, it will resume; if recording, it will pause.
 
 				[codeblock]
-OBSClient.toggle_record_pause()
+				OBSClient.toggle_record_pause()
 				[/codeblock]
 			</description>
 		</method>
@@ -1696,10 +1696,10 @@ OBSClient.toggle_record_pause()
 				Toggles the replay buffer output state (starts if stopped, stops if started).
 
 				[codeblock]
-OBSClient.toggle_replay_buffer(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.toggle_replay_buffer(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -1710,10 +1710,10 @@ OBSClient.toggle_replay_buffer(func(status, data):
 				Toggles the stream output state (starts if stopped, stops if started).
 
 				[codeblock]
-OBSClient.toggle_stream(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.toggle_stream(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -1724,10 +1724,10 @@ OBSClient.toggle_stream(func(status, data):
 				Toggles the virtual camera output state (starts if stopped, stops if started).
 
 				[codeblock]
-OBSClient.toggle_virtual_cam(func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.toggle_virtual_cam(func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>
@@ -1739,7 +1739,7 @@ OBSClient.toggle_virtual_cam(func(status, data):
 				Triggers a hotkey by its name. Use [method get_hotkey_list] to get available hotkey names. The optional [param context_name] can specify a source context for source-specific hotkeys.
 
 				[codeblock]
-OBSClient.trigger_hotkey_by_name("hotkey_name_value")
+				OBSClient.trigger_hotkey_by_name("hotkey_name_value")
 				[/codeblock]
 			</description>
 		</method>
@@ -1751,7 +1751,7 @@ OBSClient.trigger_hotkey_by_name("hotkey_name_value")
 				Triggers a media action on a media input. The [param media_action] should be one of: "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_PLAY", "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_PAUSE", "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_STOP", "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART", "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_NEXT", or "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_PREVIOUS".
 
 				[codeblock]
-OBSClient.trigger_media_input_action("input_name_value", "example_string")
+				OBSClient.trigger_media_input_action("input_name_value", "example_string")
 				[/codeblock]
 			</description>
 		</method>
@@ -1761,7 +1761,7 @@ OBSClient.trigger_media_input_action("input_name_value", "example_string")
 				Triggers a transition from the current preview scene to program in studio mode. This is equivalent to clicking the Transition button in OBS.
 
 				[codeblock]
-OBSClient.trigger_studio_mode_transition()
+				OBSClient.trigger_studio_mode_transition()
 				[/codeblock]
 			</description>
 		</method>
@@ -1773,10 +1773,10 @@ OBSClient.trigger_studio_mode_transition()
 				Unsubscribes a previously registered callback from specific event categories.
 
 				[codeblock]
-OBSClient.unsubscribe_from_events(0, func(status, data):
-    if status.result:
-        pass
-)
+				OBSClient.unsubscribe_from_events(0, func(status, data):
+				    if status.result:
+				        pass
+				)
 				[/codeblock]
 			</description>
 		</method>

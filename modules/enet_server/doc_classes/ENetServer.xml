@@ -227,7 +227,7 @@
 				    ENetServer.set_authentication_mode(ENetServer.AUTH_CUSTOM)
 				    ENetServer.set_custom_authenticator(_custom_auth_logic)
 
-				func _custom_auth_logic(peer: ENetServerPeer, data: Dictionary) -> void:
+				func _custom_auth_logic(peer: ENetServerPeer, data: Dictionary) -&gt; void:
 				    if data.get("token") == "secret123":
 				        peer.authenticate() # Approved
 				    else:
