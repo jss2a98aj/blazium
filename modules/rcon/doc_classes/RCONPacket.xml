@@ -9,6 +9,7 @@
 		[b]Note:[/b] This class only provides static utility methods and does not need to be instantiated.
 	</description>
 	<tutorials>
+		<link title="RCON Developer Examples">https://github.com/blazium-games/rcon_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="create_battleye_command" qualifiers="static">

@@ -37,6 +37,7 @@
 		[/codeblocks]
 	</description>
 	<tutorials>
+		<link title="RCON Developer Examples">https://github.com/blazium-games/rcon_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="get_connected_clients" qualifiers="const">
