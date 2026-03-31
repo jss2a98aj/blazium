@@ -7,6 +7,7 @@
 		Handles the status, metrics, tracking, and port mapping logic required to initiate or receive an outgoing DCC SEND block over the networking protocol layer safely utilizing asynchronous connections.
 	</description>
 	<tutorials>
+		<link title="IRCClient Developer Examples">https://github.com/blazium-games/irc_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="accept">

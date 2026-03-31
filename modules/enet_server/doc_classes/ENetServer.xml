@@ -23,6 +23,7 @@
 		[/codeblock]
 	</description>
 	<tutorials>
+		<link title="ENetServer Developer Examples">https://github.com/blazium-games/enetserver_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="broadcast_packet">
@@ -111,7 +112,11 @@
 			<param index="0" name="peer_id" type="int" />
 			<param index="1" name="reason" type="String" default="&quot;&quot;" />
 			<description>
-				Disconnects the specified peer with an optional reason.
+				Disconnects the specified peer with an optional reason. Server will emit [signal peer_disconnected] with this reason.
+				[codeblock]
+				# Kick a peer if they are AFK
+				ENetServer.kick_peer(peer_id, "Kicked for being AFK")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="register_event">
@@ -120,6 +125,13 @@
 			<param index="1" name="callback" type="Callable" />
 			<description>
 				Registers a custom event callback. The callable will be executed whenever a custom event packet with the matching [param event_name] is received from any client.
+				[codeblock]
+				func _ready():
+				    ENetServer.register_event("player_jump", _on_player_jump)
+
+				func _on_player_jump(peer: ENetServerPeer, payload: Dictionary, channel: int):
+				    print("Player ", peer.get_peer_id(), " jumped to ", payload.get("position"))
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_node_state">
@@ -149,6 +161,13 @@
 			<param index="3" name="reliable" type="bool" default="true" />
 			<description>
 				Sends a packet to the specified peer. The packet can be of any type (Dictionary, String, int, etc.) and will be automatically encoded.
+				[codeblock]
+				# Send a simple String
+				ENetServer.send_packet(peer_id, "Welcome to the server", 0, true)
+
+				# Send a Dictionary packet
+				ENetServer.send_packet(peer_id, {"type": "ping", "timestamp": Time.get_ticks_msec()}, 0, true)
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_packet_to_all">
@@ -159,6 +178,11 @@
 			<param index="3" name="exclude" type="int[]" default="[]" />
 			<description>
 				Sends a packet to all connected peers, optionally excluding specific peer IDs.
+				[codeblock]
+				# Example: Send a chat message to everyone except the sender
+				var exclude_list : Array[int] = [sender_peer_id]
+				ENetServer.send_packet_to_all({"type": "chat", "msg": "Hello"}, 0, true, exclude_list)
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_packet_to_multiple">
@@ -197,6 +221,18 @@
 			<param index="0" name="callable" type="Callable" />
 			<description>
 				Sets a custom authentication callable that will be invoked for each peer during the prelogin phase.
+				The callable must return a [Dictionary] or emit a signal depending on your auth routine.
+				[codeblock]
+				func _ready():
+				    ENetServer.set_authentication_mode(ENetServer.AUTH_CUSTOM)
+				    ENetServer.set_custom_authenticator(_custom_auth_logic)
+
+				func _custom_auth_logic(peer: ENetServerPeer, data: Dictionary) -&gt; void:
+				    if data.get("token") == "secret123":
+				        peer.authenticate() # Approved
+				    else:
+				        peer.reject("Invalid token") # Denied
+				[/codeblock]
 			</description>
 		</method>
 		<method name="set_poll_rate">

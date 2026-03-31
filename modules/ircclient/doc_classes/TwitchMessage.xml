@@ -7,6 +7,7 @@
 		Extends the standardized IRC message to incorporate Twitch-specific capabilities such as badges, emotes, cheer tracking, and native broadcaster flags seamlessly mapped into a standalone node wrapper natively.
 	</description>
 	<tutorials>
+		<link title="IRCClient Developer Examples">https://github.com/blazium-games/irc_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="get_color" qualifiers="static">
