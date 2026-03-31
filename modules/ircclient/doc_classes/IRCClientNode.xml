@@ -73,6 +73,9 @@
 				[param username] is the username for the connection.
 				[param realname] is the real name or description.
 				[param password] is optional server password (not NickServ).
+				[codeblock]
+				$IRCClientNode.connect_to_server("irc.libera.chat", 6697, true, "BlazeBot", "bot", "Blazium Test Bot")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="disable_sasl">
@@ -234,6 +237,9 @@
 			<param index="1" name="key" type="String" default="&quot;&quot;" />
 			<description>
 				Joins an IRC channel. Optionally provide a [param key] for password-protected channels.
+				[codeblock]
+				$IRCClientNode.join_channel("#blazium")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="monitor_add">
@@ -304,6 +310,9 @@
 			<description>
 				Sends a CTCP ACTION message (like /me in IRC clients).
 				Example: [code]irc.send_action("#channel", "waves hello")[/code]
+				[codeblock]
+				$IRCClientNode.send_action("#blazium", "waves to the channel")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_dcc_file">
@@ -320,6 +329,9 @@
 			<param index="1" name="message" type="String" />
 			<description>
 				Sends a notice to a channel or user. Notices are like messages but should not trigger automatic responses.
+				[codeblock]
+				$IRCClientNode.send_notice("TargetUser", "This is an automated notice")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_privmsg">
@@ -328,6 +340,9 @@
 			<param index="1" name="message" type="String" />
 			<description>
 				Sends a message to a channel or user. [param target] can be a channel name (starting with #) or a nickname.
+				[codeblock]
+				$IRCClientNode.send_privmsg("#blazium", "Hello world!")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_raw">
@@ -442,6 +457,9 @@
 			<param index="1" name="topic" type="String" />
 			<description>
 				Generates and launches a `TOPIC` adjustment payload mapped accurately against [param channel] dynamically altering the channel's standard display sequence with [param topic].
+				[codeblock]
+				$IRCClientNode.set_topic("#blazium", "Welcome to the official Blazium channel!")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="strip_formatting">

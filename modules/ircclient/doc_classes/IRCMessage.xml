@@ -7,6 +7,7 @@
 		Parses and encapsulates an active IRC protocol line into an isolated structure, splitting it into standardized tags, prefixes, commands, and parameters based on the RFC 1459 and IRCv3 specifications.
 	</description>
 	<tutorials>
+		<link title="IRCClient Developer Examples">https://github.com/blazium-games/irc_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="decode_base64_string" qualifiers="static">

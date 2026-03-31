@@ -7,6 +7,7 @@
 		The base client socket layer implementing raw stream processing dynamically evaluating standard networking pipelines and replacing them with specific advanced external Twitch v3 architecture features securely tracking data without latency overhead safely.
 	</description>
 	<tutorials>
+		<link title="IRCClient Developer Examples">https://github.com/blazium-games/irc_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="ban_user">

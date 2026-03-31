@@ -7,6 +7,7 @@
 		A data container that stores information about an IRC user, including their nickname, username, hostname, account registration, and away status. Typically assembled from IRC origin prefixes (nick!user@host).
 	</description>
 	<tutorials>
+		<link title="IRCClient Developer Examples">https://github.com/blazium-games/irc_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="get_prefix" qualifiers="const">

@@ -46,6 +46,7 @@
 	</description>
 	<tutorials>
 		<link title="IRC Client README">https://github.com/blazium-games/blazium/blob/main/modules/ircclient/README.md</link>
+		<link title="IRCClient Developer Examples">https://github.com/blazium-games/irc_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="accept_dcc_transfer">
@@ -191,6 +192,9 @@
 				[param realname] - Your real name or description.
 				[param password] - Optional server password (PASS command). For SASL, use [method enable_sasl] instead.
 				[b]Note:[/b] You must call [method poll] regularly after connecting to process IRC messages.
+				[codeblock]
+				irc.connect_to_server("irc.libera.chat", 6697, true, "BlaziumBot", "bot", "Blazium Test Bot")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="deop_user">
@@ -220,6 +224,9 @@
 			<param index="0" name="quit_message" type="String" default="&quot;&quot;" />
 			<description>
 				Disconnects from the IRC server with an optional quit message. Disables auto-reconnect for manual disconnects.
+				[codeblock]
+				irc.disconnect_from_server("Shutting down bot")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="enable_auto_reconnect">
@@ -613,6 +620,9 @@
 			<param index="1" name="key" type="String" default="&quot;&quot;" />
 			<description>
 				Joins an IRC channel. Use [param key] for password-protected channels. Emits [signal joined] when successful.
+				[codeblock]
+				irc.join_channel("#blazium")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="kick_user">
