@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="CrowdControlEffect" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
+		Represents an individual interactivity effect in the CrowdControl system.
 	</brief_description>
 	<description>
+		[CrowdControlEffect] defines a single effect that a viewer can trigger in your game, such as giving coins, changing player color, or dealing damage.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -10,6 +12,7 @@
 		<method name="to_json" qualifiers="const">
 			<return type="Dictionary" />
 			<description>
+				Serializes this [CrowdControlEffect] into a JSON-compatible dictionary for sending to the CrowdControl API.
 			</description>
 		</method>
 	</methods>

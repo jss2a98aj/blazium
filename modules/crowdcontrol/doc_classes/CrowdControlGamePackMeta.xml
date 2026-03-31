@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="CrowdControlGamePackMeta" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
+		Stores the metadata for a [CrowdControlGamePack].
 	</brief_description>
 	<description>
+		[CrowdControlGamePackMeta] represents the public-facing information about your game context in CrowdControl, such as its name, description, selected platform, and optional Steam ID.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -10,6 +12,7 @@
 		<method name="to_json" qualifiers="const">
 			<return type="Dictionary" />
 			<description>
+				Serializes this [CrowdControlGamePackMeta] into a JSON-compatible dictionary to be embedded into the GamePack export.
 			</description>
 		</method>
 	</methods>
