@@ -8,12 +8,20 @@
 		Each peer goes through a connection lifecycle: connecting → prelogin (if authentication is enabled) → authenticated → disconnecting.
 	</description>
 	<tutorials>
+		<link title="ENetServer Developer Examples">https://github.com/blazium-games/enetserver_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="authenticate">
 			<return type="void" />
 			<description>
 				Marks the peer as authenticated and moves them to the [constant STATE_AUTHENTICATED] state. Can only be called when the peer is in [constant STATE_PRELOGIN] state.
+				[codeblock]
+				func _on_peer_prelogin(peer: ENetServerPeer, login_data: Dictionary):
+				    if login_data.get("password") == "secret":
+				        peer.authenticate()
+				    else:
+				        peer.reject("Wrong password")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="disconnect_peer">
@@ -21,6 +29,9 @@
 			<param index="0" name="reason" type="String" default="&quot;&quot;" />
 			<description>
 				Disconnects the peer from the server with an optional reason. The peer will be removed after the disconnection is complete.
+				[codeblock]
+				peer.disconnect_peer("Server is shutting down.")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="get_connection_time" qualifiers="const">
@@ -47,6 +58,11 @@
 			<param index="0" name="reason" type="String" default="&quot;&quot;" />
 			<description>
 				Rejects the peer's connection attempt and disconnects them. Can only be called when the peer is in [constant STATE_CONNECTING] or [constant STATE_PRELOGIN] state.
+				[codeblock]
+				func _on_peer_prelogin(peer: ENetServerPeer, login_data: Dictionary):
+				    if not is_valid(login_data):
+				        peer.reject("Invalid login data")
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_packet">

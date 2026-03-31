@@ -8,6 +8,7 @@
 		This singleton is used internally by [ENetServer] and [ENetClient] but can also be used directly for custom packet handling.
 	</description>
 	<tutorials>
+		<link title="ENetServer Developer Examples">https://github.com/blazium-games/enetserver_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="decode_auto">
@@ -15,6 +16,9 @@
 			<param index="0" name="data" type="PackedByteArray" />
 			<description>
 				Automatically detects the packet type from the header and decodes it to the appropriate Variant type. This is the recommended method for most use cases.
+				[codeblock]
+				var decoded_packet = ENetPacketUtils.decode_auto(raw_byte_array)
+				[/codeblock]
 			</description>
 		</method>
 		<method name="decode_dictionary">
@@ -57,6 +61,10 @@
 			<param index="0" name="variant" type="Variant" />
 			<description>
 				Automatically detects the best encoding method for the given Variant and returns encoded data with a type header. This is the recommended method for most use cases.
+				[codeblock]
+				var array_to_send = PackedByteArray()
+				array_to_send = ENetPacketUtils.encode_auto({"type": "chat", "msg": "hello"})
+				[/codeblock]
 			</description>
 		</method>
 		<method name="encode_dictionary">

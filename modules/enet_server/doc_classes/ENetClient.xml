@@ -27,6 +27,7 @@
 		[/codeblock]
 	</description>
 	<tutorials>
+		<link title="ENetClient Developer Examples">https://github.com/blazium-games/enetserver_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="connect_to_server">
@@ -102,6 +103,13 @@
 			<param index="1" name="callback" type="Callable" />
 			<description>
 				Registers a custom event callback. The callable will be executed whenever a custom event packet with the matching [param event_name] is received.
+				[codeblock]
+				func _ready():
+				    ENetClient.register_event("server_status", _on_status)
+
+				func _on_status(payload: Dictionary, channel: int):
+				    print("Server update: ", payload)
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_node_state">
@@ -120,6 +128,9 @@
 			<param index="2" name="reliable" type="bool" default="true" />
 			<description>
 				Sends a packet to the server. The packet can be of any type (Dictionary, String, int, etc.) and will be automatically encoded using the same format as [ENetServer].
+				[codeblock]
+				ENetClient.send_packet({"action": "jump", "power": 1.5}, 0, true)
+				[/codeblock]
 			</description>
 		</method>
 		<method name="send_raw_packet">
@@ -129,6 +140,10 @@
 			<param index="2" name="reliable" type="bool" default="true" />
 			<description>
 				Sends raw byte data directly to the server without ENet packet type headers or serialization.
+				[codeblock]
+				var byte_arr = PackedByteArray([0x01, 0x02, 0x03, 0x04])
+				ENetClient.send_raw_packet(byte_arr, 0, true)
+				[/codeblock]
 			</description>
 		</method>
 		<method name="set_compression_mode">
