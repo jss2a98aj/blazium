@@ -1562,9 +1562,6 @@
 		<member name="DisplayServer" type="DisplayServer" setter="" getter="">
 			The [DisplayServer] singleton.
 		</member>
-		<member name="ENV" type="ENV" setter="" getter="">
-			The [ENV] singleton.
-		</member>
 		<member name="ENetClient" type="ENetClient" setter="" getter="">
 			The [ENetClient] singleton.
 		</member>
@@ -1604,9 +1601,6 @@
 		</member>
 		<member name="InputMap" type="InputMap" setter="" getter="">
 			The [InputMap] singleton.
-		</member>
-		<member name="JWT" type="JWT" setter="" getter="">
-			The [JWT] singleton.
 		</member>
 		<member name="JavaClassWrapper" type="JavaClassWrapper" setter="" getter="">
 			The [JavaClassWrapper] singleton.
