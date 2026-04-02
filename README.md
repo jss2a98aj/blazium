@@ -6,8 +6,6 @@
   </a>
 </p>
 
-[![Code Triagers Badge](https://www.codetriage.com/blazium-games/blazium/badges/users.svg)](https://www.codetriage.com/blazium-games/blazium)
-
 ## 2D and 3D cross-platform game engine
 
 **[Blazium Engine](https://blazium.app) is a feature-packed, cross-platform
