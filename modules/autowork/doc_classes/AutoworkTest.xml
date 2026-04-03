@@ -1,0 +1,1273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AutoworkTest" inherits="Node" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+		Core class for the Autowork framework: AutoworkTest.
+		Enables native testing, assertions, and mock implementations within Blazium Engine.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="_after_all" qualifiers="virtual">
+			<return type="void" />
+			<description>
+				Utility method:  after all.
+			</description>
+		</method>
+		<method name="_after_each" qualifiers="virtual">
+			<return type="void" />
+			<description>
+				Utility method:  after each.
+			</description>
+		</method>
+		<method name="_before_all" qualifiers="virtual">
+			<return type="void" />
+			<description>
+				Utility method:  before all.
+			</description>
+		</method>
+		<method name="_before_each" qualifiers="virtual">
+			<return type="void" />
+			<description>
+				Utility method:  before each.
+			</description>
+		</method>
+		<method name="add_child_autofree">
+			<return type="Node" />
+			<param index="0" name="child" type="Node" />
+			<description>
+				Adds a child node to the test sandbox and schedules it for automatic deletion at the end of the test.
+			</description>
+		</method>
+		<method name="add_child_autoqfree">
+			<return type="Node" />
+			<param index="0" name="child" type="Node" />
+			<description>
+				Adds a child node to the test sandbox and schedules it for automatic deletion at the end of the test.
+				[codeblock]
+				var ret_child = add_child_autoqfree(new_child)
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_accessors">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="property" type="StringName" />
+			<param index="2" name="default" type="Variant" />
+			<param index="3" name="set_to" type="Variant" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_accessors(node, "position", Vector2(100, 100), Vector2(200, 200))
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_almost_eq">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="error_margin" type="Variant" />
+			<param index="3" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param got] is equal to [param expected].
+				[codeblock]
+				assert_almost_eq(1.0001, 1.0, 0.01, "Close enough float")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_almost_ne">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="error_margin" type="Variant" />
+			<param index="3" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param got] is not equal to [param expected].
+				[codeblock]
+				assert_almost_ne(1.5, 1.0, 0.01, "Not close float")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_between">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expect_low" type="Variant" />
+			<param index="2" name="expect_high" type="Variant" />
+			<param index="3" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param got] is between [param expect_low] and [param expect_high].
+				[codeblock]
+				assert_between(5, 1, 10, "5 is between 1 and 10")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_call_count">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="method" type="StringName" />
+			<param index="2" name="expected_count" type="int" />
+			<param index="3" name="args" type="Array" default="[]" />
+			<param index="4" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_call_count(self, "get_parent", 0, [])
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_called">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="method" type="StringName" />
+			<param index="2" name="args" type="Array" default="[]" />
+			<param index="3" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that a method was called on a stubbed or spied object.
+				[codeblock]
+				assert_called(obj, "call_me_maybe", [1, 2])
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_called_count">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="method" type="StringName" />
+			<param index="2" name="expected_count" type="int" />
+			<param index="3" name="args" type="Array" default="[]" />
+			<param index="4" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that a method was called on a stubbed or spied object.
+			</description>
+		</method>
+		<method name="assert_connected">
+			<return type="bool" />
+			<param index="0" name="source" type="Object" />
+			<param index="1" name="target" type="Object" />
+			<param index="2" name="signal" type="StringName" />
+			<param index="3" name="method_name" type="StringName" default="&quot;&quot;" />
+			<description>
+				Asserts that [param source] and [param target] are connected via [param signal].
+				[codeblock]
+				assert_connected(base, self, "child_entered_tree", "pass_test")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_dir_does_not_exist">
+			<return type="bool" />
+			<param index="0" name="dir_path" type="String" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_dir_exists">
+			<return type="bool" />
+			<param index="0" name="dir_path" type="String" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_dir_exists("res://")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_does_not_have">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="element" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_does_not_have({"a": 1, "b": 2}, "c", "Dict does not have key c")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_eq">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param got] is equal to [param expected].
+				[codeblock]
+				assert_eq(2 + 2, 4, "Inner group two math works")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_eq_deep">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param got] is equal to [param expected].
+			</description>
+		</method>
+		<method name="assert_eq_shallow">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param got] is equal to [param expected].
+				[codeblock]
+				assert_eq_shallow(1, 1, "Testing basic assert_eq_shallow alias")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_exports">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="property" type="StringName" />
+			<param index="2" name="type" type="int" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_extends">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="class_obj" type="Object" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_false">
+			<return type="bool" />
+			<param index="0" name="condition" type="bool" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param condition] is false.
+				[codeblock]
+				assert_false(false, "Inner group one: false is false")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_file_does_not_exist">
+			<return type="bool" />
+			<param index="0" name="file_path" type="String" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_file_does_not_exist("res://this_does_not_exist.txt")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_file_empty">
+			<return type="bool" />
+			<param index="0" name="file_path" type="String" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_file_exists">
+			<return type="bool" />
+			<param index="0" name="file_path" type="String" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_file_not_empty">
+			<return type="bool" />
+			<param index="0" name="file_path" type="String" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_freed">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_ge">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_gt">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_gt(5, 3)
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_gte">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_gte(gut.get_test_count(), 0, "gut.get_test_count is accessible")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_has">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="element" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that the object or collection has the specified element/property/method.
+				[codeblock]
+				assert_has([1, 2, 3], 2, "Array has 2")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_has_method">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="method" type="StringName" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that the object or collection has the specified element/property/method.
+				[codeblock]
+				assert_has_method(self, "test_expanded_asserts_pass")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_has_signal">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<param index="2" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that the object or collection has the specified element/property/method.
+				[codeblock]
+				assert_has_signal(node, "draw", "Node2D has 'draw' signal")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_is">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="class_obj" type="Object" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_le">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_lt">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_lt(2, 10)
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_lte">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_lte(gut.get_fail_count(), 100, "gut.get_fail_count is accessible")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_ne">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param got] is not equal to [param expected].
+				[codeblock]
+				assert_ne("hello", "world")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_ne_deep">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param got] is not equal to [param expected].
+			</description>
+		</method>
+		<method name="assert_ne_shallow">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param got] is not equal to [param expected].
+				[codeblock]
+				assert_ne_shallow(1, 2, "Testing basic assert_ne_shallow alias")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_no_new_orphans">
+			<return type="bool" />
+			<param index="0" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that no new orphaned instances were created since the test began.
+			</description>
+		</method>
+		<method name="assert_not_between">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expect_low" type="Variant" />
+			<param index="2" name="expect_high" type="Variant" />
+			<param index="3" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param got] is between [param expect_low] and [param expect_high].
+				[codeblock]
+				assert_not_between(15, 1, 10, "15 is not between 1 and 10")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_not_called">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="method" type="StringName" />
+			<param index="2" name="args" type="Array" default="[]" />
+			<param index="3" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that a method was called on a stubbed or spied object.
+				[codeblock]
+				assert_not_called(obj, "get_name")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_not_connected">
+			<return type="bool" />
+			<param index="0" name="source" type="Object" />
+			<param index="1" name="target" type="Object" />
+			<param index="2" name="signal" type="StringName" />
+			<param index="3" name="method_name" type="StringName" default="&quot;&quot;" />
+			<description>
+				Asserts that [param source] and [param target] are NOT connected via [param signal].
+				[codeblock]
+				assert_not_connected(base, self, "child_exiting_tree", "fail_test")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_not_freed">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_not_freed(temp)
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_not_null">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_not_null(leaked, "Node created but not freed")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_not_same">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_not_typeof">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="type" type="int" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_null">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_property">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="property" type="String" />
+			<param index="2" name="default" type="Variant" />
+			<param index="3" name="set_to" type="Variant" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_property(node, "position", Vector2(0, 0), Vector2(100, 100))
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_property_with_backing_variable">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="property" type="String" />
+			<param index="2" name="default_value" type="Variant" />
+			<param index="3" name="new_value" type="Variant" />
+			<param index="4" name="backed_by_name" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_readonly_property">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="property" type="String" />
+			<param index="2" name="new_value" type="Variant" />
+			<param index="3" name="expected" type="Variant" />
+			<param index="4" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_same">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="expected" type="Variant" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_same(ret_child, new_child, "Returned child is the same instance")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_set_property">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="property" type="String" />
+			<param index="2" name="new_value" type="Variant" />
+			<param index="3" name="expected" type="Variant" />
+			<param index="4" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_setget">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="property" type="StringName" />
+			<param index="2" name="default" type="Variant" />
+			<param index="3" name="set_to" type="Variant" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+			</description>
+		</method>
+		<method name="assert_signal_emit_count">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<param index="2" name="expected_count" type="int" />
+			<param index="3" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that a signal was emitted by the target object.
+				[codeblock]
+				assert_signal_emit_count(node, "draw", 2, "Signal 'draw' was emitted twice")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_signal_emitted">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<param index="2" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that a signal was emitted by the target object.
+				[codeblock]
+				assert_signal_emitted(self, "my_custom_signal", "Verified custom signal")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_signal_emitted_with_parameters">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<param index="2" name="expected_parameters" type="Array" />
+			<param index="3" name="index" type="int" default="-1" />
+			<param index="4" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that a signal was emitted by the target object.
+				[codeblock]
+				assert_signal_emitted_with_parameters(node, "child_entered_tree", [node], 0, "Signal parameters matched")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_signal_not_emitted">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<param index="2" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that a signal was emitted by the target object.
+				[codeblock]
+				assert_signal_not_emitted(self, "another_signal", "Verified not emitted")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_string_contains">
+			<return type="bool" />
+			<param index="0" name="got" type="String" />
+			<param index="1" name="expected" type="String" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_string_contains("hello world", "world")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_string_ends_with">
+			<return type="bool" />
+			<param index="0" name="got" type="String" />
+			<param index="1" name="expected" type="String" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_string_ends_with("hello world", "orld")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_string_starts_with">
+			<return type="bool" />
+			<param index="0" name="got" type="String" />
+			<param index="1" name="expected" type="String" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_string_starts_with("hello world", "hell")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_true">
+			<return type="bool" />
+			<param index="0" name="condition" type="bool" />
+			<param index="1" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts that [param condition] is true.
+				[codeblock]
+				assert_true(true, "Inner group one: true is true")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="assert_typeof">
+			<return type="bool" />
+			<param index="0" name="got" type="Variant" />
+			<param index="1" name="type" type="int" />
+			<param index="2" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Asserts a specific condition during tests. If the condition fails, the test is marked as failed.
+				[codeblock]
+				assert_typeof(5, TYPE_INT)
+				[/codeblock]
+			</description>
+		</method>
+		<method name="autofree">
+			<return type="void" />
+			<param index="0" name="object" type="Object" />
+			<description>
+				Utility method: autofree.
+			</description>
+		</method>
+		<method name="autoqfree">
+			<return type="void" />
+			<param index="0" name="node" type="Node" />
+			<description>
+				Utility method: autoqfree.
+			</description>
+		</method>
+		<method name="clear_parameters">
+			<return type="void" />
+			<description>
+				Utility method: clear parameters.
+			</description>
+		</method>
+		<method name="clear_text">
+			<return type="void" />
+			<description>
+				Utility method: clear text.
+			</description>
+		</method>
+		<method name="compare_deep">
+			<return type="Dictionary" />
+			<param index="0" name="v1" type="Variant" />
+			<param index="1" name="v2" type="Variant" />
+			<param index="2" name="max_differences" type="Variant" default="null" />
+			<description>
+				Utility method: compare deep.
+			</description>
+		</method>
+		<method name="compare_shallow">
+			<return type="Dictionary" />
+			<param index="0" name="v1" type="Variant" />
+			<param index="1" name="v2" type="Variant" />
+			<param index="2" name="max_differences" type="Variant" default="null" />
+			<description>
+				Utility method: compare shallow.
+			</description>
+		</method>
+		<method name="create_double">
+			<return type="Variant" />
+			<param index="0" name="thing" type="Variant" />
+			<description>
+				Utility method: create double.
+			</description>
+		</method>
+		<method name="did_wait_timeout">
+			<return type="bool" />
+			<description>
+				Utility method: did wait timeout.
+			</description>
+		</method>
+		<method name="directory_delete_files">
+			<return type="void" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Utility method: directory delete files.
+			</description>
+		</method>
+		<method name="double_inner">
+			<return type="Variant" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="inner_name" type="String" />
+			<description>
+				Creates a test double (mock/stub) of a specific resource, scene, or script.
+				[codeblock]
+				# double_inner("res://fake.gd", "InnerClass")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="double_resource">
+			<return type="Variant" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Creates a test double (mock/stub) of a specific resource, scene, or script.
+			</description>
+		</method>
+		<method name="double_scene">
+			<return type="Variant" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Creates a test double (mock/stub) of a specific resource, scene, or script.
+			</description>
+		</method>
+		<method name="double_script">
+			<return type="Variant" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Creates a test double (mock/stub) of a specific resource, scene, or script.
+			</description>
+		</method>
+		<method name="double_singleton">
+			<return type="Variant" />
+			<param index="0" name="name" type="String" />
+			<description>
+				Creates a test double (mock/stub) of a specific resource, scene, or script.
+				[codeblock]
+				double_singleton("FakeSingletonName")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="fail_test">
+			<return type="void" />
+			<param index="0" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Utility method: fail test.
+			</description>
+		</method>
+		<method name="file_delete">
+			<return type="void" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Utility method: file delete.
+			</description>
+		</method>
+		<method name="file_touch">
+			<return type="void" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Utility method: file touch.
+			</description>
+		</method>
+		<method name="get_assert_count">
+			<return type="int" />
+			<description>
+				Utility method: get assert count.
+				[codeblock]
+				assert_true(get_assert_count() &gt; 0, "Assert count getter binds")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_call_count">
+			<return type="int" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="method" type="StringName" />
+			<param index="2" name="args" type="Array" default="[]" />
+			<description>
+				Utility method: get call count.
+			</description>
+		</method>
+		<method name="get_call_parameters">
+			<return type="Array" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="method" type="StringName" />
+			<param index="2" name="index" type="int" default="-1" />
+			<description>
+				Utility method: get call parameters.
+			</description>
+		</method>
+		<method name="get_current_parameter_index" qualifiers="const">
+			<return type="int" />
+			<description>
+				Utility method: get current parameter index.
+			</description>
+		</method>
+		<method name="get_fail_count">
+			<return type="int" />
+			<description>
+				Utility method: get fail count.
+				[codeblock]
+				assert_eq(get_fail_count(), 0, "There should be 0 failure tests from older intentional fail tests")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_file_as_text">
+			<return type="String" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Utility method: get file as text.
+			</description>
+		</method>
+		<method name="get_logger">
+			<return type="Variant" />
+			<description>
+				Utility method: get logger.
+				[codeblock]
+				assert_not_null(gut.get_logger(), "gut.logger is accessible natively")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_parameter_count" qualifiers="const">
+			<return type="int" />
+			<description>
+				Utility method: get parameter count.
+			</description>
+		</method>
+		<method name="get_pass_count">
+			<return type="int" />
+			<description>
+				Utility method: get pass count.
+				[codeblock]
+				assert_true(get_pass_count() &gt; 0, "Pass count getter binds")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_pending_count">
+			<return type="int" />
+			<description>
+				Utility method: get pending count.
+				[codeblock]
+				assert_eq(get_pending_count(), 2, "There should be 0 pending test from older hooks")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_signal_emit_count">
+			<return type="int" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<description>
+				Utility method: get signal emit count.
+			</description>
+		</method>
+		<method name="get_signal_parameters">
+			<return type="Array" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<param index="2" name="index" type="int" default="-1" />
+			<description>
+				Utility method: get signal parameters.
+			</description>
+		</method>
+		<method name="get_summary">
+			<return type="Dictionary" />
+			<description>
+				Utility method: get summary.
+				[codeblock]
+				var summary_dict = get_summary()
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_summary_text">
+			<return type="String" />
+			<description>
+				Utility method: get summary text.
+				[codeblock]
+				var summary_txt = get_summary_text()
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_test_count">
+			<return type="int" />
+			<description>
+				Returns the current count of get test count.
+				[codeblock]
+				assert_gte(gut.get_test_count(), 0, "gut.get_test_count is accessible")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="has_parameters" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Utility method: has parameters.
+			</description>
+		</method>
+		<method name="ignore_method_when_doubling">
+			<return type="void" />
+			<param index="0" name="thing" type="Variant" />
+			<param index="1" name="method" type="StringName" />
+			<description>
+				Utility method: ignore method when doubling.
+			</description>
+		</method>
+		<method name="is_file_empty">
+			<return type="bool" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Utility method: is file empty.
+			</description>
+		</method>
+		<method name="maximize">
+			<return type="void" />
+			<description>
+				Utility method: maximize.
+			</description>
+		</method>
+		<method name="p">
+			<return type="void" />
+			<param index="0" name="text" type="String" />
+			<param index="1" name="level" type="int" default="0" />
+			<description>
+				Prints a message to the Autowork logger console natively.
+			</description>
+		</method>
+		<method name="partial_double">
+			<return type="Variant" />
+			<param index="0" name="thing" type="Variant" />
+			<description>
+				Utility method: partial double.
+			</description>
+		</method>
+		<method name="partial_double_inner">
+			<return type="Variant" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="inner_name" type="String" />
+			<description>
+				Utility method: partial double inner.
+			</description>
+		</method>
+		<method name="partial_double_singleton">
+			<return type="Variant" />
+			<param index="0" name="name" type="String" />
+			<description>
+				Utility method: partial double singleton.
+			</description>
+		</method>
+		<method name="pass_test">
+			<return type="void" />
+			<param index="0" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Utility method: pass test.
+				[codeblock]
+				pass_test("Forced pass")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="pause_before_teardown">
+			<return type="void" />
+			<description>
+				Utility method: pause before teardown.
+			</description>
+		</method>
+		<method name="pending">
+			<return type="void" />
+			<param index="0" name="text" type="String" default="&quot;&quot;" />
+			<description>
+				Utility method: pending.
+				[codeblock]
+				# pending("Disabled missing key dictionary diff logging test natively as C++ deep arrays print structurally differently")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="register_inner_classes">
+			<return type="void" />
+			<param index="0" name="base_script" type="Variant" />
+			<description>
+				Utility method: register inner classes.
+			</description>
+		</method>
+		<method name="replace_node">
+			<return type="void" />
+			<param index="0" name="base" type="Node" />
+			<param index="1" name="path" type="NodePath" />
+			<param index="2" name="with_node" type="Node" />
+			<description>
+				Utility method: replace node.
+			</description>
+		</method>
+		<method name="set_current_parameter_index">
+			<return type="void" />
+			<param index="0" name="index" type="int" />
+			<description>
+				Utility method: set current parameter index.
+			</description>
+		</method>
+		<method name="set_doubler">
+			<return type="void" />
+			<param index="0" name="doubler" type="AutoworkDoubler" />
+			<description>
+				Utility method: set doubler.
+			</description>
+		</method>
+		<method name="set_logger">
+			<return type="void" />
+			<param index="0" name="logger" type="AutoworkLogger" />
+			<description>
+				Utility method: set logger.
+			</description>
+		</method>
+		<method name="set_spy">
+			<return type="void" />
+			<param index="0" name="spy" type="AutoworkSpy" />
+			<description>
+				Utility method: set spy.
+			</description>
+		</method>
+		<method name="set_stubber">
+			<return type="void" />
+			<param index="0" name="stubber" type="AutoworkStubber" />
+			<description>
+				Utility method: set stubber.
+			</description>
+		</method>
+		<method name="show_orphans">
+			<return type="void" />
+			<param index="0" name="should" type="bool" />
+			<description>
+				Utility method: show orphans.
+			</description>
+		</method>
+		<method name="simulate">
+			<return type="void" />
+			<param index="0" name="node" type="Node" />
+			<param index="1" name="times" type="int" />
+			<param index="2" name="delta" type="float" />
+			<description>
+				Utility method: simulate.
+			</description>
+		</method>
+		<method name="skip_if_godot_version_lt">
+			<return type="bool" />
+			<param index="0" name="expected" type="String" />
+			<description>
+				Utility method: skip if godot version lt.
+			</description>
+		</method>
+		<method name="skip_if_godot_version_ne">
+			<return type="bool" />
+			<param index="0" name="expected" type="String" />
+			<description>
+				Utility method: skip if godot version ne.
+			</description>
+		</method>
+		<method name="spy">
+			<return type="Variant" />
+			<param index="0" name="thing" type="Variant" />
+			<description>
+				Utility method: spy.
+			</description>
+		</method>
+		<method name="stub">
+			<return type="AutoworkStubParams" />
+			<param index="0" name="object" type="Variant" />
+			<param index="1" name="method" type="StringName" default="&amp;&quot;&quot;" />
+			<description>
+				Utility method: stub.
+			</description>
+		</method>
+		<method name="use_parameters">
+			<return type="Variant" />
+			<param index="0" name="params" type="Array" />
+			<description>
+				Utility method: use parameters.
+			</description>
+		</method>
+		<method name="wait_for_signal">
+			<return type="Variant" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<param index="2" name="max_wait" type="float" />
+			<param index="3" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Suspends the coroutine execution until a specific amount of time or frames have elapsed.
+			</description>
+		</method>
+		<method name="wait_frames">
+			<return type="Variant" />
+			<param index="0" name="frames" type="int" />
+			<param index="1" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Suspends the coroutine execution until a specific amount of time or frames have elapsed.
+				[codeblock]
+				# await wait_frames(2, "Wait frames completed")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="wait_idle_frames">
+			<return type="Variant" />
+			<param index="0" name="frames" type="int" />
+			<param index="1" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Suspends the coroutine execution until a specific amount of time or frames have elapsed.
+				[codeblock]
+				# await wait_idle_frames(1, "Testing idle frames wrapper")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="wait_physics_frames">
+			<return type="Variant" />
+			<param index="0" name="frames" type="int" />
+			<param index="1" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Suspends the coroutine execution until a specific amount of time or frames have elapsed.
+				[codeblock]
+				# await wait_physics_frames(2, "Wait physics frames completed")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="wait_process_frames">
+			<return type="Variant" />
+			<param index="0" name="frames" type="int" />
+			<param index="1" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Suspends the coroutine execution until a specific amount of time or frames have elapsed.
+			</description>
+		</method>
+		<method name="wait_seconds">
+			<return type="Variant" />
+			<param index="0" name="seconds" type="float" />
+			<param index="1" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Suspends the coroutine execution until a specific amount of time or frames have elapsed.
+				[codeblock]
+				# await wait_seconds(0.1, "Wait 0.1s completed")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="wait_until">
+			<return type="Variant" />
+			<param index="0" name="callable" type="Callable" />
+			<param index="1" name="max_wait" type="float" />
+			<param index="2" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Suspends the coroutine execution until a specific amount of time or frames have elapsed.
+			</description>
+		</method>
+		<method name="wait_while">
+			<return type="Variant" />
+			<param index="0" name="callable" type="Callable" />
+			<param index="1" name="max_wait" type="float" />
+			<param index="2" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Suspends the coroutine execution until a specific amount of time or frames have elapsed.
+			</description>
+		</method>
+		<method name="watch_signal">
+			<return type="void" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<description>
+				Utility method: watch signal.
+			</description>
+		</method>
+		<method name="watch_signals">
+			<return type="void" />
+			<param index="0" name="object" type="Object" />
+			<description>
+				Utility method: watch signals.
+			</description>
+		</method>
+		<method name="yield_for">
+			<return type="Variant" />
+			<param index="0" name="seconds" type="float" />
+			<param index="1" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Utility method: yield for.
+			</description>
+		</method>
+		<method name="yield_frames">
+			<return type="Variant" />
+			<param index="0" name="frames" type="int" />
+			<param index="1" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Utility method: yield frames.
+			</description>
+		</method>
+		<method name="yield_to">
+			<return type="Variant" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<param index="2" name="max_wait" type="float" />
+			<param index="3" name="message" type="String" default="&quot;&quot;" />
+			<description>
+				Utility method: yield to.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="gut" type="Variant" setter="set_gut" getter="get_gut">
+		</member>
+	</members>
+</class>

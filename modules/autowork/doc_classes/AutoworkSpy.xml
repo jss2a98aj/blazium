@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AutoworkSpy" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+		Core class for the Autowork framework: AutoworkSpy.
+		Enables native testing, assertions, and mock implementations within Blazium Engine.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="add_call">
+			<return type="void" />
+			<param index="0" name="object" type="Variant" />
+			<param index="1" name="method_name" type="StringName" />
+			<param index="2" name="args" type="Array" />
+			<description>
+				Utility method: add call.
+			</description>
+		</method>
+		<method name="call_count">
+			<return type="int" />
+			<param index="0" name="object" type="Variant" />
+			<param index="1" name="method_name" type="StringName" />
+			<param index="2" name="args" type="Variant" default="null" />
+			<description>
+				Utility method: call count.
+			</description>
+		</method>
+		<method name="clear">
+			<return type="void" />
+			<description>
+				Utility method: clear.
+			</description>
+		</method>
+		<method name="get_call_parameters">
+			<return type="Array" />
+			<param index="0" name="object" type="Variant" />
+			<param index="1" name="method_name" type="StringName" />
+			<param index="2" name="index" type="int" default="-1" />
+			<description>
+				Utility method: get call parameters.
+			</description>
+		</method>
+		<method name="was_called">
+			<return type="bool" />
+			<param index="0" name="object" type="Variant" />
+			<param index="1" name="method_name" type="StringName" />
+			<param index="2" name="args" type="Variant" default="null" />
+			<description>
+				Utility method: was called.
+			</description>
+		</method>
+	</methods>
+</class>

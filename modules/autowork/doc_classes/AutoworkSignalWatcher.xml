@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AutoworkSignalWatcher" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+		Core class for the Autowork framework: AutoworkSignalWatcher.
+		Enables native testing, assertions, and mock implementations within Blazium Engine.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="clear">
+			<return type="void" />
+			<description>
+				Utility method: clear.
+			</description>
+		</method>
+		<method name="did_emit">
+			<return type="bool" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<description>
+				Utility method: did emit.
+			</description>
+		</method>
+		<method name="get_emissions">
+			<return type="Array" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<description>
+				Utility method: get emissions.
+			</description>
+		</method>
+		<method name="watch_signal">
+			<return type="void" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="signal" type="StringName" />
+			<description>
+				Utility method: watch signal.
+			</description>
+		</method>
+		<method name="watch_signals">
+			<return type="void" />
+			<param index="0" name="object" type="Object" />
+			<description>
+				Utility method: watch signals.
+			</description>
+		</method>
+	</methods>
+</class>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="Autowork" inherits="Node" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+		Core class for the Autowork framework: Autowork.
+		Enables native testing, assertions, and mock implementations within Blazium Engine.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="add_directory">
+			<return type="void" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="prefix" type="String" default="&quot;&quot;" />
+			<param index="2" name="suffix" type="String" default="&quot;&quot;" />
+			<description>
+				Utility method: add directory.
+			</description>
+		</method>
+		<method name="add_script">
+			<return type="void" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Utility method: add script.
+			</description>
+		</method>
+		<method name="clear_text">
+			<return type="void" />
+			<description>
+				Utility method: clear text.
+			</description>
+		</method>
+		<method name="get_assert_count">
+			<return type="int" />
+			<description>
+				Utility method: get assert count.
+				[codeblock]
+				assert_true(get_assert_count() &gt; 0, "Assert count getter binds")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_doubler" qualifiers="const">
+			<return type="AutoworkDoubler" />
+			<description>
+				Utility method: get doubler.
+			</description>
+		</method>
+		<method name="get_fail_count">
+			<return type="int" />
+			<description>
+				Utility method: get fail count.
+				[codeblock]
+				assert_eq(get_fail_count(), 0, "There should be 0 failure tests from older intentional fail tests")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_logger" qualifiers="const">
+			<return type="AutoworkLogger" />
+			<description>
+				Utility method: get logger.
+				[codeblock]
+				assert_not_null(gut.get_logger(), "gut.logger is accessible natively")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_pass_count">
+			<return type="int" />
+			<description>
+				Utility method: get pass count.
+				[codeblock]
+				assert_true(get_pass_count() &gt; 0, "Pass count getter binds")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_pending_count">
+			<return type="int" />
+			<description>
+				Utility method: get pending count.
+				[codeblock]
+				assert_eq(get_pending_count(), 2, "There should be 0 pending test from older hooks")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_spy" qualifiers="const">
+			<return type="AutoworkSpy" />
+			<description>
+				Utility method: get spy.
+			</description>
+		</method>
+		<method name="get_stubber" qualifiers="const">
+			<return type="AutoworkStubber" />
+			<description>
+				Utility method: get stubber.
+			</description>
+		</method>
+		<method name="get_test_collector" qualifiers="const">
+			<return type="AutoworkCollector" />
+			<description>
+				Utility method: get test collector.
+			</description>
+		</method>
+		<method name="get_test_count">
+			<return type="int" />
+			<description>
+				Returns the current count of get test count.
+				[codeblock]
+				assert_gte(gut.get_test_count(), 0, "gut.get_test_count is accessible")
+				[/codeblock]
+			</description>
+		</method>
+		<method name="get_test_script_count">
+			<return type="int" />
+			<description>
+				Returns the current count of get test script count.
+			</description>
+		</method>
+		<method name="maximize">
+			<return type="void" />
+			<description>
+				Utility method: maximize.
+			</description>
+		</method>
+		<method name="p">
+			<return type="void" />
+			<param index="0" name="text" type="String" />
+			<param index="1" name="level" type="int" default="0" />
+			<description>
+				Prints a message to the Autowork logger console natively.
+			</description>
+		</method>
+		<method name="pause_before_teardown">
+			<return type="void" />
+			<description>
+				Utility method: pause before teardown.
+			</description>
+		</method>
+		<method name="run_tests">
+			<return type="void" />
+			<param index="0" name="run_rest" type="bool" default="false" />
+			<description>
+				Utility method: run tests.
+			</description>
+		</method>
+		<method name="set_select">
+			<return type="void" />
+			<param index="0" name="test_name" type="String" />
+			<description>
+				Utility method: set select.
+			</description>
+		</method>
+		<method name="show_orphans">
+			<return type="void" />
+			<param index="0" name="should" type="bool" />
+			<description>
+				Utility method: show orphans.
+			</description>
+		</method>
+	</methods>
+</class>
