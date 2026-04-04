@@ -218,6 +218,22 @@ EditorAbout::EditorAbout() {
 	tc->set_theme_type_variation("TabContainerOdd");
 	vbc->add_child(tc);
 
+	// Blazium Developers.
+	List<String> blazium_devs;
+	blazium_devs.push_back(TTR("Developers"));
+	const char *const *blazium_dev_src[] = {
+		BLAZIUM_DEVELOPERS,
+	};
+	tc->add_child(_populate_list(TTR("Developers"), blazium_devs, blazium_dev_src, 0b1));
+
+	// Blazium Sponsors.
+	List<String> blazium_sponsors;
+	blazium_sponsors.push_back(TTR("Sponsors"));
+	const char *const *blazium_sponsors_src[] = {
+		BLAZIUM_SPONSORS,
+	};
+	tc->add_child(_populate_list(TTR("Sponsors"), blazium_sponsors, blazium_sponsors_src, 0b1, true));
+
 	// Authors.
 
 	List<String> dev_sections;
@@ -232,7 +248,7 @@ EditorAbout::EditorAbout() {
 		AUTHORS_PROJECT_MANAGERS,
 		AUTHORS_DEVELOPERS,
 	};
-	tc->add_child(_populate_list(TTR("Authors"), dev_sections, dev_src, 0b1)); // First section (Project Founders) is always one column.
+	tc->add_child(_populate_list(TTR("Godot Authors"), dev_sections, dev_src, 0b1)); // First section (Project Founders) is always one column.
 
 	// Donors.
 
@@ -255,7 +271,7 @@ EditorAbout::EditorAbout() {
 		DONORS_MEMBERS_PLATINUM,
 		DONORS_MEMBERS_GOLD,
 	};
-	tc->add_child(_populate_list(TTR("Donors"), donor_sections, donor_src, 0b1, true)); // First section (Patron) is one column.
+	tc->add_child(_populate_list(TTR("Godot Donors"), donor_sections, donor_src, 0b1, true)); // First section (Patron) is one column.
 
 	// License.
 
