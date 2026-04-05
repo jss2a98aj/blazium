@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AutoworkLogger" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+		Core class for the Autowork framework: AutoworkLogger.
+		Enables native testing, assertions, and mock implementations within Blazium Engine.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="add_fail">
+			<return type="void" />
+			<param index="0" name="message" type="String" />
+			<description>
+				Utility method: add fail.
+			</description>
+		</method>
+		<method name="add_pass">
+			<return type="void" />
+			<param index="0" name="message" type="String" />
+			<description>
+				Utility method: add pass.
+			</description>
+		</method>
+		<method name="add_warning">
+			<return type="void" />
+			<param index="0" name="message" type="String" />
+			<description>
+				Utility method: add warning.
+			</description>
+		</method>
+		<method name="inc_orphans">
+			<return type="void" />
+			<param index="0" name="count" type="int" />
+			<description>
+				Utility method: inc orphans.
+			</description>
+		</method>
+		<method name="inc_test_count">
+			<return type="void" />
+			<description>
+				Returns the current count of inc test count.
+			</description>
+		</method>
+		<method name="print_summary">
+			<return type="void" />
+			<description>
+				Utility method: print summary.
+			</description>
+		</method>
+	</methods>
+</class>

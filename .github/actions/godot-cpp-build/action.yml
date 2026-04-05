@@ -32,6 +32,16 @@ runs:
       shell: sh
       run: ${{ inputs.bin }} --headless --dump-gdextension-interface --dump-extension-api
 
+    - name: Patch SConstruct for Linux ARCOM
+      if: runner.os == 'Linux'
+      shell: python
+      run: |
+        with open("blazium-cpp/SConstruct", "r") as f:
+            content = f.read()
+        content = content.replace('library = env.GodotCPP()', 'env["ARCOM_POSIX"] = env.get("ARCOM", "$AR $ARFLAGS $TARGET $SOURCES").replace("$TARGET", "$TARGET.posix").replace("$SOURCES", "$SOURCES.posix")\nenv["ARCOM"] = "${TEMPFILE(ARCOM_POSIX)}"\nlibrary = env.GodotCPP()')
+        with open("blazium-cpp/SConstruct", "w") as f:
+            f.write(content)
+
     - name: SCons Build
       shell: sh
       env:

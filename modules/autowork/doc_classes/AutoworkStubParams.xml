@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AutoworkStubParams" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+		Core class for the Autowork framework: AutoworkStubParams.
+		Enables native testing, assertions, and mock implementations within Blazium Engine.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="to_call_super">
+			<return type="AutoworkStubParams" />
+			<description>
+				Utility method: to call super.
+			</description>
+		</method>
+		<method name="to_do_nothing">
+			<return type="AutoworkStubParams" />
+			<description>
+				Utility method: to do nothing.
+			</description>
+		</method>
+		<method name="to_return">
+			<return type="AutoworkStubParams" />
+			<param index="0" name="value" type="Variant" />
+			<description>
+				Utility method: to return.
+			</description>
+		</method>
+		<method name="when_passed">
+			<return type="AutoworkStubParams" />
+			<param index="0" name="args" type="Variant" />
+			<description>
+				Utility method: when passed.
+			</description>
+		</method>
+	</methods>
+</class>

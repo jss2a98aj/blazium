@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AutoworkInputSender" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+		Core class for the Autowork framework: AutoworkInputSender.
+		Enables native testing, assertions, and mock implementations within Blazium Engine.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="action_down">
+			<return type="void" />
+			<param index="0" name="action" type="StringName" />
+			<param index="1" name="strength" type="float" default="1.0" />
+			<param index="2" name="target" type="Node" default="null" />
+			<description>
+				Simulates global or targeted input events for 'action_down'.
+			</description>
+		</method>
+		<method name="action_up">
+			<return type="void" />
+			<param index="0" name="action" type="StringName" />
+			<param index="1" name="target" type="Node" default="null" />
+			<description>
+				Simulates global or targeted input events for 'action_up'.
+			</description>
+		</method>
+		<method name="key_down">
+			<return type="void" />
+			<param index="0" name="keycode" type="int" />
+			<param index="1" name="target" type="Node" default="null" />
+			<description>
+				Simulates global or targeted input events for 'key_down'.
+				[codeblock]
+				sender.key_down(KEY_SPACE)
+				[/codeblock]
+			</description>
+		</method>
+		<method name="key_up">
+			<return type="void" />
+			<param index="0" name="keycode" type="int" />
+			<param index="1" name="target" type="Node" default="null" />
+			<description>
+				Simulates global or targeted input events for 'key_up'.
+				[codeblock]
+				sender.key_up(KEY_SPACE)
+				[/codeblock]
+			</description>
+		</method>
+		<method name="mouse_down">
+			<return type="void" />
+			<param index="0" name="button_index" type="int" />
+			<param index="1" name="position" type="Vector2" default="Vector2(0, 0)" />
+			<param index="2" name="target" type="Node" default="null" />
+			<description>
+				Simulates global or targeted input events for 'mouse_down'.
+				[codeblock]
+				sender.mouse_down(MOUSE_BUTTON_LEFT, Vector2(100, 100))
+				[/codeblock]
+			</description>
+		</method>
+		<method name="mouse_motion">
+			<return type="void" />
+			<param index="0" name="position" type="Vector2" />
+			<param index="1" name="relative" type="Vector2" default="Vector2(0, 0)" />
+			<param index="2" name="target" type="Node" default="null" />
+			<description>
+				Simulates global or targeted input events for 'mouse_motion'.
+			</description>
+		</method>
+		<method name="mouse_up">
+			<return type="void" />
+			<param index="0" name="button_index" type="int" />
+			<param index="1" name="position" type="Vector2" default="Vector2(0, 0)" />
+			<param index="2" name="target" type="Node" default="null" />
+			<description>
+				Simulates global or targeted input events for 'mouse_up'.
+				[codeblock]
+				sender.mouse_up(MOUSE_BUTTON_LEFT, Vector2(100, 100))
+				[/codeblock]
+			</description>
+		</method>
+		<method name="reset_inputs">
+			<return type="void" />
+			<description>
+				Utility method: reset inputs.
+			</description>
+		</method>
+	</methods>
+</class>

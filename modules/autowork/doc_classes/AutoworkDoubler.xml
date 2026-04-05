@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AutoworkDoubler" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+		Core class for the Autowork framework: AutoworkDoubler.
+		Enables native testing, assertions, and mock implementations within Blazium Engine.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="double_scene">
+			<return type="Variant" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Creates a test double (mock/stub) of a specific resource, scene, or script.
+			</description>
+		</method>
+		<method name="double_script">
+			<return type="Variant" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Creates a test double (mock/stub) of a specific resource, scene, or script.
+			</description>
+		</method>
+		<method name="set_spy">
+			<return type="void" />
+			<param index="0" name="spy" type="AutoworkSpy" />
+			<description>
+				Utility method: set spy.
+			</description>
+		</method>
+		<method name="set_stubber">
+			<return type="void" />
+			<param index="0" name="stubber" type="AutoworkStubber" />
+			<description>
+				Utility method: set stubber.
+			</description>
+		</method>
+	</methods>
+</class>

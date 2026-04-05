@@ -664,6 +664,25 @@ void Main::print_help(const char *p_binary) {
 	print_help_option("--test [--help]", "Run unit tests. Use --test --help for more information.\n", CLI_OPTION_AVAILABILITY_EDITOR);
 #endif
 #endif
+
+// AUTOWORK
+#ifdef MODULE_AUTOWORK_ENABLED
+	print_help_title("Autowork options");
+	print_help_option("--aw-dir=<directory>", "Run Autowork tests in the specified directory.\n");
+	print_help_option("--aw-file=<file>", "Run a specific Autowork test script.\n");
+	print_help_option("--aw-test=<name>", "Run a specific Autowork test by name.\n");
+	print_help_option("--aw-select=<pattern>", "Run Autowork test scripts matching the pattern.\n");
+	print_help_option("--aw-prefix=<prefix>", "Set the prefix for Autowork test files (default: \"test_\").\n");
+	print_help_option("--aw-suffix=<suffix>", "Set the suffix for Autowork test files (default: \".gd\").\n");
+	print_help_option("--aw-inner-class=<pattern>", "Run Autowork inner classes matching the pattern.\n");
+	print_help_option("--aw-junit=<file>", "Export Autowork test results to a JUnit XML file.\n");
+	print_help_option("--aw-json=<file>", "Export Autowork test results to a JSON file.\n");
+	print_help_option("--aw-pre-run=<script>", "Run a script before Autowork tests start.\n");
+	print_help_option("--aw-post-run=<script>", "Run a script after Autowork tests finish.\n");
+	print_help_option("--aw-hide-orphans", "Do not print orphaned nodes during Autowork tests.\n");
+	print_help_option("--aw-include-subdirs", "Include subdirectories when scanning for Autowork tests.\n");
+#endif
+
 	OS::get_singleton()->print("\n");
 }
 

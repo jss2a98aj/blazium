@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AutoworkCollector" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+		Core class for the Autowork framework: AutoworkCollector.
+		Enables native testing, assertions, and mock implementations within Blazium Engine.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="add_script">
+			<return type="void" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Utility method: add script.
+			</description>
+		</method>
+		<method name="get_scripts" qualifiers="const">
+			<return type="Array" />
+			<description>
+				Utility method: get scripts.
+			</description>
+		</method>
+		<method name="process_directory">
+			<return type="void" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Utility method: process directory.
+			</description>
+		</method>
+	</methods>
+</class>

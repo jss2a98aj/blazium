@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AutoworkStubber" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+		Core class for the Autowork framework: AutoworkStubber.
+		Enables native testing, assertions, and mock implementations within Blazium Engine.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="clear">
+			<return type="void" />
+			<description>
+				Utility method: clear.
+			</description>
+		</method>
+		<method name="get_return">
+			<return type="Variant" />
+			<param index="0" name="object" type="Variant" />
+			<param index="1" name="method_name" type="StringName" />
+			<param index="2" name="args" type="Array" default="[]" />
+			<description>
+				Utility method: get return.
+			</description>
+		</method>
+		<method name="set_return">
+			<return type="void" />
+			<param index="0" name="object" type="Variant" />
+			<param index="1" name="method_name" type="StringName" />
+			<param index="2" name="return_value" type="Variant" />
+			<param index="3" name="args" type="Variant" default="null" />
+			<description>
+				Utility method: set return.
+			</description>
+		</method>
+		<method name="should_call_super">
+			<return type="bool" />
+			<param index="0" name="object" type="Variant" />
+			<param index="1" name="method_name" type="StringName" />
+			<param index="2" name="args" type="Array" default="[]" />
+			<description>
+				Utility method: should call super.
+			</description>
+		</method>
+	</methods>
+</class>
