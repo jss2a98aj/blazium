@@ -36,6 +36,8 @@
 #include "core/templates/local_vector.h"
 #include "servers/navigation/navigation_utilities.h"
 
+#include <cfloat> // FLT_MAX
+
 struct NavBaseIteration;
 
 namespace gd {

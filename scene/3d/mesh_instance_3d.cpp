@@ -40,6 +40,8 @@
 #include "scene/resources/navigation_mesh.h"
 #include "servers/navigation_server_3d.h"
 
+#include <cfloat> // FLT_EPSILON
+
 Callable MeshInstance3D::_navmesh_source_geometry_parsing_callback;
 RID MeshInstance3D::_navmesh_source_geometry_parser;
 

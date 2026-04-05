@@ -32,7 +32,10 @@
 
 #include "core/io/json.h"
 
+#include "core/variant/typed_array.h"
 #include "thirdparty/doctest/doctest.h"
+
+#include <cfloat> // DBL_MAX
 
 namespace TestJSON {
 
