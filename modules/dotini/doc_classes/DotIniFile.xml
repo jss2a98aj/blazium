@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="DotIniFile" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="add_macro">
+			<return type="void" />
+			<param index="0" name="name" type="String" />
+			<param index="1" name="value" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="add_type_constraint">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="type" type="int" enum="Variant.Type" />
+			<description>
+			</description>
+		</method>
+		<method name="append_value">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="value" type="Variant" />
+			<description>
+			</description>
+		</method>
+		<method name="check_for_updates">
+			<return type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="clear">
+			<return type="void" />
+			<description>
+			</description>
+		</method>
+		<method name="clear_section">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="clone" qualifiers="const">
+			<return type="DotIniFile" />
+			<description>
+			</description>
+		</method>
+		<method name="ensure_value">
+			<return type="Variant" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="default_value" type="Variant" />
+			<description>
+			</description>
+		</method>
+		<method name="erase_section">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="erase_section_key">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="from_config_file">
+			<return type="void" />
+			<param index="0" name="config" type="ConfigFile" />
+			<description>
+			</description>
+		</method>
+		<method name="from_dictionary">
+			<return type="void" />
+			<param index="0" name="dict" type="Dictionary" />
+			<description>
+			</description>
+		</method>
+		<method name="get_global_fallback" qualifiers="static">
+			<return type="DotIniFile" />
+			<description>
+			</description>
+		</method>
+		<method name="get_included_files" qualifiers="const">
+			<return type="DotIniFile[]" />
+			<description>
+			</description>
+		</method>
+		<method name="get_key_comment" qualifiers="const">
+			<return type="String" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="get_keys_matching" qualifiers="const">
+			<return type="PackedStringArray" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="match_pattern" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="get_macro" qualifiers="const">
+			<return type="String" />
+			<param index="0" name="name" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="get_section_as_dict" qualifiers="const">
+			<return type="Dictionary" />
+			<param index="0" name="section" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="get_section_comment" qualifiers="const">
+			<return type="String" />
+			<param index="0" name="section" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="get_section_keys" qualifiers="const">
+			<return type="PackedStringArray" />
+			<param index="0" name="section" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="get_sections" qualifiers="const">
+			<return type="PackedStringArray" />
+			<description>
+			</description>
+		</method>
+		<method name="get_value" qualifiers="const">
+			<return type="Variant" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="default" type="Variant" default="null" />
+			<param index="3" name="interpolate" type="bool" default="true" />
+			<description>
+			</description>
+		</method>
+		<method name="get_value_array" qualifiers="const">
+			<return type="Array" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="interpolate" type="bool" default="true" />
+			<description>
+			</description>
+		</method>
+		<method name="get_value_b64" qualifiers="const">
+			<return type="String" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="default" type="String" default="&quot;&quot;" />
+			<description>
+			</description>
+		</method>
+		<method name="get_value_bool" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="default" type="bool" default="false" />
+			<param index="3" name="interpolate" type="bool" default="true" />
+			<description>
+			</description>
+		</method>
+		<method name="get_value_float" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="default" type="float" default="0.0" />
+			<param index="3" name="interpolate" type="bool" default="true" />
+			<description>
+			</description>
+		</method>
+		<method name="get_value_int" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="default" type="int" default="0" />
+			<param index="3" name="interpolate" type="bool" default="true" />
+			<description>
+			</description>
+		</method>
+		<method name="get_value_raw" qualifiers="const">
+			<return type="String" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="default" type="String" default="&quot;&quot;" />
+			<description>
+			</description>
+		</method>
+		<method name="get_value_string" qualifiers="const">
+			<return type="String" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="default" type="String" default="&quot;&quot;" />
+			<param index="3" name="interpolate" type="bool" default="true" />
+			<description>
+			</description>
+		</method>
+		<method name="has_section" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="section" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="has_section_key" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="is_autosave_enabled" qualifiers="const">
+			<return type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="is_read_only" qualifiers="const">
+			<return type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="load">
+			<return type="int" enum="Error" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="append" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="load_encrypted">
+			<return type="int" enum="Error" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="key" type="PackedByteArray" />
+			<param index="2" name="append" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="load_encrypted_pass">
+			<return type="int" enum="Error" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="pass" type="String" />
+			<param index="2" name="append" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="load_from_base64">
+			<return type="int" enum="Error" />
+			<param index="0" name="base64" type="String" />
+			<param index="1" name="append" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="load_from_buffer">
+			<return type="int" enum="Error" />
+			<param index="0" name="buffer" type="PackedByteArray" />
+			<param index="1" name="append" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="load_from_string">
+			<return type="int" enum="Error" />
+			<param index="0" name="string" type="String" />
+			<param index="1" name="append" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="merge_with">
+			<return type="void" />
+			<param index="0" name="other" type="DotIniFile" />
+			<param index="1" name="overwrite" type="bool" default="true" />
+			<description>
+			</description>
+		</method>
+		<method name="remove_type_constraint">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="rename_key">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="old_key" type="String" />
+			<param index="2" name="new_key" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="rename_section">
+			<return type="void" />
+			<param index="0" name="old_section" type="String" />
+			<param index="1" name="new_section" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="save">
+			<return type="int" enum="Error" />
+			<param index="0" name="path" type="String" default="&quot;&quot;" />
+			<description>
+			</description>
+		</method>
+		<method name="save_all">
+			<return type="int" enum="Error" />
+			<description>
+			</description>
+		</method>
+		<method name="save_encrypted">
+			<return type="int" enum="Error" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="key" type="PackedByteArray" />
+			<description>
+			</description>
+		</method>
+		<method name="save_encrypted_pass">
+			<return type="int" enum="Error" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="pass" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="save_to_base64" qualifiers="const">
+			<return type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="save_to_buffer" qualifiers="const">
+			<return type="PackedByteArray" />
+			<description>
+			</description>
+		</method>
+		<method name="save_to_string" qualifiers="const">
+			<return type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="set_autosave">
+			<return type="void" />
+			<param index="0" name="enabled" type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="set_default_padding">
+			<return type="void" />
+			<param index="0" name="pre_key" type="String" />
+			<param index="1" name="post_key" type="String" />
+			<param index="2" name="pre_val" type="String" />
+			<param index="3" name="post_val" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="set_global_fallback" qualifiers="static">
+			<return type="void" />
+			<param index="0" name="fallback" type="DotIniFile" />
+			<description>
+			</description>
+		</method>
+		<method name="set_key_comment">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="comment" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="set_read_only">
+			<return type="void" />
+			<param index="0" name="read_only" type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="set_section_comment">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="comment" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="set_value">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="value" type="Variant" />
+			<description>
+			</description>
+		</method>
+		<method name="set_value_b64">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="utf8_string" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="sort_section_keys">
+			<return type="void" />
+			<param index="0" name="section" type="String" />
+			<param index="1" name="ascending" type="bool" default="true" />
+			<description>
+			</description>
+		</method>
+		<method name="to_config_file" qualifiers="const">
+			<return type="ConfigFile" />
+			<description>
+			</description>
+		</method>
+		<method name="to_dictionary" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<signals>
+		<signal name="file_reloaded">
+			<description>
+			</description>
+		</signal>
+		<signal name="section_erased">
+			<param index="0" name="section" type="String" />
+			<description>
+			</description>
+		</signal>
+		<signal name="value_changed">
+			<param index="0" name="section" type="String" />
+			<param index="1" name="key" type="String" />
+			<param index="2" name="new_value" type="Variant" />
+			<description>
+			</description>
+		</signal>
+	</signals>
+</class>

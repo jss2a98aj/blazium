@@ -4047,11 +4047,9 @@ int registerReporter(const char*, int, IReporter*) { return 0; }
 
 #if !defined(DOCTEST_CONFIG_COLORS_NONE)
 #if !defined(DOCTEST_CONFIG_COLORS_WINDOWS) && !defined(DOCTEST_CONFIG_COLORS_ANSI)
-#ifdef DOCTEST_PLATFORM_WINDOWS
-#define DOCTEST_CONFIG_COLORS_WINDOWS
-#else // linux
+// In Blazium/Godot, Windows terminal uses ANSI escape codes by default.
+// Using DOCTEST_CONFIG_COLORS_WINDOWS with SetConsoleTextAttribute conflicts and causes hangs when stdout is a pipe.
 #define DOCTEST_CONFIG_COLORS_ANSI
-#endif // platform
 #endif // DOCTEST_CONFIG_COLORS_WINDOWS && DOCTEST_CONFIG_COLORS_ANSI
 #endif // DOCTEST_CONFIG_COLORS_NONE
 
@@ -4394,8 +4392,9 @@ namespace {
         static_cast<void>(s);    // for DOCTEST_CONFIG_COLORS_NONE or DOCTEST_CONFIG_COLORS_WINDOWS
         static_cast<void>(code); // for DOCTEST_CONFIG_COLORS_NONE
 #ifdef DOCTEST_CONFIG_COLORS_ANSI
+        static bool is_tty = isatty(STDOUT_FILENO);
         if(g_no_colors ||
-           (isatty(STDOUT_FILENO) == false && getContextOptions()->force_colors == false))
+           (getContextOptions()->force_colors == false && is_tty == false))
             return;
 
         auto col = "";
@@ -4421,8 +4420,9 @@ namespace {
 #endif // DOCTEST_CONFIG_COLORS_ANSI
 
 #ifdef DOCTEST_CONFIG_COLORS_WINDOWS
+        static bool is_tty = _isatty(_fileno(stdout));
         if(g_no_colors ||
-           (_isatty(_fileno(stdout)) == false && getContextOptions()->force_colors == false))
+           (getContextOptions()->force_colors == false && is_tty == false))
             return;
 
         static struct ConsoleHelper {
