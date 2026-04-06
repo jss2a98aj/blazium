@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+from misc.utility.scons_hints import *
+
+Import("env")
+Import("env_modules")
+
+env_justamcp = env_modules.Clone()
+
+# Blazium source files
+env_justamcp.add_source_files(env.modules_sources, "*.cpp")
+env_justamcp.add_source_files(env.modules_sources, "tools/*.cpp")
+
+
+# Editor only sources can be separated if needed, but since we use `#ifdef TOOLS_ENABLED` inline or in `register_types.cpp`
+# this is usually sufficient.

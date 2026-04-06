@@ -416,5 +416,13 @@ void Autowork::run_tests(bool p_run_rest) {
 			js.instantiate();
 			js->export_json(logger, json_p);
 		}
+
+		bool is_headless = DisplayServer::get_singleton() && DisplayServer::get_singleton()->get_name() == "headless";
+		if (is_headless) {
+			SceneTree *scene_tree = Object::cast_to<SceneTree>(OS::get_singleton()->get_main_loop());
+			if (scene_tree) {
+				scene_tree->quit(logger->get_fails());
+			}
+		}
 	}
 }

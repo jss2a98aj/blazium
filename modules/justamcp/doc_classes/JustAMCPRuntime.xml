@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPRuntime" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		A runtime singleton that hosts the Model Context Protocol (MCP) server for JustAMCP.
+	</brief_description>
+	<description>
+		JustAMCPRuntime is the core Engine singleton that runs a local server, managing Model Context Protocol (MCP) communication with external AI agents safely independently of the SceneTree.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="execute_command">
+			<return type="Dictionary" />
+			<param index="0" name="command" type="String" />
+			<param index="1" name="params" type="Dictionary" />
+			<description>
+				Executes an MCP command by forwarding it to the appropriate internal toolkit or capability handler.
+			</description>
+		</method>
+		<method name="poll">
+			<return type="void" />
+			<description>
+				Manually processes incoming network transactions, handles new connections natively, and evaluates active payloads asynchronously.
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="enabled" type="bool" setter="set_enabled" getter="is_enabled" default="true">
+		</member>
+		<member name="port" type="int" setter="set_port" getter="get_port" default="7777">
+		</member>
+	</members>
+	<signals>
+		<signal name="client_connected">
+			<description>
+				Emitted when a new Model Context Protocol client successfully connects and authenticates to the internal TCP server.
+			</description>
+		</signal>
+		<signal name="client_disconnected">
+			<description>
+				Emitted when an active Model Context Protocol client disconnects, errors out, or explicitly terminates the connection.
+			</description>
+		</signal>
+		<signal name="command_received">
+			<param index="0" name="command" type="String" />
+			<param index="1" name="params" type="Dictionary" />
+			<description>
+				Emitted when the runtime parses an incoming payload from an MCP client. Used internally to relay the [param command] and its corresponding [param params] payload to the ecosystem executor.
+			</description>
+		</signal>
+	</signals>
+</class>

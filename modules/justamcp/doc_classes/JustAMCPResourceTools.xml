@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPResourceTools" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Provides specialized MCP capabilities for retrieving, generating, and mutating [Resource] assets in a project pipeline.
+	</brief_description>
+	<description>
+		Hosts internal APIs mapped directly to the Model Context Protocol schema for handling arbitrary filesystem operations bound explicitly to standard Godot [Resource] formats.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

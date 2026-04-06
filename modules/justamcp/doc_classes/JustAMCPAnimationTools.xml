@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPAnimationTools" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Provides specialized MCP capabilities for evaluating, extracting, or mutating animation resources via external AI agents.
+	</brief_description>
+	<description>
+		Hosts internal APIs necessary for manipulating the AnimationPlayer/AnimationTree and providing serialized playback info to Model Context Protocol clients.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

@@ -32,6 +32,7 @@
 
 #include "editor/editor_inspector.h"
 #include "editor/editor_property_name_processor.h"
+#include "editor/editor_settings.h"
 #include "editor/editor_string_names.h"
 #include "editor/themes/editor_scale.h"
 #include "scene/gui/check_button.h"
@@ -366,6 +367,7 @@ SectionedInspector::SectionedInspector() :
 	inspector->set_v_size_flags(SIZE_EXPAND_FILL);
 	right_vb->add_child(inspector, true);
 	inspector->set_use_doc_hints(true);
+	inspector->set_use_folding(!bool(EDITOR_GET("interface/inspector/disable_folding")));
 
 	sections->connect("cell_selected", callable_mp(this, &SectionedInspector::_section_selected));
 }
