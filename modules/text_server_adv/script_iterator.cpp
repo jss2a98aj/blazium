@@ -32,8 +32,22 @@
 
 // This implementation is derived from ICU: icu4c/source/extra/scrptrun/scrptrun.cpp
 
-bool ScriptIterator::same_script(int32_t p_script_one, int32_t p_script_two) {
+inline constexpr UChar32 ZERO_WIDTH_JOINER = 0x200d;
+inline constexpr UChar32 VARIATION_SELECTOR_15 = 0xfe0e;
+inline constexpr UChar32 VARIATION_SELECTOR_16 = 0xfe0f;
+
+inline bool ScriptIterator::same_script(int32_t p_script_one, int32_t p_script_two) {
 	return p_script_one <= USCRIPT_INHERITED || p_script_two <= USCRIPT_INHERITED || p_script_one == p_script_two;
+}
+
+inline bool ScriptIterator::is_emoji(UChar32 p_c, UChar32 p_next) {
+	if (p_next == VARIATION_SELECTOR_15 && (u_hasBinaryProperty(p_c, UCHAR_EMOJI) || u_hasBinaryProperty(p_c, UCHAR_EXTENDED_PICTOGRAPHIC))) {
+		return false;
+	} else if (p_next == VARIATION_SELECTOR_16 && (u_hasBinaryProperty(p_c, UCHAR_EMOJI) || u_hasBinaryProperty(p_c, UCHAR_EXTENDED_PICTOGRAPHIC))) {
+		return true;
+	} else {
+		return u_hasBinaryProperty(p_c, UCHAR_EMOJI_PRESENTATION) || u_hasBinaryProperty(p_c, UCHAR_EMOJI_MODIFIER) || u_hasBinaryProperty(p_c, UCHAR_REGIONAL_INDICATOR);
+	}
 }
 
 ScriptIterator::ScriptIterator(const String &p_string, int p_start, int p_length) {
@@ -65,11 +79,16 @@ ScriptIterator::ScriptIterator(const String &p_string, int p_start, int p_length
 		script_code = USCRIPT_COMMON;
 		for (script_start = script_end; script_end < p_length; script_end++) {
 			UChar32 ch = str[script_end];
+			UChar32 n = (script_end + 1 < p_length) ? str[script_end + 1] : 0;
 			UScriptCode sc = uscript_getScript(ch, &err);
 			if (U_FAILURE(err)) {
 				memfree(paren_stack);
 				ERR_FAIL_MSG(u_errorName(err));
 			}
+			if (is_emoji(ch, n)) {
+				sc = USCRIPT_SYMBOLS_EMOJI;
+			}
+
 			if (u_getIntPropertyValue(ch, UCHAR_BIDI_PAIRED_BRACKET_TYPE) != U_BPT_NONE) {
 				if (u_getIntPropertyValue(ch, UCHAR_BIDI_PAIRED_BRACKET_TYPE) == U_BPT_OPEN) {
 					// If it's an open character, push it onto the stack.
@@ -96,7 +115,11 @@ ScriptIterator::ScriptIterator(const String &p_string, int p_start, int p_length
 				}
 			}
 
-			if (same_script(script_code, sc)) {
+			if (script_code == USCRIPT_SYMBOLS_EMOJI && script_code != sc) {
+				if (ch == VARIATION_SELECTOR_15 || n == VARIATION_SELECTOR_15 || !(is_emoji(ch, n) || ch == ZERO_WIDTH_JOINER || ch == VARIATION_SELECTOR_16 || u_hasBinaryProperty(ch, UCHAR_EXTENDED_PICTOGRAPHIC))) {
+					break;
+				}
+			} else if (same_script(script_code, sc)) {
 				if (script_code <= USCRIPT_INHERITED && sc > USCRIPT_INHERITED) {
 					script_code = sc;
 					// Now that we have a final script code, fix any open characters we pushed before we knew the script code.

@@ -137,8 +137,8 @@ class SceneImportSettingsDialog : public ConfirmationDialog {
 		TreeItem *mesh_node = nullptr;
 		TreeItem *material_node = nullptr;
 
-		float cam_rot_x = -Math_PI / 4;
-		float cam_rot_y = -Math_PI / 4;
+		float cam_rot_x = -Math::PI / 4;
+		float cam_rot_y = -Math::PI / 4;
 		float cam_zoom = 1;
 
 		String last_external_path;
@@ -154,8 +154,8 @@ class SceneImportSettingsDialog : public ConfirmationDialog {
 		TreeItem *scene_node = nullptr;
 		TreeItem *mesh_node = nullptr;
 
-		float cam_rot_x = -Math_PI / 4;
-		float cam_rot_y = -Math_PI / 4;
+		float cam_rot_x = -Math::PI / 4;
+		float cam_rot_y = -Math::PI / 4;
 		float cam_zoom = 1;
 		HashMap<StringName, Variant> settings;
 	};

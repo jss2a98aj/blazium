@@ -147,11 +147,12 @@ const char *VariantParser::tk_name[TK_MAX] = {
 
 static double stor_fix(const String &p_str) {
 	if (p_str == "inf") {
-		return INFINITY;
-	} else if (p_str == "inf_neg") {
-		return -INFINITY;
+		return Math::INF;
+	} else if (p_str == "-inf" || p_str == "inf_neg") {
+		// inf_neg kept for compatibility.
+		return -Math::INF;
 	} else if (p_str == "nan") {
-		return NAN;
+		return Math::NaN;
 	}
 	return -1;
 }
@@ -411,22 +412,19 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 				if (cchar <= 32) {
 					break;
 				}
-
-				if (cchar == '-' || (cchar >= '0' && cchar <= '9')) {
+				StringBuffer<> token_text;
+				if (cchar == '-') {
+					token_text += '-';
+					cchar = p_stream->get_char();
+				}
+				if (cchar >= '0' && cchar <= '9') {
 					//a number
-
-					StringBuffer<> num;
 #define READING_SIGN 0
 #define READING_INT 1
 #define READING_DEC 2
 #define READING_EXP 3
 #define READING_DONE 4
 					int reading = READING_INT;
-
-					if (cchar == '-') {
-						num += '-';
-						cchar = p_stream->get_char();
-					}
 
 					char32_t c = cchar;
 					bool exp_sign = false;
@@ -474,7 +472,7 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 						if (reading == READING_DONE) {
 							break;
 						}
-						num += c;
+						token_text += c;
 						c = p_stream->get_char();
 					}
 
@@ -483,17 +481,16 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 					r_token.type = TK_NUMBER;
 
 					if (is_float) {
-						r_token.value = num.as_double();
+						r_token.value = token_text.as_double();
 					} else {
-						r_token.value = num.as_int();
+						r_token.value = token_text.as_int();
 					}
 					return OK;
 				} else if (is_ascii_alphabet_char(cchar) || is_underscore(cchar)) {
-					StringBuffer<> id;
 					bool first = true;
 
 					while (is_ascii_alphabet_char(cchar) || is_underscore(cchar) || (!first && is_digit(cchar))) {
-						id += cchar;
+						token_text += cchar;
 						cchar = p_stream->get_char();
 						first = false;
 					}
@@ -501,7 +498,7 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 					p_stream->saved = cchar;
 
 					r_token.type = TK_IDENTIFIER;
-					r_token.value = id.as_string();
+					r_token.value = token_text.as_string();
 					return OK;
 				} else {
 					r_err_str = "Unexpected character";
@@ -698,11 +695,12 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 		} else if (id == "null" || id == "nil") {
 			value = Variant();
 		} else if (id == "inf") {
-			value = INFINITY;
-		} else if (id == "inf_neg") {
-			value = -INFINITY;
+			value = Math::INF;
+		} else if (id == "-inf" || id == "inf_neg") {
+			// inf_neg kept for compatibility.
+			value = -Math::INF;
 		} else if (id == "nan") {
-			value = NAN;
+			value = Math::NaN;
 		} else if (id == "Vector2") {
 			Vector<real_t> args;
 			Error err = _parse_construct<real_t>(p_stream, args, line, r_err_str);
@@ -1795,13 +1793,13 @@ Error VariantParser::parse(Stream *p_stream, Variant &r_ret, String &r_err_str, 
 static String rtos_fix(double p_value) {
 	if (p_value == 0.0) {
 		return "0"; //avoid negative zero (-0) being written, which may annoy git, svn, etc. for changes when they don't exist.
-	} else if (isnan(p_value)) {
+	} else if (std::isnan(p_value)) {
 		return "nan";
-	} else if (isinf(p_value)) {
+	} else if (std::isinf(p_value)) {
 		if (p_value > 0) {
 			return "inf";
 		} else {
-			return "inf_neg";
+			return "-inf";
 		}
 	} else {
 		return rtoss(p_value);
@@ -1821,7 +1819,7 @@ Error VariantWriter::write(const Variant &p_variant, StoreStringFunc p_store_str
 		} break;
 		case Variant::FLOAT: {
 			String s = rtos_fix(p_variant.operator double());
-			if (s != "inf" && s != "inf_neg" && s != "nan") {
+			if (s != "inf" && s != "-inf" && s != "nan") {
 				if (!s.contains_char('.') && !s.contains_char('e') && !s.contains_char('E')) {
 					s += ".0";
 				}

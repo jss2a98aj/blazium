@@ -40,6 +40,8 @@
 #include "scene/resources/navigation_mesh.h"
 #include "servers/navigation_server_3d.h"
 
+#include <cfloat> // FLT_EPSILON
+
 Callable MeshInstance3D::_navmesh_source_geometry_parsing_callback;
 RID MeshInstance3D::_navmesh_source_geometry_parser;
 
@@ -584,7 +586,7 @@ Ref<ArrayMesh> MeshInstance3D::bake_mesh_from_current_blend_shape_mix(Ref<ArrayM
 
 		for (int blendshape_index = 0; blendshape_index < blend_shape_count; blendshape_index++) {
 			float blend_weight = get_blend_shape_value(blendshape_index);
-			if (abs(blend_weight) <= 0.0001) {
+			if (std::abs(blend_weight) <= 0.0001) {
 				continue;
 			}
 

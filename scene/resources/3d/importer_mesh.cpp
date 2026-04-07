@@ -35,7 +35,7 @@
 #include "core/math/random_pcg.h"
 #include "scene/resources/surface_tool.h"
 
-#include <cstdint>
+#include <cfloat> // FLT_EPSILON, FLT_MAX
 
 String ImporterMesh::validate_blend_shape_name(const String &p_name) {
 	String name = p_name;

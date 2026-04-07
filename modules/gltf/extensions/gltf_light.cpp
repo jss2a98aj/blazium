@@ -33,6 +33,8 @@
 #include "../structures/gltf_object_model_property.h"
 #include "scene/3d/light_3d.h"
 
+#include <cfloat> // FLT_MAX
+
 void GLTFLight::_bind_methods() {
 	ClassDB::bind_static_method("GLTFLight", D_METHOD("from_node", "light_node"), &GLTFLight::from_node);
 	ClassDB::bind_method(D_METHOD("to_node"), &GLTFLight::to_node);
@@ -232,7 +234,7 @@ Dictionary GLTFLight::to_dictionary() const {
 	if (intensity != 1.0f) {
 		d["intensity"] = intensity;
 	}
-	if (light_type != "directional" && range != INFINITY) {
+	if (light_type != "directional" && range != Math::INF) {
 		d["range"] = range;
 	}
 	if (light_type == "spot") {

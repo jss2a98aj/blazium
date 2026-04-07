@@ -217,7 +217,7 @@ void AudioStreamPlayer3DGizmoPlugin::redraw(EditorNode3DGizmo *p_gizmo) {
 			Vector<Vector3> points_primary;
 			points_primary.resize(200);
 
-			real_t step = Math_TAU / 100.0;
+			real_t step = Math::TAU / 100.0;
 			for (int i = 0; i < 100; i++) {
 				const float a = i * step;
 				const float an = (i + 1) * step;
@@ -236,7 +236,7 @@ void AudioStreamPlayer3DGizmoPlugin::redraw(EditorNode3DGizmo *p_gizmo) {
 			points_secondary.resize(16);
 
 			for (int i = 0; i < 8; i++) {
-				const float a = i * (Math_TAU / 8.0);
+				const float a = i * (Math::TAU / 8.0);
 				const Vector3 from(Math::sin(a) * radius, Math::cos(a) * radius, ofs);
 
 				points_secondary.write[i * 2 + 0] = from;

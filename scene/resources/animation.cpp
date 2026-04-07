@@ -2441,7 +2441,7 @@ int Animation::_find(const Vector<K> &p_keys, double p_time, bool p_backward, bo
 
 	if (p_limit) {
 		double diff = length - keys[middle].time;
-		if ((signbit(keys[middle].time) && !Math::is_zero_approx(keys[middle].time)) || (signbit(diff) && !Math::is_zero_approx(diff))) {
+		if ((std::signbit(keys[middle].time) && !Math::is_zero_approx(keys[middle].time)) || (std::signbit(diff) && !Math::is_zero_approx(diff))) {
 			ERR_PRINT_ONCE_ED("Found the key outside the animation range. Consider using the clean-up option in AnimationTrackEditor to fix it.");
 			return -1;
 		}
@@ -2476,7 +2476,7 @@ Variant Animation::_interpolate_angle(const Variant &p_a, const Variant &p_b, re
 	if (vformat == ((1 << Variant::INT) | (1 << Variant::FLOAT)) || vformat == (1 << Variant::FLOAT)) {
 		real_t a = p_a;
 		real_t b = p_b;
-		return Math::fposmod((float)Math::lerp_angle(a, b, p_c), (float)Math_TAU);
+		return Math::fposmod((float)Math::lerp_angle(a, b, p_c), (float)Math::TAU);
 	}
 	return _interpolate(p_a, p_b, p_c);
 }
@@ -2513,7 +2513,7 @@ Variant Animation::_cubic_interpolate_angle_in_time(const Variant &p_pre_a, cons
 		real_t b = p_b;
 		real_t pa = p_pre_a;
 		real_t pb = p_post_b;
-		return Math::fposmod((float)Math::cubic_interpolate_angle_in_time(a, b, pa, pb, p_c, p_b_t, p_pre_a_t, p_post_b_t), (float)Math_TAU);
+		return Math::fposmod((float)Math::cubic_interpolate_angle_in_time(a, b, pa, pb, p_c, p_b_t, p_pre_a_t, p_post_b_t), (float)Math::TAU);
 	}
 	return _cubic_interpolate_in_time(p_pre_a, p_a, p_b, p_post_b, p_c, p_pre_a_t, p_b_t, p_post_b_t);
 }
@@ -4108,21 +4108,21 @@ bool Animation::_float_track_optimize_key(const TKey<float> t0, const TKey<float
 	if (Math::is_equal_approx(t0.time, t1.time) || Math::is_equal_approx(t1.time, t2.time)) {
 		return true;
 	}
-	if (abs(t0.value - t1.value) < p_allowed_precision_error && abs(t1.value - t2.value) < p_allowed_precision_error) {
+	if (std::abs(t0.value - t1.value) < p_allowed_precision_error && std::abs(t1.value - t2.value) < p_allowed_precision_error) {
 		return true;
 	}
 	// Calc velocities.
 	double v0 = (t1.value - t0.value) / (t1.time - t0.time);
 	double v1 = (t2.value - t1.value) / (t2.time - t1.time);
 	// Avoid zero div but check equality.
-	if (abs(v0 - v1) < p_allowed_precision_error) {
+	if (std::abs(v0 - v1) < p_allowed_precision_error) {
 		return true;
-	} else if (abs(v0) < p_allowed_precision_error || abs(v1) < p_allowed_precision_error) {
+	} else if (std::abs(v0) < p_allowed_precision_error || std::abs(v1) < p_allowed_precision_error) {
 		return false;
 	}
-	if (!signbit(v0 * v1)) {
-		v0 = abs(v0);
-		v1 = abs(v1);
+	if (!std::signbit(v0 * v1)) {
+		v0 = std::abs(v0);
+		v1 = std::abs(v1);
 		double ratio = v0 < v1 ? v0 / v1 : v1 / v0;
 		if (ratio >= 1.0 - p_allowed_velocity_err) {
 			return true;
@@ -4145,15 +4145,15 @@ bool Animation::_vector2_track_optimize_key(const TKey<Vector2> t0, const TKey<V
 	double v0 = vc0.length();
 	double v1 = vc1.length();
 	// Avoid zero div but check equality.
-	if (abs(v0 - v1) < p_allowed_precision_error) {
+	if (std::abs(v0 - v1) < p_allowed_precision_error) {
 		return true;
-	} else if (abs(v0) < p_allowed_precision_error || abs(v1) < p_allowed_precision_error) {
+	} else if (std::abs(v0) < p_allowed_precision_error || std::abs(v1) < p_allowed_precision_error) {
 		return false;
 	}
 	// Check axis.
 	if (vc0.normalized().dot(vc1.normalized()) >= 1.0 - p_allowed_angular_error * 2.0) {
-		v0 = abs(v0);
-		v1 = abs(v1);
+		v0 = std::abs(v0);
+		v1 = std::abs(v1);
 		double ratio = v0 < v1 ? v0 / v1 : v1 / v0;
 		if (ratio >= 1.0 - p_allowed_velocity_err) {
 			return true;
@@ -4176,15 +4176,15 @@ bool Animation::_vector3_track_optimize_key(const TKey<Vector3> t0, const TKey<V
 	double v0 = vc0.length();
 	double v1 = vc1.length();
 	// Avoid zero div but check equality.
-	if (abs(v0 - v1) < p_allowed_precision_error) {
+	if (std::abs(v0 - v1) < p_allowed_precision_error) {
 		return true;
-	} else if (abs(v0) < p_allowed_precision_error || abs(v1) < p_allowed_precision_error) {
+	} else if (std::abs(v0) < p_allowed_precision_error || std::abs(v1) < p_allowed_precision_error) {
 		return false;
 	}
 	// Check axis.
 	if (vc0.normalized().dot(vc1.normalized()) >= 1.0 - p_allowed_angular_error * 2.0) {
-		v0 = abs(v0);
-		v1 = abs(v1);
+		v0 = std::abs(v0);
+		v1 = std::abs(v1);
 		double ratio = v0 < v1 ? v0 / v1 : v1 / v0;
 		if (ratio >= 1.0 - p_allowed_velocity_err) {
 			return true;
@@ -4207,16 +4207,16 @@ bool Animation::_quaternion_track_optimize_key(const TKey<Quaternion> t0, const 
 	if (q0.get_axis().dot(q1.get_axis()) >= 1.0 - p_allowed_angular_error * 2.0) {
 		double a0 = Math::acos(t0.value.dot(t1.value));
 		double a1 = Math::acos(t1.value.dot(t2.value));
-		if (a0 + a1 >= Math_PI / 2) {
+		if (a0 + a1 >= Math::PI / 2) {
 			return false; // Rotation is more than 180 deg, keep key.
 		}
 		// Calc velocities.
 		double v0 = a0 / (t1.time - t0.time);
 		double v1 = a1 / (t2.time - t1.time);
 		// Avoid zero div but check equality.
-		if (abs(v0 - v1) < p_allowed_precision_error) {
+		if (std::abs(v0 - v1) < p_allowed_precision_error) {
 			return true;
-		} else if (abs(v0) < p_allowed_precision_error || abs(v1) < p_allowed_precision_error) {
+		} else if (std::abs(v0) < p_allowed_precision_error || std::abs(v1) < p_allowed_precision_error) {
 			return false;
 		}
 		double ratio = v0 < v1 ? v0 / v1 : v1 / v0;
@@ -4325,7 +4325,7 @@ void Animation::_blend_shape_track_optimize(int p_idx, real_t p_allowed_velocity
 	}
 
 	if (bst->blend_shapes.size() == 2) {
-		if (abs(bst->blend_shapes[0].value - bst->blend_shapes[1].value) < p_allowed_precision_error) {
+		if (std::abs(bst->blend_shapes[0].value - bst->blend_shapes[1].value) < p_allowed_precision_error) {
 			bst->blend_shapes.remove_at(1);
 		}
 	}
@@ -4357,11 +4357,11 @@ void Animation::_value_track_optimize(int p_idx, real_t p_allowed_velocity_err, 
 				t1.value = vt->values[i + 1].value;
 				t2.value = vt->values[i + 2].value;
 				if (is_using_angle) {
-					float diff1 = fmod(t1.value - t0.value, Math_TAU);
-					t1.value = t0.value + fmod(2.0 * diff1, Math_TAU) - diff1;
-					float diff2 = fmod(t2.value - t1.value, Math_TAU);
-					t2.value = t1.value + fmod(2.0 * diff2, Math_TAU) - diff2;
-					if (abs(abs(diff1) + abs(diff2)) >= Math_PI) {
+					float diff1 = std::fmod(t1.value - t0.value, Math::TAU);
+					t1.value = t0.value + std::fmod(2.0 * diff1, Math::TAU) - diff1;
+					float diff2 = std::fmod(t2.value - t1.value, Math::TAU);
+					t2.value = t1.value + std::fmod(2.0 * diff2, Math::TAU) - diff2;
+					if (std::abs(std::abs(diff1) + std::abs(diff2)) >= Math::PI) {
 						break; // Rotation is more than 180 deg, keep key.
 					}
 				}
@@ -4421,10 +4421,10 @@ void Animation::_value_track_optimize(int p_idx, real_t p_allowed_velocity_err, 
 				float val_0 = vt->values[0].value;
 				float val_1 = vt->values[1].value;
 				if (is_using_angle) {
-					float diff1 = fmod(val_1 - val_0, Math_TAU);
-					val_1 = val_0 + fmod(2.0 * diff1, Math_TAU) - diff1;
+					float diff1 = std::fmod(val_1 - val_0, Math::TAU);
+					val_1 = val_0 + std::fmod(2.0 * diff1, Math::TAU) - diff1;
 				}
-				single_key = abs(val_0 - val_1) < p_allowed_precision_error;
+				single_key = std::abs(val_0 - val_1) < p_allowed_precision_error;
 			} break;
 			case Variant::VECTOR2: {
 				Vector2 val_0 = vt->values[0].value;
@@ -4507,7 +4507,7 @@ struct AnimationCompressionDataState {
 		if (p_delta == 0) {
 			return 0;
 		} else if (p_delta < 0) {
-			p_delta = ABS(p_delta) - 1;
+			p_delta = Math::abs(p_delta) - 1;
 			if (p_delta == 0) {
 				return 1;
 			}
@@ -4689,7 +4689,7 @@ struct AnimationCompressionDataState {
 
 				uint16_t deltau;
 				if (delta < 0) {
-					deltau = (ABS(delta) - 1) | (1 << max_shifts[j]);
+					deltau = (Math::abs(delta) - 1) | (1 << max_shifts[j]);
 				} else {
 					deltau = delta;
 				}
@@ -4754,9 +4754,9 @@ Vector3i Animation::_compress_key(uint32_t p_track, const AABB &p_bounds, int32_
 			}
 			Vector3 axis = rot.get_axis();
 			float angle = rot.get_angle();
-			angle = Math::fposmod(double(angle), double(Math_PI * 2.0));
+			angle = Math::fposmod(double(angle), double(Math::PI * 2.0));
 			Vector2 oct = axis.octahedron_encode();
-			Vector3 rot_norm(oct.x, oct.y, angle / (Math_PI * 2.0)); // high resolution rotation in 0-1 angle.
+			Vector3 rot_norm(oct.x, oct.y, angle / (Math::PI * 2.0)); // high resolution rotation in 0-1 angle.
 
 			for (int j = 0; j < 3; j++) {
 				values[j] = CLAMP(int32_t(rot_norm[j] * 65535.0), 0, 65535);
@@ -5532,7 +5532,7 @@ int Animation::_get_compressed_key_count(uint32_t p_compressed_track) const {
 
 Quaternion Animation::_uncompress_quaternion(const Vector3i &p_value) const {
 	Vector3 axis = Vector3::octahedron_decode(Vector2(float(p_value.x) / 65535.0, float(p_value.y) / 65535.0));
-	float angle = (float(p_value.z) / 65535.0) * 2.0 * Math_PI;
+	float angle = (float(p_value.z) / 65535.0) * 2.0 * Math::PI;
 	return Quaternion(axis, angle);
 }
 Vector3 Animation::_uncompress_pos_scale(uint32_t p_compressed_track, const Vector3i &p_value) const {
