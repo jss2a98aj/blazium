@@ -1562,6 +1562,8 @@
 		<member name="DisplayServer" type="DisplayServer" setter="" getter="">
 			The [DisplayServer] singleton.
 		</member>
+		<member name="ENV" type="ENV" setter="" getter="">
+		</member>
 		<member name="ENetClient" type="ENetClient" setter="" getter="">
 			The [ENetClient] singleton.
 		</member>
