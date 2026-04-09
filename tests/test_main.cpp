@@ -259,7 +259,9 @@ int test_main(int argc, char *argv[]) {
 		delete[] doctest_args;
 	}
 
-	return test_context.run();
+	int result = test_context.run();
+	WorkerThreadPool::get_singleton()->finish();
+	return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
