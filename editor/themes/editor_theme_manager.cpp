@@ -1845,6 +1845,15 @@ void EditorThemeManager::_populate_standard_styles(const Ref<EditorTheme> &p_the
 	// ColorPicker and related nodes.
 	{
 		// ColorPicker.
+		p_config.circle_style_focus = p_config.button_style_focus->duplicate();
+		p_config.circle_style_focus->set_corner_radius_all(256 * EDSCALE);
+		p_config.circle_style_focus->set_corner_detail(32 * EDSCALE);
+
+		p_config.rect_style_focus = p_config.button_style_focus->duplicate();
+		p_config.rect_style_focus->set_corner_radius_all(0);
+		p_config.rect_style_focus->set_corner_detail(0);
+
+		p_theme->set_color("focused_not_editing_cursor_color", "ColorPicker", p_config.highlight_color);
 
 		p_theme->set_constant("margin", "ColorPicker", p_config.base_margin);
 		p_theme->set_constant("sv_width", "ColorPicker", 256 * EDSCALE);
@@ -1872,6 +1881,10 @@ void EditorThemeManager::_populate_standard_styles(const Ref<EditorTheme> &p_the
 		p_theme->set_icon("expanded_arrow", "ColorPicker", p_theme->get_icon(SNAME("GuiTreeArrowDown"), EditorStringName(EditorIcons)));
 		p_theme->set_icon("folded_arrow", "ColorPicker", p_theme->get_icon(SNAME("GuiTreeArrowRight"), EditorStringName(EditorIcons)));
 		p_theme->set_icon("folded_arrow_mirrored", "ColorPicker", p_theme->get_icon(SNAME("GuiTreeArrowLeft"), EditorStringName(EditorIcons)));
+
+		p_theme->set_stylebox("sample_focus", "ColorPicker", p_config.rect_style_focus);
+		p_theme->set_stylebox("picker_focus_rectangle", "ColorPicker", p_config.rect_style_focus);
+		p_theme->set_stylebox("picker_focus_circle", "ColorPicker", p_config.circle_style_focus);
 
 		// ColorPickerButton.
 		p_theme->set_icon("bg", "ColorPickerButton", p_theme->get_icon(SNAME("GuiMiniCheckerboard"), EditorStringName(EditorIcons)));
