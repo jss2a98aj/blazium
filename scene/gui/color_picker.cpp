@@ -30,7 +30,6 @@
 
 #include "color_picker.h"
 
-#include "scene/gui/aspect_ratio_container.h"
 #include "scene/gui/color_button.h"
 #include "scene/gui/color_mode.h"
 #include "scene/gui/color_picker_shape.h"
@@ -55,8 +54,11 @@
 #include "scene/resources/style_box_flat.h"
 #include "scene/theme/theme_db.h"
 #include "servers/display_server.h"
-#include "thirdparty/misc/ok_color.h"
 #include "thirdparty/misc/ok_color_shader.h"
+
+#ifdef MACOS_ENABLED
+#include "scene/gui/link_button.h"
+#endif // MACOS_ENABLED
 
 List<Color> ColorPicker::preset_cache;
 List<Color> ColorPicker::recent_preset_cache;
@@ -72,6 +74,14 @@ void ColorPicker::_notification(int p_what) {
 		case NOTIFICATION_ENTER_TREE: {
 			_update_color();
 		} break;
+
+#ifdef MACOS_ENABLED
+		case NOTIFICATION_VISIBILITY_CHANGED: {
+			if (is_visible_in_tree()) {
+				perm_hb->set_visible(!OS::get_singleton()->get_granted_permissions().has("macos.permission.RECORD_SCREEN"));
+			}
+		} break;
+#endif // MACOS_ENABLED
 
 		case NOTIFICATION_READY: {
 			// FIXME: The embedding check is needed to fix a bug in single-window mode (GH-93718).
@@ -2131,7 +2141,26 @@ ColorPicker::ColorPicker() {
 	recent_preset_group.instantiate();
 
 	set_pick_color(Color(1, 1, 1));
+
+#ifdef MACOS_ENABLED
+	perm_hb = memnew(HBoxContainer);
+	perm_hb->set_alignment(BoxContainer::ALIGNMENT_CENTER);
+
+	LinkButton *perm_link = memnew(LinkButton);
+	perm_link->set_text(ETR("Screen Recording permission missing!"));
+	perm_link->set_tooltip_text(ETR("Screen Recording permission is required to pick colors from the other application windows.\nClick here to request access..."));
+	perm_link->connect(SceneStringName(pressed), callable_mp(this, &ColorPicker::_req_permission));
+	perm_hb->add_child(perm_link);
+	real_vbox->add_child(perm_hb);
+	perm_hb->set_visible(false);
+#endif // MACOS_ENABLED
 }
+
+#ifdef MACOS_ENABLED
+void ColorPicker::_req_permission() {
+	OS::get_singleton()->request_permission("macos.permission.RECORD_SCREEN");
+}
+#endif // MACOS_ENABLED
 
 ColorPicker::~ColorPicker() {
 	for (ColorMode *mode : modes) {
