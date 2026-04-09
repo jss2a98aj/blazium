@@ -31,6 +31,7 @@
 #include "servers/text_server.h"
 #include "text_server.compat.inc"
 
+#include "core/config/project_settings.h"
 #include "core/variant/typed_array.h"
 #include "servers/rendering_server.h"
 
@@ -2299,6 +2300,10 @@ bool TextServer::is_valid_letter(uint64_t p_unicode) const {
 }
 
 TextServer::TextServer() {
+	// Default font rendering related project settings.
+	GLOBAL_DEF_BASIC("internationalization/locale/include_text_server_data", false);
+	GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "internationalization/locale/line_breaking_strictness", PROPERTY_HINT_ENUM, "Auto,Loose,Normal,Strict"), 0);
+
 	_init_diacritics_map();
 }
 
