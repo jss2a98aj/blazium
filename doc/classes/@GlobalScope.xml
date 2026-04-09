@@ -1603,6 +1603,7 @@
 			The [InputMap] singleton.
 		</member>
 		<member name="JWT" type="JWT" setter="" getter="">
+			The [JWT] (JSON Web Token) singleton.
 		</member>
 		<member name="JavaClassWrapper" type="JavaClassWrapper" setter="" getter="">
 			The [JavaClassWrapper] singleton.
