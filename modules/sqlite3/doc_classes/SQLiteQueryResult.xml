@@ -9,7 +9,7 @@
 	<tutorials>
 	</tutorials>
 	<members>
-		<member name="arguments" type="Array" setter="" getter="get_arguments" default="[]">
+		<member name="arguments" type="Variant" setter="" getter="get_arguments" default="[]">
 			The arguments of the query.
 		</member>
 		<member name="error" type="String" setter="" getter="get_error" default="&quot;&quot;">

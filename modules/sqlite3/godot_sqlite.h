@@ -42,7 +42,7 @@
 class SQLiteColumnSchema : public RefCounted {
 	GDCLASS(SQLiteColumnSchema, RefCounted);
 	String name;
-	Variant::Type type;
+	Variant::Type type = Variant::NIL;
 	Variant default_value;
 	bool primary_key = false;
 	bool auto_increment = false;

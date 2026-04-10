@@ -174,14 +174,14 @@ void SQLiteQuery::finalize() {
 
 void SQLiteQuery::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_last_error_message"), &SQLiteQuery::get_last_error_message);
-	ClassDB::bind_method(D_METHOD("execute", "arguments"), &SQLiteQuery::execute, DEFVAL(Array()));
+	ClassDB::bind_method(D_METHOD("execute", "arguments"), &SQLiteQuery::execute, DEFVAL(Variant()));
 	ClassDB::bind_method(D_METHOD("batch_execute", "rows"), &SQLiteQuery::batch_execute);
 	ClassDB::bind_method(D_METHOD("get_columns"), &SQLiteQuery::get_columns);
 	ClassDB::bind_method(D_METHOD("get_query"), &SQLiteQuery::get_query);
 	ClassDB::bind_method(D_METHOD("get_arguments"), &SQLiteQuery::get_arguments);
 	ClassDB::bind_method(D_METHOD("set_arguments", "arguments"), &SQLiteQuery::set_arguments);
 	ClassDB::bind_method(D_METHOD("is_ready"), &SQLiteQuery::is_ready);
-	ClassDB::bind_method(D_METHOD("finalize"), &SQLiteQuery::finalize);
+	ClassDB::bind_method(D_METHOD("finalize_query"), &SQLiteQuery::finalize);
 	ClassDB::bind_method(D_METHOD("get_stmt_status", "op", "reset"), &SQLiteQuery::get_stmt_status, DEFVAL(false));
 
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "arguments"), "set_arguments", "get_arguments");

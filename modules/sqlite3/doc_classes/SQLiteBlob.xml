@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="SQLiteBlob" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="close">
+			<return type="void" />
+			<description>
+			</description>
+		</method>
+		<method name="get_size" qualifiers="const">
+			<return type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="read_chunk">
+			<return type="PackedByteArray" />
+			<param index="0" name="offset" type="int" />
+			<param index="1" name="length" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="write_chunk">
+			<return type="bool" />
+			<param index="0" name="offset" type="int" />
+			<param index="1" name="buffer" type="PackedByteArray" />
+			<description>
+			</description>
+		</method>
+	</methods>
+</class>

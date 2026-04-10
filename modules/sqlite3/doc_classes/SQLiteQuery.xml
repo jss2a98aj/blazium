@@ -11,16 +11,22 @@
 	<methods>
 		<method name="batch_execute">
 			<return type="SQLiteQueryResult[]" />
-			<param index="0" name="rows" type="Array[]" />
+			<param index="0" name="rows" type="Array" />
 			<description>
 				Executes a batch of SQL queries. The queries are provided as an array of strings. Returns the result of the last query in the batch.
 			</description>
 		</method>
 		<method name="execute">
 			<return type="SQLiteQueryResult" />
-			<param index="0" name="arguments" type="Array" default="[]" />
+			<param index="0" name="arguments" type="Variant" default="null" />
 			<description>
 				Executes a single SQL query. The query is provided as a string. If the query requires arguments, they can be provided as an array. Returns the result of the query.
+			</description>
+		</method>
+		<method name="finalize_query">
+			<return type="void" />
+			<description>
+				Finalizes and cleans up the prepared query statement.
 			</description>
 		</method>
 		<method name="get_columns">
@@ -35,21 +41,22 @@
 				Returns the last error message, if any. If there was no error, returns an empty string.
 			</description>
 		</method>
+		<method name="get_stmt_status">
+			<return type="int" />
+			<param index="0" name="op" type="int" />
+			<param index="1" name="reset" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
 		<method name="is_ready" qualifiers="const">
 			<return type="bool" />
 			<description>
 				Returns true if the statement is prepared.
 			</description>
 		</method>
-		<method name="finalize">
-			<return type="void" />
-			<description>
-				Finalizes and cleans up the prepared query statement.
-			</description>
-		</method>
 	</methods>
 	<members>
-		<member name="arguments" type="Array" setter="set_arguments" getter="get_arguments" default="[]">
+		<member name="arguments" type="Variant" setter="set_arguments" getter="get_arguments" default="null">
 			Arguments for the query.
 		</member>
 		<member name="query" type="String" setter="" getter="get_query" default="&quot;&quot;">
