@@ -32,6 +32,9 @@
 #include "justamcp_runtime.h"
 
 #ifdef TOOLS_ENABLED
+#include "core/config/project_settings.h"
+#include "core/os/os.h"
+#include "editor/editor_settings.h"
 #include "justamcp_editor_plugin.h"
 #include "justamcp_server.h"
 #include "tools/justamcp_analysis_tools.h"
@@ -55,11 +58,45 @@
 #include "tools/justamcp_tool_executor.h"
 #endif
 
+#ifndef TOOLS_ENABLED
+#include "core/config/project_settings.h"
+#include "core/os/os.h"
+#endif
+
+static bool _is_justamcp_enabled() {
+	if (OS::get_singleton()->get_cmdline_args().find("--enable-mcp")) {
+		return true;
+	}
+
+	bool use_project_override = false;
+	if (ProjectSettings::get_singleton() && ProjectSettings::get_singleton()->has_setting("blazium/justamcp/override_editor_settings")) {
+		use_project_override = GLOBAL_GET("blazium/justamcp/override_editor_settings");
+	}
+
+#ifdef TOOLS_ENABLED
+	if (use_project_override || !EditorSettings::get_singleton()) {
+#else
+	{
+#endif
+		if (ProjectSettings::get_singleton() && ProjectSettings::get_singleton()->has_setting("blazium/justamcp/server_enabled")) {
+			return GLOBAL_GET("blazium/justamcp/server_enabled");
+		}
+#ifdef TOOLS_ENABLED
+	} else if (EditorSettings::get_singleton() && EditorSettings::get_singleton()->has_setting("blazium/justamcp/server_enabled")) {
+		return EditorSettings::get_singleton()->get_setting("blazium/justamcp/server_enabled");
+#endif
+	}
+
+	return false;
+}
+
 void initialize_justamcp_module(ModuleInitializationLevel p_level) {
 	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
 		GDREGISTER_CLASS(JustAMCPRuntime);
-		JustAMCPRuntime *runtime = memnew(JustAMCPRuntime);
-		Engine::get_singleton()->add_singleton(Engine::Singleton("JustAMCPRuntime", runtime));
+		if (_is_justamcp_enabled()) {
+			JustAMCPRuntime *runtime = memnew(JustAMCPRuntime);
+			Engine::get_singleton()->add_singleton(Engine::Singleton("JustAMCPRuntime", runtime));
+		}
 	}
 
 #ifdef TOOLS_ENABLED
@@ -86,16 +123,20 @@ void initialize_justamcp_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(JustAMCPTileMapTools);
 	}
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
-		EditorPlugins::add_by_type<JustAMCPEditorPlugin>();
+		if (_is_justamcp_enabled()) {
+			EditorPlugins::add_by_type<JustAMCPEditorPlugin>();
+		}
 	}
 #endif
 }
 
 void uninitialize_justamcp_module(ModuleInitializationLevel p_level) {
 	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
-		if (JustAMCPRuntime *runtime = Object::cast_to<JustAMCPRuntime>(Engine::get_singleton()->get_singleton_object("JustAMCPRuntime"))) {
-			Engine::get_singleton()->remove_singleton("JustAMCPRuntime");
-			memdelete(runtime);
+		if (Engine::get_singleton()->has_singleton("JustAMCPRuntime")) {
+			if (JustAMCPRuntime *runtime = Object::cast_to<JustAMCPRuntime>(Engine::get_singleton()->get_singleton_object("JustAMCPRuntime"))) {
+				Engine::get_singleton()->remove_singleton("JustAMCPRuntime");
+				memdelete(runtime);
+			}
 		}
 	}
 }
