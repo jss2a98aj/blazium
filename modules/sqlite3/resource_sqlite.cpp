@@ -59,7 +59,7 @@ void SQLiteDatabase::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_columns", "table_name"), &SQLiteDatabase::get_columns);
 	ClassDB::bind_method(D_METHOD("insert_row", "table_name", "value"), &SQLiteDatabase::insert_row);
 	ClassDB::bind_method(D_METHOD("insert_rows", "table_name", "values"), &SQLiteDatabase::insert_rows);
-	ClassDB::bind_method(D_METHOD("update_rows", "table_name", "condition", "value"), &SQLiteDatabase::update_rows, DEFVAL(String()));
+	ClassDB::bind_method(D_METHOD("update_rows", "table_name", "condition", "value"), &SQLiteDatabase::update_rows, DEFVAL(Dictionary()));
 	ClassDB::bind_method(D_METHOD("delete_rows", "table_name", "condition"), &SQLiteDatabase::delete_rows, DEFVAL(String()));
 	ClassDB::bind_method(D_METHOD("select_rows", "table_name", "condition"), &SQLiteDatabase::select_rows, DEFVAL(String()));
 	ClassDB::bind_method(D_METHOD("get_tables"), &SQLiteDatabase::get_tables);
