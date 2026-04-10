@@ -888,6 +888,13 @@ int Main::test_entrypoint(int argc, char *argv[], bool &tests_need_run) {
 		if ((strncmp(argv[x], "--test", 6) == 0) && (strlen(argv[x]) == 6)) {
 			tests_need_run = true;
 #ifdef TESTS_ENABLED
+			// Populate cmdline args BEFORE test_setup() so modules initialized during setup can read test/headless flags
+			List<String> cmdline_args;
+			for (int i = 0; i < argc; i++) {
+				cmdline_args.push_back(String::utf8(argv[i]));
+			}
+			OS::get_singleton()->set_cmdline("", cmdline_args, List<String>());
+
 			// TODO: need to come up with different test contexts.
 			// Not every test requires high-level functionality like `ClassDB`.
 			test_setup();
@@ -895,7 +902,7 @@ int Main::test_entrypoint(int argc, char *argv[], bool &tests_need_run) {
 			test_cleanup();
 			return status;
 #else
-			ERR_PRINT(
+			OS::get_singleton()->print(
 					"`--test` was specified on the command line, but this Godot binary was compiled without support for unit tests. Aborting.\n"
 					"To be able to run unit tests, use the `tests=yes` SCons option when compiling Godot.\n");
 			return EXIT_FAILURE;

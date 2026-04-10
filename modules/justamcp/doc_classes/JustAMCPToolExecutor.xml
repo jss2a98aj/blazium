@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPToolExecutor" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Executes standardized MCP tool requests dynamically on the engine's tools ecosystem.
+	</brief_description>
+	<description>
+		This node bridges the incoming Model Context Protocol command schemas and securely delegates them to specialized tool processors like [JustAMCPSceneTools] and [JustAMCPResourceTools].
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="execute_tool">
+			<return type="Dictionary" />
+			<param index="0" name="tool_name" type="String" />
+			<param index="1" name="args" type="Dictionary" />
+			<description>
+				Dynamically routes the [param tool_name] payload alongside its [param args] directly to the appropriate engine capability toolkit.
+			</description>
+		</method>
+		<method name="get_tool_schemas" qualifiers="static">
+			<return type="Array" />
+			<param index="0" name="register_only" type="bool" default="false" />
+			<param index="1" name="ignore_settings" type="bool" default="false" />
+			<description>
+				Returns a structured array of active JSON schemas representing the required parameters for every initialized MCP tool.
+			</description>
+		</method>
+		<method name="set_test_scene_root" qualifiers="static">
+			<return type="void" />
+			<param index="0" name="node" type="Node" />
+			<description>
+				Overrides the runtime's default scene root retrieval by statically assigning a mock or specific root [Node]. Specifically used to simulate active scenes during headless unit testing.
+			</description>
+		</method>
+	</methods>
+</class>

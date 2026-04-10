@@ -236,6 +236,10 @@ VKAPI_ATTR VkBool32 VKAPI_CALL RenderingContextDriverVulkan::_debug_messenger_ca
 		return VK_FALSE;
 	}
 
+	if (p_callback_data->pMessageIdName && strstr(p_callback_data->pMessageIdName, "Loader Message") != nullptr && strstr(p_callback_data->pMessage, "windows_read_data_files_in_registry") != nullptr) {
+		return VK_FALSE;
+	}
+
 	String type_string;
 	switch (p_message_type) {
 		case (VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT):

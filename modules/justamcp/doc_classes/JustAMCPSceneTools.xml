@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPSceneTools" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Provides specialized MCP capabilities for parsing, traversing, and editing live [SceneTree] graphs.
+	</brief_description>
+	<description>
+		Hosts internal APIs utilized via the Model Context Protocol to query properties remotely, manipulate active nodes, and fetch real-time spatial properties of the currently opened Editor scene.
+	</description>
+	<tutorials>
+	</tutorials>
+</class>

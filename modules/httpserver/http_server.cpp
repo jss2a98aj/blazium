@@ -545,6 +545,8 @@ String HTTPServer::_get_status_text(int p_code) const {
 			return "OK";
 		case 201:
 			return "Created";
+		case 202:
+			return "Accepted";
 		case 204:
 			return "No Content";
 		case 400:
