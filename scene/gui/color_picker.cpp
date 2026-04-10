@@ -30,7 +30,6 @@
 
 #include "color_picker.h"
 
-#include "scene/gui/color_button.h"
 #include "scene/gui/color_mode.h"
 #include "scene/gui/color_picker_shape.h"
 #include "scene/gui/file_dialog.h"
@@ -95,22 +94,6 @@ void ColorPicker::_notification(int p_what) {
 				// On unsupported platforms, use a legacy method for color picking.
 				btn_pick->set_tooltip_text(ETR("Pick a color from the application window."));
 				btn_pick->connect(SceneStringName(pressed), callable_mp(this, &ColorPicker::_pick_button_pressed_legacy));
-			}
-		} break;
-
-		case NOTIFICATION_TRANSLATION_CHANGED: {
-			List<BaseButton *> buttons;
-			preset_group->get_buttons(&buttons);
-			for (List<BaseButton *>::Element *E = buttons.front(); E; E = E->next()) {
-				Color preset_color = ((ColorButton *)E->get())->get_color();
-				E->get()->set_tooltip_text(vformat(atr(ETR("Color: #%s\nLMB: Apply color\nRMB: Remove preset")), preset_color.to_html(preset_color.a < 1)));
-			}
-
-			buttons.clear();
-			recent_preset_group->get_buttons(&buttons);
-			for (List<BaseButton *>::Element *E = buttons.front(); E; E = E->next()) {
-				Color preset_color = ((ColorButton *)E->get())->get_color();
-				E->get()->set_tooltip_text(vformat(atr(ETR("Color: #%s\nLMB: Apply color")), preset_color.to_html(preset_color.a < 1)));
 			}
 		} break;
 
@@ -685,7 +668,7 @@ void ColorPicker::_select_from_preset_container(const Color &p_color) {
 	}
 
 	for (int i = 0; i < preset_hbc->get_child_count(); i++) {
-		ColorButton *current_btn = Object::cast_to<ColorButton>(preset_hbc->get_child(i));
+		ColorPresetButton *current_btn = Object::cast_to<ColorPresetButton>(preset_hbc->get_child(i));
 		if (current_btn && p_color == current_btn->get_color()) {
 			current_btn->set_pressed_no_signal(true);
 			break;
@@ -695,7 +678,7 @@ void ColorPicker::_select_from_preset_container(const Color &p_color) {
 
 bool ColorPicker::_select_from_recent_preset_hbc(const Color &p_color) {
 	for (int i = 0; i < recent_preset_hbc->get_child_count(); i++) {
-		ColorButton *current_btn = Object::cast_to<ColorButton>(recent_preset_hbc->get_child(i));
+		ColorPresetButton *current_btn = Object::cast_to<ColorPresetButton>(recent_preset_hbc->get_child(i));
 		if (current_btn && p_color == current_btn->get_color()) {
 			if (recent_preset_group->get_pressed_button()) {
 				recent_preset_group->get_pressed_button()->set_pressed_no_signal(false);
@@ -798,7 +781,7 @@ void ColorPicker::_update_presets() {
 
 			if (palette_edited) {
 				palette_name->set_text(vformat("%s*", palette_name->get_text().remove_char('*')));
-				palette_name->set_tooltip_text(ETR("The changes to this palette have not been saved to a file."));
+				palette_name->set_tooltip_text(TTRC("The changes to this palette have not been saved to a file."));
 			}
 		}
 	}
@@ -839,7 +822,7 @@ void ColorPicker::_text_type_toggled() {
 		text_type->set_button_icon(theme_cache.hex_code_icon);
 
 		c_text->set_editable(false);
-		c_text->set_tooltip_text(RTR("Copy this constructor in a script."));
+		c_text->set_tooltip_text(TTRC("Copy this constructor in a script."));
 	} else {
 		text_type->set_button_icon(theme_cache.hex_icon);
 
@@ -890,14 +873,11 @@ ColorPicker::PickerShapeType ColorPicker::get_picker_shape() const {
 }
 
 void ColorPicker::_add_preset_button(const Color &p_color) {
-	ColorButton *cur_preset = (ColorButton *)preset_group->get_pressed_button();
+	ColorPresetButton *cur_preset = (ColorPresetButton *)preset_group->get_pressed_button();
 	if (cur_preset && cur_preset->get_color() != color) {
 		cur_preset->set_pressed_no_signal(false);
 	}
-	ColorButton *btn_preset_new = memnew(ColorButton(p_color));
-	btn_preset_new->set_toggle_mode(true);
-	btn_preset_new->set_size_mode(BaseButton::SIZE_MODE_FIT_HEIGHT);
-	btn_preset_new->set_tooltip_text(vformat(atr(ETR("Color: #%s\nLMB: Apply color\nRMB: Remove preset")), p_color.to_html(p_color.a < 1)));
+	ColorPresetButton *btn_preset_new = memnew(ColorPresetButton(p_color, false));
 	SET_DRAG_FORWARDING_GCDU(btn_preset_new, ColorPicker);
 	btn_preset_new->set_button_group(preset_group);
 	preset_hbc->add_child(btn_preset_new);
@@ -908,14 +888,11 @@ void ColorPicker::_add_preset_button(const Color &p_color) {
 }
 
 void ColorPicker::_add_recent_preset_button(const Color &p_color) {
-	ColorButton *cur_preset = (ColorButton *)recent_preset_group->get_pressed_button();
+	ColorPresetButton *cur_preset = (ColorPresetButton *)recent_preset_group->get_pressed_button();
 	if (cur_preset && cur_preset->get_color() != color) {
 		cur_preset->set_pressed_no_signal(false);
 	}
-	ColorButton *btn_preset_new = memnew(ColorButton(p_color));
-	btn_preset_new->set_toggle_mode(true);
-	btn_preset_new->set_size_mode(BaseButton::SIZE_MODE_FIT_HEIGHT);
-	btn_preset_new->set_tooltip_text(vformat(atr(ETR("Color: #%s\nLMB: Apply color")), p_color.to_html(p_color.a < 1)));
+	ColorPresetButton *btn_preset_new = memnew(ColorPresetButton(p_color, true));
 	btn_preset_new->set_button_group(recent_preset_group);
 	recent_preset_hbc->add_child(btn_preset_new);
 	recent_preset_hbc->move_child(btn_preset_new, 0);
@@ -927,7 +904,7 @@ void ColorPicker::_load_palette() {
 	List<String> extensions;
 	ResourceLoader::get_recognized_extensions_for_type("ColorPalette", &extensions);
 
-	file_dialog->set_title(RTR("Load Color Palette"));
+	file_dialog->set_title(ETR("Load Color Palette"));
 	file_dialog->clear_filters();
 	for (const String &K : extensions) {
 		file_dialog->add_filter("*." + K);
@@ -947,7 +924,7 @@ void ColorPicker::_save_palette(bool p_is_save_as) {
 		List<String> extensions;
 		ResourceLoader::get_recognized_extensions_for_type("ColorPalette", &extensions);
 
-		file_dialog->set_title(RTR("Save Color Palette"));
+		file_dialog->set_title(ETR("Save Color Palette"));
 		file_dialog->clear_filters();
 		for (const String &K : extensions) {
 			file_dialog->add_filter("*." + K);
@@ -959,17 +936,13 @@ void ColorPicker::_save_palette(bool p_is_save_as) {
 	}
 }
 
+#ifdef TOOLS_ENABLED
 void ColorPicker::_quick_open_palette_file_selected(const String &p_path) {
-	if (!file_dialog) {
-		file_dialog = memnew(FileDialog);
-		add_child(file_dialog, false, INTERNAL_MODE_FRONT);
-		file_dialog->connect("file_selected", callable_mp(this, &ColorPicker::_palette_file_selected));
-		file_dialog->set_access(FileDialog::ACCESS_FILESYSTEM);
-		file_dialog->set_current_dir(Engine::get_singleton()->is_editor_hint() ? "res://" : "user://");
-	}
+	_ensure_file_dialog();
 	file_dialog->set_file_mode(FileDialog::FILE_MODE_OPEN_FILE);
 	_palette_file_selected(p_path);
 }
+#endif // ifdef TOOLS_ENABLED
 
 void ColorPicker::_palette_file_selected(const String &p_path) {
 	switch (file_dialog->get_file_mode()) {
@@ -1023,13 +996,13 @@ void ColorPicker::_palette_file_selected(const String &p_path) {
 }
 
 Variant ColorPicker::_get_drag_data_fw(const Point2 &p_point, Control *p_from_control) {
-	ColorButton *dragged_preset_button = Object::cast_to<ColorButton>(p_from_control);
+	ColorPresetButton *dragged_preset_button = Object::cast_to<ColorPresetButton>(p_from_control);
 
 	if (!dragged_preset_button) {
 		return Variant();
 	}
 
-	ColorButton *drag_preview = memnew(ColorButton(dragged_preset_button->get_color()));
+	ColorPresetButton *drag_preview = memnew(ColorPresetButton(dragged_preset_button->get_color(), false));
 	drag_preview->set_custom_minimum_size(Size2(30, 30) * theme_cache.base_scale);
 	set_drag_preview(drag_preview);
 
@@ -1063,6 +1036,19 @@ void ColorPicker::_drop_data_fw(const Point2 &p_point, const Variant &p_data, Co
 		}
 		preset_hbc->move_child(preset_hbc->get_child(preset_from_id), hover_now);
 	}
+}
+
+void ColorPicker::_ensure_file_dialog() {
+	if (file_dialog) {
+		return;
+	}
+
+	file_dialog = memnew(FileDialog);
+	file_dialog->set_mode_overrides_title(false);
+	file_dialog->set_access(FileDialog::ACCESS_FILESYSTEM);
+	file_dialog->set_current_dir(Engine::get_singleton()->is_editor_hint() ? "res://" : "user://");
+	add_child(file_dialog, false, INTERNAL_MODE_FRONT);
+	file_dialog->connect("file_selected", callable_mp(this, &ColorPicker::_palette_file_selected));
 }
 
 void ColorPicker::add_preset(const Color &p_color) {
@@ -1123,7 +1109,7 @@ void ColorPicker::erase_preset(const Color &p_color) {
 
 		// Find preset button to remove.
 		for (int i = 0; i < preset_hbc->get_child_count(); i++) {
-			ColorButton *current_btn = Object::cast_to<ColorButton>(preset_hbc->get_child(i));
+			ColorPresetButton *current_btn = Object::cast_to<ColorPresetButton>(preset_hbc->get_child(i));
 			if (current_btn && p_color == current_btn->get_color()) {
 				current_btn->queue_free();
 				// Removing focused control loose the focus totally. We focus on previous button to keep it possible to navigate with keyboard/joypad.
@@ -1163,7 +1149,7 @@ void ColorPicker::erase_recent_preset(const Color &p_color) {
 
 		// Find recent preset button to remove.
 		for (int i = 0; i < recent_preset_hbc->get_child_count(); i++) {
-			ColorButton *current_btn = Object::cast_to<ColorButton>(recent_preset_hbc->get_child(i));
+			ColorPresetButton *current_btn = Object::cast_to<ColorPresetButton>(recent_preset_hbc->get_child(i));
 			if (current_btn && p_color == current_btn->get_color()) {
 				memdelete(current_btn);
 				break;
@@ -1377,7 +1363,7 @@ void ColorPicker::_preset_input(const Ref<InputEvent> &p_event, const Color &p_c
 	}
 }
 
-void ColorPicker::_recent_preset_pressed(const bool p_pressed, ColorButton *p_preset) {
+void ColorPicker::_recent_preset_pressed(const bool p_pressed, ColorPresetButton *p_preset) {
 	if (p_pressed) {
 		set_pick_color(p_preset->get_color());
 
@@ -1392,7 +1378,7 @@ void ColorPicker::_recent_preset_pressed(const bool p_pressed, ColorButton *p_pr
 	}
 }
 
-void ColorPicker::_preset_pressed(const bool p_pressed, ColorButton *p_preset) {
+void ColorPicker::_preset_pressed(const bool p_pressed, ColorPresetButton *p_preset) {
 	if (p_pressed) {
 		set_pick_color(p_preset->get_color());
 		add_recent_preset(color);
@@ -1541,36 +1527,31 @@ void ColorPicker::_update_menu_items() {
 	options_menu->clear();
 	options_menu->reset_size();
 
-	if (!presets.is_empty()) {
-		options_menu->add_icon_item(get_theme_icon(SNAME("save"), SNAME("FileDialog")), RTR("Save"), static_cast<int>(MenuOption::MENU_SAVE));
-		options_menu->set_item_tooltip(-1, ETR("Save the current color palette to reuse later."));
-	}
-	if (!palette_path.is_empty()) {
-		options_menu->add_icon_item(get_theme_icon(SNAME("save"), SNAME("FileDialog")), RTR("Save As"), static_cast<int>(MenuOption::MENU_SAVE_AS));
-		options_menu->set_item_tooltip(-1, ETR("Save the current color palette as a new to reuse later."));
-	}
-	options_menu->add_icon_item(get_theme_icon(SNAME("load"), SNAME("FileDialog")), RTR("Load"), static_cast<int>(MenuOption::MENU_LOAD));
+	options_menu->add_icon_item(get_theme_icon(SNAME("save"), SNAME("FileDialog")), ETR("Save"), static_cast<int>(MenuOption::MENU_SAVE));
+	options_menu->set_item_tooltip(-1, ETR("Save the current color palette to reuse later."));
+	options_menu->set_item_disabled(-1, presets.is_empty());
+
+	options_menu->add_icon_item(get_theme_icon(SNAME("save"), SNAME("FileDialog")), ETR("Save As"), static_cast<int>(MenuOption::MENU_SAVE_AS));
+	options_menu->set_item_tooltip(-1, ETR("Save the current color palette as a new to reuse later."));
+	options_menu->set_item_disabled(-1, palette_path.is_empty());
+
+	options_menu->add_icon_item(get_theme_icon(SNAME("load"), SNAME("FileDialog")), ETR("Load"), static_cast<int>(MenuOption::MENU_LOAD));
 	options_menu->set_item_tooltip(-1, ETR("Load existing color palette."));
 
+#ifdef TOOLS_ENABLED
 	if (Engine::get_singleton()->is_editor_hint()) {
-		options_menu->add_icon_item(get_theme_icon(SNAME("load"), SNAME("FileDialog")), RTR("Quick Load"), static_cast<int>(MenuOption::MENU_QUICKLOAD));
-		options_menu->set_item_tooltip(-1, ETR("Load existing color palette."));
+		options_menu->add_icon_item(get_theme_icon(SNAME("load"), SNAME("FileDialog")), TTRC("Quick Load"), static_cast<int>(MenuOption::MENU_QUICKLOAD));
+		options_menu->set_item_tooltip(-1, TTRC("Load existing color palette."));
 	}
+#endif // TOOLS_ENABLED
 
-	if (!presets.is_empty()) {
-		options_menu->add_icon_item(get_theme_icon(SNAME("clear"), SNAME("FileDialog")), RTR("Clear"), static_cast<int>(MenuOption::MENU_CLEAR));
-		options_menu->set_item_tooltip(-1, ETR("Clear the currently loaded color palettes in the picker."));
-	}
+	options_menu->add_icon_item(get_theme_icon(SNAME("clear"), SNAME("FileDialog")), ETR("Clear"), static_cast<int>(MenuOption::MENU_CLEAR));
+	options_menu->set_item_tooltip(-1, ETR("Clear the currently loaded color palettes in the picker."));
+	options_menu->set_item_disabled(-1, presets.is_empty());
 }
 
 void ColorPicker::_options_menu_cbk(int p_which) {
-	if (!file_dialog) {
-		file_dialog = memnew(FileDialog);
-		add_child(file_dialog, false, INTERNAL_MODE_FRONT);
-		file_dialog->connect("file_selected", callable_mp(this, &ColorPicker::_palette_file_selected));
-		file_dialog->set_access(FileDialog::ACCESS_FILESYSTEM);
-		file_dialog->set_current_dir(Engine::get_singleton()->is_editor_hint() ? "res://" : "user://");
-	}
+	_ensure_file_dialog();
 
 	MenuOption option = static_cast<MenuOption>(p_which);
 	switch (option) {
@@ -2064,6 +2045,7 @@ ColorPicker::ColorPicker() {
 	text_type->set_tooltip_text(RTR("Switch between hexadecimal and code values."));
 	hex_hbc->add_child(text_type);
 	text_type->set_tooltip_text(RTR("Switch between hexadecimal and code values."));
+	text_type->set_tooltip_auto_translate_mode(AUTO_TRANSLATE_MODE_ALWAYS);
 	text_type->connect(SceneStringName(pressed), callable_mp(this, &ColorPicker::_text_type_toggled));
 
 	c_text = memnew(LineEdit);
@@ -2115,7 +2097,7 @@ ColorPicker::ColorPicker() {
 	recent_preset_foldable->set_text(ETR("Recent Colors"));
 
 	menu_btn = memnew(MenuButton);
-	menu_btn->set_flat(true);
+	menu_btn->set_flat(false);
 	menu_btn->set_focus_mode(FOCUS_ALL);
 	menu_btn->set_tooltip_text(ETR("Show all options available."));
 	menu_btn->connect("about_to_popup", callable_mp(this, &ColorPicker::_update_menu_items));
@@ -2356,4 +2338,22 @@ void ColorPickerButton::_bind_methods() {
 ColorPickerButton::ColorPickerButton(const String &p_text) :
 		Button(p_text) {
 	set_toggle_mode(true);
+}
+
+/////////////////
+
+String ColorPresetButton::get_tooltip(const Point2 &p_pos) const {
+	Color col = get_color();
+	if (recent) {
+		return vformat(atr(ETR("Color: #%s\nLMB: Apply color")), col.to_html(col.a < 1));
+	}
+	return vformat(atr(ETR("Color: #%s\nLMB: Apply color\nRMB: Remove preset")), col.to_html(col.a < 1));
+}
+
+ColorPresetButton::ColorPresetButton(Color p_color, bool p_recent) {
+	set_color(p_color);
+	recent = p_recent;
+	set_size_mode(BaseButton::SIZE_MODE_FIT_HEIGHT);
+	set_toggle_mode(true);
+	set_tooltip_auto_translate_mode(AUTO_TRANSLATE_MODE_DISABLED);
 }

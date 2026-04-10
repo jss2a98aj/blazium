@@ -32,10 +32,10 @@
 
 #include "scene/gui/box_container.h"
 #include "scene/gui/button.h"
+#include "scene/gui/color_button.h"
 #include "scene/gui/popup.h"
 
 class AspectRatioContainer;
-class ColorButton;
 class ColorMode;
 class ColorModeRGB;
 class ColorModeHSV;
@@ -57,8 +57,19 @@ class TextureRect;
 class FoldableContainer;
 class FileDialog;
 
+class ColorPresetButton : public ColorButton {
+	GDCLASS(ColorPresetButton, ColorButton)
+
+	bool recent = false;
+
+public:
+	virtual String get_tooltip(const Point2 &p_pos) const override;
+
+	ColorPresetButton(Color p_color, bool p_recent);
+};
+
 class ColorPicker : public VBoxContainer {
-	GDCLASS(ColorPicker, VBoxContainer);
+	GDCLASS(ColorPicker, VBoxContainer)
 
 	// These classes poke into theme items for their internal logic.
 	friend class ColorPickerShape;
@@ -160,8 +171,8 @@ private:
 	GridContainer *slider_gc = nullptr;
 	HBoxContainer *hex_hbc = nullptr;
 	Button *mode_btns[MODE_MAX];
-	Ref<ButtonGroup> mode_group = nullptr;
-	ColorButton *selected_recent_preset = nullptr;
+	Ref<ButtonGroup> mode_group;
+	ColorPresetButton *selected_recent_preset = nullptr;
 	Ref<ButtonGroup> preset_group;
 	Ref<ButtonGroup> recent_preset_group;
 
@@ -300,8 +311,8 @@ private:
 	void _line_edit_input(const Ref<InputEvent> &p_event);
 	void _preset_foldable_button_pressed(int p_idx);
 	void _preset_input(const Ref<InputEvent> &p_event, const Color &p_color);
-	void _recent_preset_pressed(const bool p_pressed, ColorButton *p_preset);
-	void _preset_pressed(const bool p_pressed, ColorButton *p_preset);
+	void _recent_preset_pressed(const bool p_pressed, ColorPresetButton *p_preset);
+	void _preset_pressed(const bool p_pressed, ColorPresetButton *p_preset);
 	void _text_changed(const String &p_new_text);
 	void _add_preset_pressed();
 	void _html_focus_exit();
@@ -331,6 +342,8 @@ private:
 	bool _can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from_control) const;
 	void _drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from_control);
 
+	void _ensure_file_dialog();
+
 protected:
 	void _validate_property(PropertyInfo &p_property) const;
 	virtual void _update_theme_item_cache() override;
@@ -343,7 +356,10 @@ public:
 	void set_editor_settings(Object *p_editor_settings);
 	void set_quick_open_callback(const Callable &p_file_selected);
 	void set_palette_saved_callback(const Callable &p_palette_saved);
-#endif
+
+	void _quick_open_palette_file_selected(const String &p_path);
+#endif // TOOLS_ENABLED
+
 	HSlider *get_slider(int idx);
 	Vector<float> get_active_slider_values();
 
@@ -361,7 +377,7 @@ public:
 	Color get_pick_color() const;
 	void set_old_color(const Color &p_color);
 	Color get_old_color() const;
-	void _quick_open_palette_file_selected(const String &p_path);
+
 	void _palette_file_selected(const String &p_path);
 
 	void set_display_old_color(bool p_enabled);
