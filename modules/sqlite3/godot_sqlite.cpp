@@ -955,7 +955,7 @@ void SQLiteAccess::_sqlite_udf_static_trampoline(sqlite3_context *context, int a
 		Variant value;
 		switch (col_type) {
 			case SQLITE_INTEGER:
-				value = Variant(sqlite3_value_int64(argv[i]));
+				value = Variant((int64_t)sqlite3_value_int64(argv[i]));
 				break;
 			case SQLITE_FLOAT:
 				value = Variant(sqlite3_value_double(argv[i]));
@@ -1032,7 +1032,7 @@ void SQLiteAccess::_sqlite_udf_step_trampoline(sqlite3_context *context, int arg
 		int type = sqlite3_value_type(argv[i]);
 		switch (type) {
 			case SQLITE_INTEGER:
-				value = Variant(sqlite3_value_int64(argv[i]));
+				value = Variant((int64_t)sqlite3_value_int64(argv[i]));
 				break;
 			case SQLITE_FLOAT:
 				value = Variant(sqlite3_value_double(argv[i]));
