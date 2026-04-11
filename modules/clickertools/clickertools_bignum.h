@@ -54,6 +54,23 @@ public:
 	bool is_greater_than(Ref<BlaziumBigNum> p_other) const;
 	bool is_less_than(Ref<BlaziumBigNum> p_other) const;
 	bool is_equal_to(Ref<BlaziumBigNum> p_other) const;
+	Ref<BlaziumBigNum> pow_float(double p_power) const;
+	Ref<BlaziumBigNum> pow_int(int64_t p_power) const;
+	Ref<BlaziumBigNum> root(int64_t p_n) const;
+	Ref<BlaziumBigNum> sqroot() const;
+	double log10() const;
+	int64_t to_int() const;
+
+	static Ref<BlaziumBigNum> exp(int64_t p_n);
+
+	static Ref<BlaziumBigNum> get_max();
+	static Ref<BlaziumBigNum> get_min();
+	static Ref<BlaziumBigNum> get_inf();
+	static Ref<BlaziumBigNum> get_nan();
+
+	bool is_greater_than_or_equal_to(Ref<BlaziumBigNum> p_other) const;
+	bool is_less_than_or_equal_to(Ref<BlaziumBigNum> p_other) const;
+	bool is_approximately_equal(Ref<BlaziumBigNum> p_other, double p_tolerance = 1e-9) const;
 
 	bool is_inf() const;
 	bool is_nan() const;

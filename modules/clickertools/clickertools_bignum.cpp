@@ -61,6 +61,25 @@ void BlaziumBigNum::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("to_pretty_string", "precision"), &BlaziumBigNum::to_pretty_string, DEFVAL(3));
 
 	ClassDB::bind_method(D_METHOD("parse_string", "value"), &BlaziumBigNum::parse_string);
+
+	ClassDB::bind_method(D_METHOD("pow_float", "power"), &BlaziumBigNum::pow_float);
+	ClassDB::bind_method(D_METHOD("pow_int", "power"), &BlaziumBigNum::pow_int);
+	ClassDB::bind_method(D_METHOD("root", "n"), &BlaziumBigNum::root);
+	ClassDB::bind_method(D_METHOD("sqroot"), &BlaziumBigNum::sqroot);
+	ClassDB::bind_method(D_METHOD("log10"), &BlaziumBigNum::log10);
+	ClassDB::bind_method(D_METHOD("to_int"), &BlaziumBigNum::to_int);
+
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("exp", "n"), &BlaziumBigNum::exp);
+
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("get_max"), &BlaziumBigNum::get_max);
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("get_min"), &BlaziumBigNum::get_min);
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("get_inf"), &BlaziumBigNum::get_inf);
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("get_nan"), &BlaziumBigNum::get_nan);
+
+	ClassDB::bind_method(D_METHOD("is_greater_than_or_equal_to", "other"), &BlaziumBigNum::is_greater_than_or_equal_to);
+	ClassDB::bind_method(D_METHOD("is_less_than_or_equal_to", "other"), &BlaziumBigNum::is_less_than_or_equal_to);
+	ClassDB::bind_method(D_METHOD("is_approximately_equal", "other", "tolerance"), &BlaziumBigNum::is_approximately_equal, DEFVAL(1e-9));
+
 	ClassDB::bind_method(D_METHOD("parse_float", "value"), &BlaziumBigNum::parse_float);
 
 	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("from_string", "value"), &BlaziumBigNum::from_string);
@@ -180,4 +199,78 @@ Ref<BlaziumBigNum> BlaziumBigNum::from_bignum(const Ref<BlaziumBigNum> &p_other)
 		b->bignum = p_other->get_bignum();
 	}
 	return b;
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::pow_float(double p_power) const {
+	return memnew(BlaziumBigNum(bignum.pow(p_power)));
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::pow_int(int64_t p_power) const {
+	return memnew(BlaziumBigNum(bignum.pow(static_cast<intmax_t>(p_power))));
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::root(int64_t p_n) const {
+	return memnew(BlaziumBigNum(bignum.root(static_cast<intmax_t>(p_n))));
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::sqroot() const {
+	return memnew(BlaziumBigNum(bignum.sqrt()));
+}
+
+double BlaziumBigNum::log10() const {
+	auto res = bignum.log10();
+	if (res) {
+		return *res;
+	}
+	return NAN;
+}
+
+int64_t BlaziumBigNum::to_int() const {
+	auto res = bignum.to_number();
+	if (res) {
+		return static_cast<int64_t>(*res);
+	}
+	ERR_PRINT("BigNum is too large to fit in int64_t.");
+	return 0;
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::exp(int64_t p_n) {
+	return memnew(BlaziumBigNum(BigNumber::BigNum::exp(static_cast<uintmax_t>(p_n))));
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::get_max() {
+	return memnew(BlaziumBigNum(BigNumber::BigNum::max()));
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::get_min() {
+	return memnew(BlaziumBigNum(BigNumber::BigNum::min()));
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::get_inf() {
+	return memnew(BlaziumBigNum(BigNumber::BigNum::inf()));
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::get_nan() {
+	return memnew(BlaziumBigNum(BigNumber::BigNum::nan()));
+}
+
+bool BlaziumBigNum::is_greater_than_or_equal_to(Ref<BlaziumBigNum> p_other) const {
+	if (p_other.is_null()) {
+		return false;
+	}
+	return bignum >= p_other->get_bignum();
+}
+
+bool BlaziumBigNum::is_less_than_or_equal_to(Ref<BlaziumBigNum> p_other) const {
+	if (p_other.is_null()) {
+		return false;
+	}
+	return bignum <= p_other->get_bignum();
+}
+
+bool BlaziumBigNum::is_approximately_equal(Ref<BlaziumBigNum> p_other, double p_tolerance) const {
+	if (p_other.is_null()) {
+		return false;
+	}
+	return bignum.approximately_equal(p_other->get_bignum(), p_tolerance);
 }
