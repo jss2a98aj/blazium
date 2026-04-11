@@ -192,7 +192,7 @@ void EditorAutoloadSettings::_autoload_edited() {
 
 	if (column == 0) {
 		String name = ti->get_text(0);
-		String old_name = selected_autoload.get_slice("/", 1);
+		String old_name = selected_autoload.get_slicec('/', 1);
 
 		if (name == old_name) {
 			return;
@@ -247,7 +247,7 @@ void EditorAutoloadSettings::_autoload_edited() {
 		String scr_path = GLOBAL_GET(base);
 
 		if (scr_path.begins_with("*")) {
-			scr_path = scr_path.substr(1, scr_path.length());
+			scr_path = scr_path.substr(1);
 		}
 
 		// Singleton autoloads are represented with a leading "*" in their path.
@@ -488,7 +488,7 @@ void EditorAutoloadSettings::update_autoload() {
 			continue;
 		}
 
-		String name = pi.name.get_slice("/", 1);
+		String name = pi.name.get_slicec('/', 1);
 		String scr_path = GLOBAL_GET(pi.name);
 
 		if (name.is_empty()) {
@@ -499,7 +499,7 @@ void EditorAutoloadSettings::update_autoload() {
 		info.is_singleton = scr_path.begins_with("*");
 
 		if (info.is_singleton) {
-			scr_path = scr_path.substr(1, scr_path.length());
+			scr_path = scr_path.substr(1);
 		}
 
 		info.name = name;
@@ -867,7 +867,7 @@ EditorAutoloadSettings::EditorAutoloadSettings() {
 			continue;
 		}
 
-		String name = pi.name.get_slice("/", 1);
+		String name = pi.name.get_slicec('/', 1);
 		String scr_path = GLOBAL_GET(pi.name);
 
 		if (name.is_empty()) {
@@ -878,7 +878,7 @@ EditorAutoloadSettings::EditorAutoloadSettings() {
 		info.is_singleton = scr_path.begins_with("*");
 
 		if (info.is_singleton) {
-			scr_path = scr_path.substr(1, scr_path.length());
+			scr_path = scr_path.substr(1);
 		}
 
 		info.name = name;

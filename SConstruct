@@ -877,7 +877,7 @@ else:  # GCC, Clang
                     "-Wstringop-overflow=4",
                 ]
             )
-            env.Append(CXXFLAGS=["-Wplacement-new=1"])
+            env.Append(CXXFLAGS=["-Wplacement-new=1", "-Wvirtual-inheritance"])
             # Need to fix a warning with AudioServer lambdas before enabling.
             # if cc_version_major != 9:  # GCC 9 had a regression (GH-36325).
             #    env.Append(CXXFLAGS=["-Wnoexcept"])

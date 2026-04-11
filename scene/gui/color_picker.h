@@ -32,15 +32,16 @@
 
 #include "scene/gui/box_container.h"
 #include "scene/gui/button.h"
+#include "scene/gui/color_button.h"
 #include "scene/gui/popup.h"
 
 class AspectRatioContainer;
-class ColorButton;
 class ColorMode;
 class ColorModeRGB;
 class ColorModeHSV;
 class ColorModeRAW;
 class ColorModeOKHSL;
+class ColorPickerShape;
 class GridContainer;
 class HSlider;
 class Label;
@@ -56,20 +57,41 @@ class TextureRect;
 class FoldableContainer;
 class FileDialog;
 
+class ColorPresetButton : public ColorButton {
+	GDCLASS(ColorPresetButton, ColorButton)
+
+	bool recent = false;
+
+public:
+	virtual String get_tooltip(const Point2 &p_pos) const override;
+
+	ColorPresetButton(Color p_color, bool p_recent);
+};
+
 class ColorPicker : public VBoxContainer {
-	GDCLASS(ColorPicker, VBoxContainer);
+	GDCLASS(ColorPicker, VBoxContainer)
 
 	// These classes poke into theme items for their internal logic.
+	friend class ColorPickerShape;
+	friend class ColorPickerShapeRectangle;
+	friend class ColorPickerShapeWheel;
+	friend class ColorPickerShapeCircle;
+	friend class ColorPickerShapeVHSCircle;
+	friend class ColorPickerShapeOKHSLCircle;
+
 	friend class ColorModeRGB;
 	friend class ColorModeHSV;
-	friend class ColorModeRAW;
+	friend class ColorModeLinear;
 	friend class ColorModeOKHSL;
 
 public:
 	enum ColorModeType {
 		MODE_RGB,
 		MODE_HSV,
-		MODE_RAW,
+#ifndef DISABLE_DEPRECATED
+		MODE_RAW = 2,
+#endif
+		MODE_LINEAR = 2,
 		MODE_OKHSL,
 
 		MODE_MAX
@@ -86,6 +108,12 @@ public:
 	};
 
 	static const int SLIDER_COUNT = 3;
+	enum SLIDER_EXTRA {
+		SLIDER_ALPHA = 3,
+		SLIDER_INTENSITY,
+
+		SLIDER_MAX
+	};
 
 private:
 	enum class MenuOption {
@@ -107,11 +135,15 @@ private:
 #endif
 
 	int current_slider_count = SLIDER_COUNT;
-	const float WHEEL_RADIUS = 0.42;
+
+	const float DEFAULT_GAMEPAD_EVENT_DELAY_MS = 1.0 / 2;
+	const float GAMEPAD_EVENT_REPEAT_RATE_MS = 1.0 / 30;
+	float gamepad_event_delay_ms = DEFAULT_GAMEPAD_EVENT_DELAY_MS;
 
 	bool slider_theme_modified = true;
 
-	Vector<ColorMode *> modes;
+	LocalVector<ColorMode *> modes;
+	LocalVector<ColorPickerShape *> shapes;
 
 	Popup *picker_window = nullptr;
 	TextureRect *picker_texture_zoom = nullptr;
@@ -128,16 +160,8 @@ private:
 	PopupMenu *options_menu = nullptr;
 
 	MarginContainer *internal_margin = nullptr;
+	HBoxContainer *shape_container = nullptr;
 	VBoxContainer *real_vbox = nullptr;
-	HBoxContainer *hb_edit = nullptr;
-	Control *uv_edit = nullptr;
-	Control *w_edit = nullptr;
-	AspectRatioContainer *wheel_edit = nullptr;
-	MarginContainer *wheel_margin = nullptr;
-	Ref<ShaderMaterial> wheel_mat;
-	Ref<ShaderMaterial> circle_mat;
-	Control *wheel = nullptr;
-	Control *wheel_uv = nullptr;
 	Control *sample = nullptr;
 	FoldableContainer *preset_foldable = nullptr;
 	Button *add_preset_button = nullptr;
@@ -156,10 +180,16 @@ private:
 	GridContainer *slider_gc = nullptr;
 	HBoxContainer *hex_hbc = nullptr;
 	Button *mode_btns[MODE_MAX];
-	Ref<ButtonGroup> mode_group = nullptr;
-	ColorButton *selected_recent_preset = nullptr;
+	Ref<ButtonGroup> mode_group;
+	ColorPresetButton *selected_recent_preset = nullptr;
 	Ref<ButtonGroup> preset_group;
 	Ref<ButtonGroup> recent_preset_group;
+
+#ifdef MACOS_ENABLED
+	HBoxContainer *perm_hb = nullptr;
+	void _req_permission();
+#endif // MACOS_ENABLED
+
 #ifdef TOOLS_ENABLED
 	Callable quick_open_callback;
 	Callable palette_saved_callback;
@@ -167,9 +197,10 @@ private:
 
 	OptionButton *mode_option_button = nullptr;
 
-	HSlider *sliders[SLIDER_COUNT];
-	SpinBox *values[SLIDER_COUNT];
-	Label *labels[SLIDER_COUNT];
+	HSlider *sliders[SLIDER_MAX];
+	SpinBox *values[SLIDER_MAX];
+	Label *labels[SLIDER_MAX];
+
 	Button *text_type = nullptr;
 	LineEdit *c_text = nullptr;
 
@@ -178,6 +209,13 @@ private:
 	Label *alpha_label = nullptr;
 
 	bool edit_alpha = true;
+
+	HSlider *intensity_slider = nullptr;
+	SpinBox *intensity_value = nullptr;
+	Label *intensity_label = nullptr;
+
+	bool edit_intensity = true;
+
 	Size2i ms;
 	bool text_is_constructor = false;
 	PickerShapeType current_shape = SHAPE_HSV_RECTANGLE;
@@ -190,6 +228,7 @@ private:
 	List<Color> recent_presets;
 
 	Color color;
+	Color color_normalized;
 	Color old_color;
 	Color pre_picking_color;
 	bool is_picking_color = false;
@@ -217,7 +256,10 @@ private:
 	float ok_hsl_s = 0.0;
 	float ok_hsl_l = 0.0;
 
-	Color last_color;
+	bool hsv_cached = false;
+	bool okhsl_cached = false;
+
+	float intensity = 0.0;
 
 	struct ThemeCache {
 		float base_scale = 1.0;
@@ -233,6 +275,8 @@ private:
 
 		bool center_slider_grabbers = true;
 		bool colorize_sliders = true;
+
+		Color focused_not_editing_cursor_color;
 
 		Ref<Texture2D> menu_option;
 		Ref<Texture2D> screen_picker;
@@ -254,17 +298,27 @@ private:
 		Ref<Texture2D> color_hue;
 
 		Ref<Texture2D> hex_icon;
-		Ref<Texture2D> hex_code_icon;
+		Ref<Texture2D> code_icon;
+
+		Ref<StyleBox> sample_focus;
+		Ref<StyleBox> picker_focus_rectangle;
+		Ref<StyleBox> picker_focus_circle;
 
 		/* Mode buttons */
 		Ref<StyleBox> mode_button_normal;
 		Ref<StyleBox> mode_button_pressed;
 		Ref<StyleBox> mode_button_hover;
+		Ref<StyleBox> mode_button_focus;
+
 		Ref<StyleBox> sliders_panel;
 	} theme_cache;
 
-	void _copy_color_to_hsv();
-	void _copy_hsv_to_color();
+	void _copy_normalized_to_hsv_okhsl();
+	void _copy_hsv_okhsl_to_normalized();
+
+	Color _color_apply_intensity(const Color &col) const;
+	void _normalized_apply_intensity_to_color();
+	void _copy_color_to_normalized_and_intensity();
 
 	void create_slider(GridContainer *gc, int idx);
 	void _html_submitted(const String &p_html);
@@ -277,17 +331,15 @@ private:
 	void _text_type_toggled();
 	void _sample_input(const Ref<InputEvent> &p_event);
 	void _sample_draw();
-	void _hsv_draw(int p_which, Control *c);
 	void _slider_draw(int p_which);
+	void _alpha_slider_draw();
 
-	void _uv_input(const Ref<InputEvent> &p_event, Control *c);
-	void _w_input(const Ref<InputEvent> &p_event);
 	void _slider_or_spin_input(const Ref<InputEvent> &p_event);
 	void _line_edit_input(const Ref<InputEvent> &p_event);
 	void _preset_foldable_button_pressed(int p_idx);
 	void _preset_input(const Ref<InputEvent> &p_event, const Color &p_color);
-	void _recent_preset_pressed(const bool p_pressed, ColorButton *p_preset);
-	void _preset_pressed(const bool p_pressed, ColorButton *p_preset);
+	void _recent_preset_pressed(const bool p_pressed, ColorPresetButton *p_preset);
+	void _preset_pressed(const bool p_pressed, ColorPresetButton *p_preset);
 	void _text_changed(const String &p_new_text);
 	void _add_preset_pressed();
 	void _html_focus_exit();
@@ -296,6 +348,12 @@ private:
 	void _pick_finished();
 	void _update_menu_items();
 	void _options_menu_cbk(int p_which);
+	void _block_input_on_popup_show();
+	void _enable_input_on_popup_hide();
+
+	// Native color picking.
+	void _pick_button_pressed_native();
+	void _native_cb(bool p_status, const Color &p_color);
 
 	// Legacy color picking.
 	void _pick_button_pressed_legacy();
@@ -311,6 +369,8 @@ private:
 	bool _can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from_control) const;
 	void _drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from_control);
 
+	void _ensure_file_dialog();
+
 protected:
 	void _validate_property(PropertyInfo &p_property) const;
 	virtual void _update_theme_item_cache() override;
@@ -323,7 +383,10 @@ public:
 	void set_editor_settings(Object *p_editor_settings);
 	void set_quick_open_callback(const Callable &p_file_selected);
 	void set_palette_saved_callback(const Callable &p_palette_saved);
-#endif
+
+	void _quick_open_palette_file_selected(const String &p_path);
+#endif // TOOLS_ENABLED
+
 	HSlider *get_slider(int idx);
 	Vector<float> get_active_slider_values();
 
@@ -331,16 +394,20 @@ public:
 	static void finish_shaders();
 
 	void add_mode(ColorMode *p_mode);
+	void add_shape(ColorPickerShape *p_shape);
 
 	void set_edit_alpha(bool p_show);
 	bool is_editing_alpha() const;
 
-	void _set_pick_color(const Color &p_color, bool p_update_sliders);
+	void set_edit_intensity(bool p_show);
+	bool is_editing_intensity() const;
+
+	void _set_pick_color(const Color &p_color, bool p_update_sliders, bool p_calc_intensity);
 	void set_pick_color(const Color &p_color);
 	Color get_pick_color() const;
 	void set_old_color(const Color &p_color);
 	Color get_old_color() const;
-	void _quick_open_palette_file_selected(const String &p_path);
+
 	void _palette_file_selected(const String &p_path);
 
 	void set_display_old_color(bool p_enabled);
@@ -389,6 +456,7 @@ public:
 	bool is_hex_visible() const;
 
 	void set_focus_on_line_edit();
+	void set_focus_on_picker_shape();
 
 	ColorPicker();
 	~ColorPicker();
@@ -409,6 +477,7 @@ class ColorPickerButton : public Button {
 	ColorPicker *picker = nullptr;
 	Color color;
 	bool edit_alpha = true;
+	bool edit_intensity = true;
 
 	struct ThemeCache {
 		Ref<StyleBox> normal_style;
@@ -436,6 +505,9 @@ public:
 
 	void set_edit_alpha(bool p_show);
 	bool is_editing_alpha() const;
+
+	void set_edit_intensity(bool p_show);
+	bool is_editing_intensity() const;
 
 	ColorPicker *get_picker();
 	PopupPanel *get_popup();

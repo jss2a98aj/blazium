@@ -709,7 +709,17 @@ Error DisplayServer::file_dialog_show(const String &p_title, const String &p_cur
 	return ERR_UNAVAILABLE;
 }
 
+Error DisplayServer::file_dialog_show2(const String &p_title, const String &p_current_directory, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const Callable &p_callback, WindowID p_window_id) {
+	WARN_PRINT("Native dialogs not supported by this display server.");
+	return ERR_UNAVAILABLE;
+}
+
 Error DisplayServer::file_dialog_with_options_show(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback) {
+	WARN_PRINT("Native dialogs not supported by this display server.");
+	return ERR_UNAVAILABLE;
+}
+
+Error DisplayServer::file_dialog_with_options_show2(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback, WindowID p_window_id) {
 	WARN_PRINT("Native dialogs not supported by this display server.");
 	return ERR_UNAVAILABLE;
 }
@@ -745,6 +755,10 @@ Key DisplayServer::keyboard_get_label_from_physical(Key p_keycode) const {
 }
 
 void DisplayServer::show_emoji_and_symbol_picker() const {
+}
+
+bool DisplayServer::color_picker(const Callable &p_callback) {
+	return false;
 }
 
 void DisplayServer::force_process_and_drop_events() {
@@ -1054,6 +1068,7 @@ void DisplayServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("keyboard_get_label_from_physical", "keycode"), &DisplayServer::keyboard_get_label_from_physical);
 
 	ClassDB::bind_method(D_METHOD("show_emoji_and_symbol_picker"), &DisplayServer::show_emoji_and_symbol_picker);
+	ClassDB::bind_method(D_METHOD("color_picker", "callback"), &DisplayServer::color_picker);
 
 	ClassDB::bind_method(D_METHOD("process_events"), &DisplayServer::process_events);
 	ClassDB::bind_method(D_METHOD("force_process_and_drop_events"), &DisplayServer::force_process_and_drop_events);
@@ -1113,6 +1128,8 @@ void DisplayServer::_bind_methods() {
 	BIND_ENUM_CONSTANT(FEATURE_WINDOW_EMBEDDING);
 	BIND_ENUM_CONSTANT(FEATURE_NATIVE_DIALOG_FILE_MIME);
 	BIND_ENUM_CONSTANT(FEATURE_EMOJI_AND_SYMBOL_PICKER);
+	BIND_ENUM_CONSTANT(FEATURE_NATIVE_COLOR_PICKER);
+	BIND_ENUM_CONSTANT(FEATURE_SELF_FITTING_WINDOWS);
 
 	BIND_ENUM_CONSTANT(MOUSE_MODE_VISIBLE);
 	BIND_ENUM_CONSTANT(MOUSE_MODE_HIDDEN);
@@ -1188,6 +1205,7 @@ void DisplayServer::_bind_methods() {
 	BIND_ENUM_CONSTANT(WINDOW_FLAG_MOUSE_PASSTHROUGH);
 	BIND_ENUM_CONSTANT(WINDOW_FLAG_SHARP_CORNERS);
 	BIND_ENUM_CONSTANT(WINDOW_FLAG_EXCLUDE_FROM_CAPTURE);
+	BIND_ENUM_CONSTANT(WINDOW_FLAG_POPUP_WM_HINT);
 	BIND_ENUM_CONSTANT(WINDOW_FLAG_MAX);
 
 	BIND_ENUM_CONSTANT(WINDOW_EVENT_MOUSE_ENTER);
@@ -1198,6 +1216,7 @@ void DisplayServer::_bind_methods() {
 	BIND_ENUM_CONSTANT(WINDOW_EVENT_GO_BACK_REQUEST);
 	BIND_ENUM_CONSTANT(WINDOW_EVENT_DPI_CHANGE);
 	BIND_ENUM_CONSTANT(WINDOW_EVENT_TITLEBAR_CHANGE);
+	BIND_ENUM_CONSTANT(WINDOW_EVENT_FORCE_CLOSE);
 
 	BIND_ENUM_CONSTANT(WINDOW_EDGE_TOP_LEFT);
 	BIND_ENUM_CONSTANT(WINDOW_EDGE_TOP);

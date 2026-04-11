@@ -79,6 +79,19 @@ bool ColorButton::is_editing_alpha() const {
 	return edit_alpha;
 }
 
+void ColorButton::set_edit_intensity(bool p_enabled) {
+	if (edit_intensity == p_enabled) {
+		return;
+	}
+
+	edit_intensity = p_enabled;
+	notify_property_list_changed();
+}
+
+bool ColorButton::is_editing_intensity() const {
+	return edit_intensity;
+}
+
 Ref<StyleBox> ColorButton::_get_current_style() const {
 	BaseButton::DrawMode mode = get_draw_mode();
 	if (mode == DRAW_NORMAL) {
@@ -140,9 +153,12 @@ void ColorButton::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_flat"), &ColorButton::is_flat);
 	ClassDB::bind_method(D_METHOD("set_edit_alpha", "enabled"), &ColorButton::set_edit_alpha);
 	ClassDB::bind_method(D_METHOD("is_editing_alpha"), &ColorButton::is_editing_alpha);
+	ClassDB::bind_method(D_METHOD("set_edit_intensity", "show"), &ColorButton::set_edit_intensity);
+	ClassDB::bind_method(D_METHOD("is_editing_intensity"), &ColorButton::is_editing_intensity);
 
 	ADD_PROPERTY(PropertyInfo(Variant::COLOR, "color"), "set_color_no_signal", "get_color");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "edit_alpha"), "set_edit_alpha", "is_editing_alpha");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "edit_intensity"), "set_edit_intensity", "is_editing_intensity");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "flat"), "set_flat", "is_flat");
 
 	ADD_SIGNAL(MethodInfo("color_changed", PropertyInfo(Variant::COLOR, "color")));

@@ -205,6 +205,10 @@ void DisplayServerAndroid::emit_input_dialog_callback(String p_text) {
 }
 
 Error DisplayServerAndroid::file_dialog_show(const String &p_title, const String &p_current_directory, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const Callable &p_callback) {
+	return file_dialog_show2(p_title, p_current_directory, p_filename, p_show_hidden, p_mode, p_filters, p_callback, MAIN_WINDOW_ID);
+}
+
+Error DisplayServerAndroid::file_dialog_show2(const String &p_title, const String &p_current_directory, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const Callable &p_callback, WindowID p_window_id) {
 	GodotJavaWrapper *godot_java = OS_Android::get_singleton()->get_godot_java();
 	ERR_FAIL_NULL_V(godot_java, FAILED);
 	file_picker_callback = p_callback;

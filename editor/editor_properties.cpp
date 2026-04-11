@@ -602,7 +602,7 @@ bool EditorPropertyPath::_can_drop_data_fw(const Point2 &p_point, const Variant 
 	}
 
 	for (const String &extension : extensions) {
-		if (filesPaths[0].ends_with(extension.substr(1, extension.size() - 1))) {
+		if (filesPaths[0].ends_with(extension.substr(1))) {
 			return true;
 		}
 	}
@@ -3191,8 +3191,7 @@ void EditorPropertyResource::_sub_inspector_object_id_selected(int p_id) {
 void EditorPropertyResource::_open_editor_pressed() {
 	Ref<Resource> res = get_edited_property_value();
 	if (res.is_valid()) {
-		// May clear the editor so do it deferred.
-		callable_mp(EditorNode::get_singleton(), &EditorNode::edit_item).call_deferred(res.ptr(), this);
+		EditorNode::get_singleton()->edit_item(res.ptr(), this);
 	}
 }
 

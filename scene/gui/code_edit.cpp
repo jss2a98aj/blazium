@@ -139,7 +139,7 @@ void CodeEdit::_notification(int p_what) {
 
 						Point2 round_ofs = hint_ofs + theme_cache.code_hint_style->get_offset() + Vector2(0, theme_cache.font->get_ascent(theme_cache.font_size) + font_height * i + yofs);
 						round_ofs = round_ofs.round();
-						draw_string(theme_cache.font, round_ofs, line.replace(String::chr(0xFFFF), ""), HORIZONTAL_ALIGNMENT_LEFT, -1, theme_cache.font_size, theme_cache.code_hint_color);
+						draw_string(theme_cache.font, round_ofs, line.remove_char(0xFFFF), HORIZONTAL_ALIGNMENT_LEFT, -1, theme_cache.font_size, theme_cache.code_hint_color);
 						if (end > 0) {
 							// Draw an underline for the currently edited function parameter.
 							const Vector2 b = hint_ofs + theme_cache.code_hint_style->get_offset() + Vector2(begin, font_height + font_height * i + yofs);
@@ -804,7 +804,14 @@ void CodeEdit::_backspace_internal(int p_caret) {
 		}
 
 		int from_line = to_column > 0 ? to_line : to_line - 1;
-		int from_column = to_column > 0 ? (to_column - 1) : (get_line(to_line - 1).length());
+		int from_column = 0;
+		if (to_column == 0) {
+			from_column = get_line(to_line - 1).length();
+		} else if (TextEdit::is_caret_mid_grapheme_enabled() || !TextEdit::is_backspace_deletes_composite_character_enabled()) {
+			from_column = to_column - 1;
+		} else {
+			from_column = TextEdit::get_previous_composite_character_column(to_line, to_column);
+		}
 
 		merge_gutters(from_line, to_line);
 
@@ -2108,7 +2115,7 @@ String CodeEdit::get_text_for_code_completion() const {
 			completion_text += line.substr(0, get_caret_column());
 			/* Not unicode, represents the caret. */
 			completion_text += String::chr(0xFFFF);
-			completion_text += line.substr(get_caret_column(), line.size());
+			completion_text += line.substr(get_caret_column());
 		} else {
 			completion_text += line;
 		}
@@ -2408,7 +2415,7 @@ String CodeEdit::get_text_with_cursor_char(int p_line, int p_column) const {
 			result += line_text.substr(0, p_column);
 			/* Not unicode, represents the cursor. */
 			result += String::chr(0xFFFF);
-			result += line_text.substr(p_column, line_text.size());
+			result += line_text.substr(p_column);
 		} else {
 			result += line_text;
 		}
@@ -3345,8 +3352,8 @@ void CodeEdit::_set_delimiters(const TypedArray<String> &p_delimiters, Delimiter
 			continue;
 		}
 
-		const String start_key = key.get_slice(" ", 0);
-		const String end_key = key.get_slice_count(" ") > 1 ? key.get_slice(" ", 1) : String();
+		const String start_key = key.get_slicec(' ', 0);
+		const String end_key = key.get_slice_count(" ") > 1 ? key.get_slicec(' ', 1) : String();
 
 		_add_delimiter(start_key, end_key, end_key.is_empty(), p_type);
 	}

@@ -62,6 +62,9 @@ static Ref<StyleBoxFlat> color_button_pressed_style;
 static Ref<StyleBoxFlat> color_button_disabled_style;
 static Ref<StyleBoxFlat> color_button_focus_style;
 
+static Ref<StyleBoxFlat> focus_rect_style;
+static Ref<StyleBoxFlat> focus_circle_style;
+
 static Ref<StyleBoxFlat> popup_hover_style;
 static Ref<StyleBoxFlat> popup_panel_style;
 
@@ -418,7 +421,7 @@ void update_theme_icons(Ref<Theme> &p_theme, const Color &p_font_color, const Co
 	p_theme->set_icon("picker_cursor", "ColorPicker", icons["color_picker_cursor"]);
 	p_theme->set_icon("picker_cursor_bg", "ColorPicker", icons["color_picker_cursor_bg"]);
 	p_theme->set_icon("hex_icon", "ColorPicker", icons["color_picker_hex"]);
-	p_theme->set_icon("hex_code_icon", "ColorPicker", icons["color_picker_hex_code"]);
+	p_theme->set_icon("code_icon", "ColorPicker", icons["color_picker_hex_code"]);
 
 	p_theme->set_icon("bg", "ColorPickerButton", icons["mini_checkerboard"]);
 	p_theme->set_icon("overbright_indicator", "ColorPickerButton", icons["color_picker_overbright"]);
@@ -528,6 +531,8 @@ void update_theme_colors(Ref<Theme> &p_theme, const Color &p_base_color, const C
 
 	button_focus_style->set_bg_color(accent_color);
 	color_button_focus_style->set_bg_color(accent_color);
+	focus_rect_style->set_border_color(accent_color);
+	focus_circle_style->set_border_color(accent_color);
 	h_split_bar_background->set_bg_color(accent_color);
 	v_split_bar_background->set_bg_color(accent_color);
 	tab_focus_style->set_border_color(accent_color);
@@ -1111,6 +1116,9 @@ void update_theme_scale(Ref<Theme> &p_theme) {
 	int x4_scale = 4 * base_scale;
 	int x6_scale = 6 * base_scale;
 
+	focus_circle_style->set_corner_radius_all(Math::round(256 * base_scale));
+	focus_circle_style->set_corner_detail(Math::round(32 * base_scale));
+
 	popup_panel_style->set_border_width_all(int_scale);
 	p_theme->set_constant("children_hl_line_width", "Tree", int_scale);
 	p_theme->set_constant("shadow_offset_x", "Label", int_scale);
@@ -1147,8 +1155,13 @@ void update_theme_scale(Ref<Theme> &p_theme) {
 	p_theme->set_constant("preset_size", "ColorPicker", 30 * base_scale);
 	p_theme->set_constant("sv_width", "ColorPicker", 256 * base_scale);
 	p_theme->set_constant("sv_height", "ColorPicker", 256 * base_scale);
+	p_theme->set_constant("label_width", "ColorPicker", 14 * base_scale);
 
 	color_button_focus_style->set_border_width_all(x2_scale);
+	focus_rect_style->set_border_width_all(x2_scale);
+	focus_rect_style->set_expand_margin_all(x2_scale);
+	focus_circle_style->set_border_width_all(x2_scale);
+	focus_circle_style->set_expand_margin_all(x2_scale);
 	tab_focus_style->set_border_width_all(x2_scale);
 	h_separator_style->set_thickness(x2_scale);
 	v_separator_style->set_thickness(x2_scale);
@@ -1287,6 +1300,8 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	color_button_pressed_style.instantiate();
 	color_button_disabled_style.instantiate();
 	color_button_focus_style.instantiate();
+	focus_rect_style.instantiate();
+	focus_circle_style.instantiate();
 	popup_hover_style.instantiate();
 	progress_background_style.instantiate();
 	progress_fill_style.instantiate();
@@ -1352,6 +1367,10 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_stylebox("hover", "ColorButton", color_button_hover_style);
 	t->set_stylebox("disabled", "ColorButton", color_button_disabled_style);
 	t->set_stylebox("focus", "ColorButton", color_button_focus_style);
+
+	t->set_stylebox("sample_focus", "ColorPicker", focus_rect_style);
+	t->set_stylebox("picker_focus_rectangle", "ColorPicker", focus_rect_style);
+	t->set_stylebox("picker_focus_circle", "ColorPicker", focus_circle_style);
 
 	t->set_stylebox(CoreStringName(normal), "MenuButton", button_normal_style);
 	t->set_stylebox(SceneStringName(pressed), "MenuButton", button_pressed_style);
@@ -1567,6 +1586,8 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	tab_focus_style->set_draw_center(false);
 	button_focus_style->set_draw_center(false);
 	color_button_focus_style->set_draw_center(false);
+	focus_rect_style->set_draw_center(false);
+	focus_circle_style->set_draw_center(false);
 
 	t->set_font_size(SceneStringName(font_size), "Button", -1);
 	t->set_font_size(SceneStringName(font_size), "MenuBar", -1);
@@ -1649,7 +1670,6 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_constant("minimum_character_width", "LineEdit", 4);
 	t->set_constant("completion_scroll_width", "CodeEdit", 6);
 	t->set_constant("completion_lines", "CodeEdit", 7);
-	t->set_constant("label_width", "ColorPicker", 10);
 
 	t->set_color("font_shadow_color", "Label", Color(0, 0, 0, 0));
 	t->set_color("font_shadow_color", "GraphNodeTitleLabel", Color(0, 0, 0, 0));
@@ -1673,6 +1693,7 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_color("brace_mismatch_color", "CodeEdit", Color(1, 0.2, 0.2));
 	t->set_color("line_number_color", "CodeEdit", Color(0.67, 0.67, 0.67, 0.4));
 	t->set_color("line_length_guideline_color", "CodeEdit", Color(0.3, 0.5, 0.8, 0.1));
+	t->set_color("focused_not_editing_cursor_color", "ColorPicker", Color(1, 1, 1, 0.2));
 
 	embedded_style->set_content_margin_individual(10, 28, 10, 8);
 	embedded_unfocused_style->set_content_margin_individual(10, 28, 10, 8);
@@ -1738,6 +1759,8 @@ void finalize_default_theme() {
 	color_button_pressed_style.unref();
 	color_button_disabled_style.unref();
 	color_button_focus_style.unref();
+	focus_rect_style.unref();
+	focus_circle_style.unref();
 	popup_hover_style.unref();
 	progress_background_style.unref();
 	progress_fill_style.unref();

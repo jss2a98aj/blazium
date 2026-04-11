@@ -77,7 +77,7 @@ Size2 ScrollContainer::get_minimum_size() const {
 }
 
 void ScrollContainer::_cancel_drag() {
-	set_physics_process_internal(false);
+	set_process_internal(false);
 	drag_touching_deaccel = false;
 	drag_touching = false;
 	drag_speed = Vector2();
@@ -176,7 +176,7 @@ void ScrollContainer::gui_input(const Ref<InputEvent> &p_gui_input) {
 			drag_touching_deaccel = false;
 			beyond_deadzone = false;
 			time_since_motion = 0;
-			set_physics_process_internal(true);
+			set_process_internal(true);
 			time_since_motion = 0;
 
 		} else {
@@ -356,6 +356,10 @@ void ScrollContainer::_notification(int p_what) {
 		case NOTIFICATION_TRANSLATION_CHANGED: {
 			_updating_scrollbars = true;
 			callable_mp(this, is_ready() ? &ScrollContainer::_reposition_children : &ScrollContainer::_update_scrollbar_position).call_deferred();
+			if (p_what == NOTIFICATION_THEME_CHANGED) {
+				scroll_border = get_theme_constant(SNAME("scroll_border"), SNAME("Tree"));
+				scroll_speed = get_theme_constant(SNAME("scroll_speed"), SNAME("Tree"));
+			}
 		} break;
 
 		case NOTIFICATION_READY: {
@@ -382,11 +386,46 @@ void ScrollContainer::_notification(int p_what) {
 			}
 		} break;
 
-		case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
+		case NOTIFICATION_DRAG_BEGIN: {
+			if (scroll_on_drag_hover && is_visible_in_tree()) {
+				set_process_internal(true);
+			}
+		} break;
+
+		case NOTIFICATION_DRAG_END: {
+			set_process_internal(false);
+		} break;
+
+		case NOTIFICATION_INTERNAL_PROCESS: {
+			if (scroll_on_drag_hover && get_viewport()->gui_is_dragging()) {
+				Point2 mouse_position = get_viewport()->get_mouse_position() - get_global_position();
+				Transform2D xform = get_transform();
+				if (Rect2(Point2(), xform.get_scale() * get_size()).grow(scroll_border).has_point(mouse_position)) {
+					Point2 point;
+
+					if ((Math::abs(mouse_position.x) < Math::abs(mouse_position.x - get_size().width)) && (Math::abs(mouse_position.x) < scroll_border)) {
+						point.x = mouse_position.x - scroll_border;
+					} else if (Math::abs(mouse_position.x - get_size().width) < scroll_border) {
+						point.x = mouse_position.x - (get_size().width - scroll_border);
+					}
+
+					if ((Math::abs(mouse_position.y) < Math::abs(mouse_position.y - get_size().height)) && (Math::abs(mouse_position.y) < scroll_border)) {
+						point.y = mouse_position.y - scroll_border;
+					} else if (Math::abs(mouse_position.y - get_size().height) < scroll_border) {
+						point.y = mouse_position.y - (get_size().height - scroll_border);
+					}
+
+					point *= scroll_speed * get_process_delta_time();
+					point += Point2(get_h_scroll(), get_v_scroll());
+					h_scroll->set_value(point.x);
+					v_scroll->set_value(point.y);
+				}
+			}
+
 			if (drag_touching) {
 				if (drag_touching_deaccel) {
 					Vector2 pos = Vector2(h_scroll->get_value(), v_scroll->get_value());
-					pos += drag_speed * get_physics_process_delta_time();
+					pos += drag_speed * get_process_delta_time();
 
 					bool turnoff_h = false;
 					bool turnoff_v = false;
@@ -418,7 +457,7 @@ void ScrollContainer::_notification(int p_what) {
 
 					float sgn_x = drag_speed.x < 0 ? -1 : 1;
 					float val_x = Math::abs(drag_speed.x);
-					val_x -= 1000 * get_physics_process_delta_time();
+					val_x -= 1000 * get_process_delta_time();
 
 					if (val_x < 0) {
 						turnoff_h = true;
@@ -426,7 +465,7 @@ void ScrollContainer::_notification(int p_what) {
 
 					float sgn_y = drag_speed.y < 0 ? -1 : 1;
 					float val_y = Math::abs(drag_speed.y);
-					val_y -= 1000 * get_physics_process_delta_time();
+					val_y -= 1000 * get_process_delta_time();
 
 					if (val_y < 0) {
 						turnoff_v = true;
@@ -442,10 +481,10 @@ void ScrollContainer::_notification(int p_what) {
 					if (time_since_motion == 0 || time_since_motion > 0.1) {
 						Vector2 diff = drag_accum - last_drag_accum;
 						last_drag_accum = drag_accum;
-						drag_speed = diff / get_physics_process_delta_time();
+						drag_speed = diff / get_process_delta_time();
 					}
 
-					time_since_motion += get_physics_process_delta_time();
+					time_since_motion += get_process_delta_time();
 				}
 			}
 		} break;
@@ -577,6 +616,10 @@ PackedStringArray ScrollContainer::get_configuration_warnings() const {
 	}
 
 	return warnings;
+}
+
+void ScrollContainer::set_scroll_on_drag_hover(bool p_scroll) {
+	scroll_on_drag_hover = p_scroll;
 }
 
 HScrollBar *ScrollContainer::get_h_scroll_bar() {

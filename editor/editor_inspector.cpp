@@ -1912,6 +1912,12 @@ void EditorInspectorSection::set_bg_color(const Color &p_bg_color) {
 	queue_redraw();
 }
 
+void EditorInspectorSection::reset_timer() {
+	if (dropping_for_unfold && !dropping_unfold_timer->is_stopped()) {
+		dropping_unfold_timer->start();
+	}
+}
+
 bool EditorInspectorSection::has_revertable_properties() const {
 	return !revertable_properties.is_empty();
 }
@@ -2073,7 +2079,7 @@ void EditorInspectorArray::_panel_gui_input(Ref<InputEvent> p_event, int p_index
 			popup_array_index_pressed = begin_array_index + p_index;
 			rmb_popup->set_item_disabled(OPTION_MOVE_UP, popup_array_index_pressed == 0);
 			rmb_popup->set_item_disabled(OPTION_MOVE_DOWN, popup_array_index_pressed == count - 1);
-			rmb_popup->set_position(get_screen_position() + mb->get_position());
+			rmb_popup->set_position(array_elements[p_index].panel->get_screen_position() + mb->get_position());
 			rmb_popup->reset_size();
 			rmb_popup->popup();
 		}
@@ -3451,6 +3457,7 @@ void EditorInspector::update_tree() {
 			if (!vbox_per_path[root_vbox].has(acc_path)) {
 				// If the section does not exists, create it.
 				EditorInspectorSection *section = memnew(EditorInspectorSection);
+				get_root_inspector()->get_v_scroll_bar()->connect(SceneStringName(value_changed), callable_mp(section, &EditorInspectorSection::reset_timer).unbind(1));
 				current_vbox->add_child(section);
 				sections.push_back(section);
 
@@ -3519,9 +3526,9 @@ void EditorInspector::update_tree() {
 			String swap_method;
 			for (int i = (p.type == Variant::NIL ? 1 : 2); i < class_name_components.size(); i++) {
 				if (class_name_components[i].begins_with("page_size") && class_name_components[i].get_slice_count("=") == 2) {
-					page_size = class_name_components[i].get_slice("=", 1).to_int();
+					page_size = class_name_components[i].get_slicec('=', 1).to_int();
 				} else if (class_name_components[i].begins_with("add_button_text") && class_name_components[i].get_slice_count("=") == 2) {
-					add_button_text = class_name_components[i].get_slice("=", 1).strip_edges();
+					add_button_text = class_name_components[i].get_slicec('=', 1).strip_edges();
 				} else if (class_name_components[i] == "static") {
 					movable = false;
 				} else if (class_name_components[i] == "const") {
@@ -3531,7 +3538,7 @@ void EditorInspector::update_tree() {
 				} else if (class_name_components[i] == "unfoldable") {
 					foldable = false;
 				} else if (class_name_components[i].begins_with("swap_method") && class_name_components[i].get_slice_count("=") == 2) {
-					swap_method = class_name_components[i].get_slice("=", 1).strip_edges();
+					swap_method = class_name_components[i].get_slicec('=', 1).strip_edges();
 				}
 			}
 
@@ -3851,6 +3858,7 @@ void EditorInspector::update_tree() {
 				}
 
 				EditorInspectorSection *section = memnew(EditorInspectorSection);
+				get_root_inspector()->get_v_scroll_bar()->connect(SceneStringName(value_changed), callable_mp(section, &EditorInspectorSection::reset_timer).unbind(1));
 				favorites_groups_vbox->add_child(section);
 				parent_vbox = section->get_vbox();
 				section->setup("", section_name, object, sscolor, false);
@@ -3870,6 +3878,7 @@ void EditorInspector::update_tree() {
 					}
 
 					EditorInspectorSection *section = memnew(EditorInspectorSection);
+					get_root_inspector()->get_v_scroll_bar()->connect(SceneStringName(value_changed), callable_mp(section, &EditorInspectorSection::reset_timer).unbind(1));
 					vbox->add_child(section);
 					vbox = section->get_vbox();
 					section->setup("", section_name, object, sscolor, false);
@@ -4576,7 +4585,7 @@ void EditorInspector::_set_property_favorited(const String &p_path, bool p_favor
 
 	String theme_property;
 	if (p_path.begins_with("theme_override_")) {
-		theme_property = p_path.get_slice("/", 1);
+		theme_property = p_path.get_slicec('/', 1);
 	}
 
 	while (!validate_name.is_empty()) {
@@ -4968,4 +4977,5 @@ EditorInspector::EditorInspector() {
 	set_property_name_style(EditorPropertyNameProcessor::get_singleton()->get_settings_style());
 
 	set_draw_focus_border(true);
+	set_scroll_on_drag_hover(true);
 }

@@ -38,6 +38,7 @@ class ColorButton : public BaseButton {
 	bool flat = false;
 	Color color = Color(1, 1, 1);
 	bool edit_alpha = true;
+	bool edit_intensity = true;
 
 	struct ThemeCache {
 		Ref<StyleBox> normal;
@@ -68,6 +69,9 @@ public:
 
 	void set_edit_alpha(bool p_enabled);
 	bool is_editing_alpha() const;
+
+	void set_edit_intensity(bool p_enabled);
+	bool is_editing_intensity() const;
 
 	void set_flat(bool p_enabled);
 	bool is_flat() const;

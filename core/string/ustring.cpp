@@ -238,7 +238,7 @@ Error String::parse_url(String &r_scheme, String &r_host, int &r_port, String &r
 		}
 		if (is_scheme_valid) {
 			r_scheme = base.substr(0, pos + 3).to_lower();
-			base = base.substr(pos + 3, base.length() - pos - 3);
+			base = base.substr(pos + 3);
 		}
 	}
 	pos = base.find_char('#');
@@ -250,14 +250,14 @@ Error String::parse_url(String &r_scheme, String &r_host, int &r_port, String &r
 	pos = base.find_char('/');
 	// Path
 	if (pos != -1) {
-		r_path = base.substr(pos, base.length() - pos);
+		r_path = base.substr(pos);
 		base = base.substr(0, pos);
 	}
 	// Host
 	pos = base.find_char('@');
 	if (pos != -1) {
 		// Strip credentials
-		base = base.substr(pos + 1, base.length() - pos - 1);
+		base = base.substr(pos + 1);
 	}
 	if (base.begins_with("[")) {
 		// Literal IPv6
@@ -266,7 +266,7 @@ Error String::parse_url(String &r_scheme, String &r_host, int &r_port, String &r
 			return ERR_INVALID_PARAMETER;
 		}
 		r_host = base.substr(1, pos - 1);
-		base = base.substr(pos + 1, base.length() - pos - 1);
+		base = base.substr(pos + 1);
 	} else {
 		// Anything else
 		if (base.get_slice_count(":") > 2) {
@@ -278,7 +278,7 @@ Error String::parse_url(String &r_scheme, String &r_host, int &r_port, String &r
 			base = "";
 		} else {
 			r_host = base.substr(0, pos);
-			base = base.substr(pos, base.length() - pos);
+			base = base.substr(pos);
 		}
 	}
 	if (r_host.is_empty()) {
@@ -287,7 +287,7 @@ Error String::parse_url(String &r_scheme, String &r_host, int &r_port, String &r
 	r_host = r_host.to_lower();
 	// Port
 	if (base.begins_with(":")) {
-		base = base.substr(1, base.length() - 1);
+		base = base.substr(1);
 		if (!base.is_valid_int()) {
 			return ERR_INVALID_PARAMETER;
 		}
@@ -1007,7 +1007,7 @@ String String::to_camel_case() const {
 }
 
 String String::to_pascal_case() const {
-	return capitalize().replace(" ", "");
+	return capitalize().remove_char(' ');
 }
 
 String String::to_snake_case() const {
@@ -3097,6 +3097,130 @@ String String::erase(int p_pos, int p_chars) const {
 	return left(p_pos) + substr(p_pos + p_chars);
 }
 
+template <class T>
+static bool _contains_char(char32_t p_c, const T *p_chars, int p_chars_len) {
+	for (int i = 0; i < p_chars_len; ++i) {
+		if (p_c == (char32_t)p_chars[i]) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+String String::remove_char(char32_t p_char) const {
+	if (p_char == 0) {
+		return *this;
+	}
+
+	int len = length();
+	if (len == 0) {
+		return *this;
+	}
+
+	int index = 0;
+	const char32_t *old_ptr = ptr();
+	for (; index < len; ++index) {
+		if (old_ptr[index] == p_char) {
+			break;
+		}
+	}
+
+	// If no occurrence of `char` was found, return this.
+	if (index == len) {
+		return *this;
+	}
+
+	// If we found at least one occurrence of `char`, create new string, allocating enough space for the current length minus one.
+	String new_string;
+	new_string.resize(len);
+	char32_t *new_ptr = new_string.ptrw();
+
+	// Copy part of input before `char`.
+	memcpy(new_ptr, old_ptr, index * sizeof(char32_t));
+
+	int new_size = index;
+
+	// Copy rest, skipping `char`.
+	for (++index; index < len; ++index) {
+		const char32_t old_char = old_ptr[index];
+		if (old_char != p_char) {
+			new_ptr[new_size] = old_char;
+			++new_size;
+		}
+	}
+
+	new_ptr[new_size] = _null;
+
+	// Shrink new string to fit.
+	new_string.resize(new_size + 1);
+
+	return new_string;
+}
+
+template <class T>
+static String _remove_chars_common(const String &p_this, const T *p_chars, int p_chars_len) {
+	// Delegate if p_chars has a single element.
+	if (p_chars_len == 1) {
+		return p_this.remove_char(*p_chars);
+	} else if (p_chars_len == 0) {
+		return p_this;
+	}
+
+	int len = p_this.length();
+
+	if (len == 0) {
+		return p_this;
+	}
+
+	int index = 0;
+	const char32_t *old_ptr = p_this.ptr();
+	for (; index < len; ++index) {
+		if (_contains_char(old_ptr[index], p_chars, p_chars_len)) {
+			break;
+		}
+	}
+
+	// If no occurrence of `chars` was found, return this.
+	if (index == len) {
+		return p_this;
+	}
+
+	// If we found at least one occurrence of `chars`, create new string, allocating enough space for the current length minus one.
+	String new_string;
+	new_string.resize(len);
+	char32_t *new_ptr = new_string.ptrw();
+
+	// Copy part of input before `char`.
+	memcpy(new_ptr, old_ptr, index * sizeof(char32_t));
+
+	int new_size = index;
+
+	// Copy rest, skipping `chars`.
+	for (++index; index < len; ++index) {
+		const char32_t old_char = old_ptr[index];
+		if (!_contains_char(old_char, p_chars, p_chars_len)) {
+			new_ptr[new_size] = old_char;
+			++new_size;
+		}
+	}
+
+	new_ptr[new_size] = 0;
+
+	// Shrink new string to fit.
+	new_string.resize(new_size + 1);
+
+	return new_string;
+}
+
+String String::remove_chars(const String &p_chars) const {
+	return _remove_chars_common(*this, p_chars.ptr(), p_chars.length());
+}
+
+String String::remove_chars(const char *p_chars) const {
+	return _remove_chars_common(*this, p_chars, strlen(p_chars));
+}
+
 String String::substr(int p_from, int p_chars) const {
 	if (p_chars == -1) {
 		p_chars = length() - p_from;
@@ -4883,7 +5007,7 @@ String String::pad_zeros(int p_digits) const {
 String String::trim_prefix(const String &p_prefix) const {
 	String s = *this;
 	if (s.begins_with(p_prefix)) {
-		return s.substr(p_prefix.length(), s.length() - p_prefix.length());
+		return s.substr(p_prefix.length());
 	}
 	return s;
 }
@@ -4892,7 +5016,7 @@ String String::trim_prefix(const char *p_prefix) const {
 	String s = *this;
 	if (s.begins_with(p_prefix)) {
 		int prefix_length = strlen(p_prefix);
-		return s.substr(prefix_length, s.length() - prefix_length);
+		return s.substr(prefix_length);
 	}
 	return s;
 }
@@ -5048,8 +5172,8 @@ String String::path_to(const String &p_path) const {
 			return p_path; //impossible to do this
 		}
 
-		src = src.substr(src_begin.length(), src.length());
-		dst = dst.substr(dst_begin.length(), dst.length());
+		src = src.substr(src_begin.length());
+		dst = dst.substr(dst_begin.length());
 	}
 
 	//remove leading and trailing slash and split

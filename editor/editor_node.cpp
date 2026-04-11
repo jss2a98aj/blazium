@@ -3263,7 +3263,7 @@ void EditorNode::_request_screenshot() {
 }
 
 void EditorNode::_screenshot(bool p_use_utc) {
-	String name = "editor_screenshot_" + Time::get_singleton()->get_datetime_string_from_system(p_use_utc).replace(":", "") + ".png";
+	String name = "editor_screenshot_" + Time::get_singleton()->get_datetime_string_from_system(p_use_utc).remove_char(':') + ".png";
 	NodePath path = String("user://") + name;
 	_save_screenshot(path);
 	if (EDITOR_GET("interface/editor/automatically_open_screenshots")) {
@@ -3467,7 +3467,7 @@ void EditorNode::_update_file_menu_closed() {
 
 void EditorNode::_palette_quick_open_dialog() {
 	quick_open_color_palette->popup_dialog({ "ColorPalette" }, palette_file_selected_callback);
-	quick_open_color_palette->set_title(TTR("Quick Open Color Palette..."));
+	quick_open_color_palette->set_title(TTRC("Quick Open Color Palette..."));
 }
 
 void EditorNode::replace_resources_in_object(Object *p_object, const Vector<Ref<Resource>> &p_source_resources, const Vector<Ref<Resource>> &p_target_resource) {
@@ -3928,9 +3928,11 @@ void EditorNode::setup_color_picker(ColorPicker *p_picker) {
 	p_picker->set_editor_settings(EditorSettings::get_singleton());
 	int default_color_mode = EditorSettings::get_singleton()->get_project_metadata("color_picker", "color_mode", EDITOR_GET("interface/inspector/default_color_picker_mode"));
 	int picker_shape = EditorSettings::get_singleton()->get_project_metadata("color_picker", "picker_shape", EDITOR_GET("interface/inspector/default_color_picker_shape"));
+	bool show_intensity = EDITOR_GET("interface/inspector/color_picker_show_intensity");
 
 	p_picker->set_color_mode((ColorPicker::ColorModeType)default_color_mode);
 	p_picker->set_picker_shape((ColorPicker::PickerShapeType)picker_shape);
+	p_picker->set_edit_intensity(show_intensity);
 
 	p_picker->set_quick_open_callback(callable_mp(this, &EditorNode::_palette_quick_open_dialog));
 	p_picker->set_palette_saved_callback(callable_mp(EditorFileSystem::get_singleton(), &EditorFileSystem::update_file));
@@ -5038,8 +5040,8 @@ String EditorNode::_get_system_info() const {
 
 	String display_session_type;
 #ifdef LINUXBSD_ENABLED
-	// `replace` is necessary, because `capitalize` introduces a whitespace between "x" and "11".
-	display_session_type = OS::get_singleton()->get_environment("XDG_SESSION_TYPE").capitalize().replace(" ", "");
+	// `remove_char` is necessary, because `capitalize` introduces a whitespace between "x" and "11".
+	display_session_type = OS::get_singleton()->get_environment("XDG_SESSION_TYPE").capitalize().remove_char(' ');
 #endif // LINUXBSD_ENABLED
 	String driver_name = OS::get_singleton()->get_current_rendering_driver_name().to_lower();
 	String rendering_method = OS::get_singleton()->get_current_rendering_method().to_lower();
@@ -5111,8 +5113,8 @@ String EditorNode::_get_system_info() const {
 
 	String display_driver_window_mode;
 #ifdef LINUXBSD_ENABLED
-	// `replace` is necessary, because `capitalize` introduces a whitespace between "x" and "11".
-	display_driver_window_mode = DisplayServer::get_singleton()->get_name().capitalize().replace(" ", "") + " display driver";
+	// `remove_char` is necessary, because `capitalize` introduces a whitespace between "x" and "11".
+	display_driver_window_mode = DisplayServer::get_singleton()->get_name().capitalize().remove_char(' ') + " display driver";
 #endif // LINUXBSD_ENABLED
 	if (!display_driver_window_mode.is_empty()) {
 		display_driver_window_mode += ", ";
@@ -6841,7 +6843,7 @@ int EditorNode::execute_and_show_output(const String &p_title, const String &p_p
 		{
 			MutexLock lock(eta.execute_output_mutex);
 			if (prev_len != eta.output.length()) {
-				String to_add = eta.output.substr(prev_len, eta.output.length());
+				String to_add = eta.output.substr(prev_len);
 				prev_len = eta.output.length();
 				execute_outputs->add_text(to_add);
 				DisplayServer::get_singleton()->process_events(); // Get rid of pending events.

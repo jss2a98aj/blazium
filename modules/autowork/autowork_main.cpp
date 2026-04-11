@@ -195,29 +195,29 @@ void Autowork::run_tests(bool p_run_rest) {
 					collector->clear();
 					dir_overriden = true;
 				}
-				collector->process_directory(arg.get_slice("=", 1));
+				collector->process_directory(arg.get_slicec('=', 1));
 			} else if (arg.begins_with("--aw-test=") || arg.begins_with("-gunit_test_name=")) {
-				collector->test_pattern = arg.get_slice("=", 1);
+				collector->test_pattern = arg.get_slicec('=', 1);
 			} else if (arg.begins_with("--aw-select=") || arg.begins_with("-gselect=")) {
-				collector->script_pattern = arg.get_slice("=", 1);
+				collector->script_pattern = arg.get_slicec('=', 1);
 			} else if (arg.begins_with("--aw-file=") || arg.begins_with("-gtest=")) {
-				collector->add_script(arg.get_slice("=", 1));
+				collector->add_script(arg.get_slicec('=', 1));
 			} else if (arg.begins_with("--aw-prefix=") || arg.begins_with("-gprefix=")) {
-				collector->script_prefix = arg.get_slice("=", 1);
+				collector->script_prefix = arg.get_slicec('=', 1);
 			} else if (arg.begins_with("--aw-suffix=") || arg.begins_with("-gsuffix=")) {
-				collector->script_suffix = arg.get_slice("=", 1);
+				collector->script_suffix = arg.get_slicec('=', 1);
 			} else if (arg.begins_with("--aw-inner-class=") || arg.begins_with("-ginner_class=")) {
-				collector->inner_class_pattern = arg.get_slice("=", 1);
+				collector->inner_class_pattern = arg.get_slicec('=', 1);
 			} else if (arg.begins_with("--aw-junit-xml=") || arg.begins_with("-gjunit_xml_file=")) {
-				junit_path = arg.get_slice("=", 1);
+				junit_path = arg.get_slicec('=', 1);
 			} else if (arg.begins_with("--aw-junit=")) {
-				junit_path = arg.get_slice("=", 1);
+				junit_path = arg.get_slicec('=', 1);
 			} else if (arg.begins_with("--aw-json=")) {
-				json_path = arg.get_slice("=", 1);
+				json_path = arg.get_slicec('=', 1);
 			} else if (arg.begins_with("--aw-pre-run=") || arg.begins_with("-gpre_run_script=")) {
-				pre_run_path = arg.get_slice("=", 1);
+				pre_run_path = arg.get_slicec('=', 1);
 			} else if (arg.begins_with("--aw-post-run=") || arg.begins_with("-gpost_run_script=")) {
-				post_run_path = arg.get_slice("=", 1);
+				post_run_path = arg.get_slicec('=', 1);
 			} else if (arg.begins_with("-gexit")) {
 				// Autowork naturally halts after tests if launched headless, nothing explicitly needed
 			} else if (arg.begins_with("-ghide_orphans") || arg.begins_with("--aw-hide-orphans")) {
@@ -388,13 +388,13 @@ void Autowork::run_tests(bool p_run_rest) {
 		String post_p;
 		for (const String &arg : OS::get_singleton()->get_cmdline_args()) {
 			if (arg.begins_with("--aw-junit=")) {
-				junit_p = arg.get_slice("=", 1);
+				junit_p = arg.get_slicec('=', 1);
 			}
 			if (arg.begins_with("--aw-json=")) {
-				json_p = arg.get_slice("=", 1);
+				json_p = arg.get_slicec('=', 1);
 			}
 			if (arg.begins_with("--aw-post-run=")) {
-				post_p = arg.get_slice("=", 1);
+				post_p = arg.get_slicec('=', 1);
 			}
 		}
 		if (!post_p.is_empty()) {

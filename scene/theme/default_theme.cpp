@@ -1053,11 +1053,16 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 	theme->set_icon("overbright_indicator", "ColorButton", icons["color_picker_overbright"]);
 
 	// ColorPicker
+	Ref<StyleBoxFlat> focus_circle = make_flat_stylebox(style_focus_color, default_margin, default_margin, default_margin, default_margin, default_corner_radius, false, 2);
+	focus_circle->set_corner_radius_all(Math::round(256 * scale));
+	focus_circle->set_corner_detail(Math::round(32 * scale));
+
+	theme->set_color("focused_not_editing_cursor_color", "ColorPicker", Color(1, 1, 1, 0.275f));
 
 	theme->set_constant("margin", "ColorPicker", Math::round(4 * scale));
 	theme->set_constant("sv_width", "ColorPicker", Math::round(256 * scale));
 	theme->set_constant("sv_height", "ColorPicker", Math::round(256 * scale));
-	theme->set_constant("label_width", "ColorPicker", Math::round(10 * scale));
+	theme->set_constant("label_width", "ColorPicker", Math::round(14 * scale));
 	theme->set_constant("h_width", "ColorPicker", Math::round(30 * scale));
 	theme->set_constant("sample_height", "ColorPicker", Math::round(30 * scale));
 	theme->set_constant("preset_size", "ColorPicker", Math::round(30 * scale));
@@ -1080,7 +1085,11 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 	theme->set_icon("picker_cursor", "ColorPicker", icons["color_picker_cursor"]);
 	theme->set_icon("picker_cursor_bg", "ColorPicker", icons["color_picker_cursor_bg"]);
 	theme->set_icon("hex_icon", "ColorPicker", icons["color_picker_hex"]);
-	theme->set_icon("hex_code_icon", "ColorPicker", icons["color_picker_hex_code"]);
+	theme->set_icon("code_icon", "ColorPicker", icons["color_picker_code"]);
+
+	theme->set_stylebox("sample_focus", "ColorPicker", focus);
+	theme->set_stylebox("picker_focus_rectangle", "ColorPicker", focus);
+	theme->set_stylebox("picker_focus_circle", "ColorPicker", focus_circle);
 
 	{
 		const int precision = 7;

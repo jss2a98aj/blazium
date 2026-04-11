@@ -161,6 +161,8 @@ public:
 		FEATURE_WINDOW_EMBEDDING,
 		FEATURE_NATIVE_DIALOG_FILE_MIME,
 		FEATURE_EMOJI_AND_SYMBOL_PICKER,
+		FEATURE_NATIVE_COLOR_PICKER,
+		FEATURE_SELF_FITTING_WINDOWS,
 	};
 
 	virtual bool has_feature(Feature p_feature) const = 0;
@@ -401,6 +403,7 @@ public:
 		WINDOW_FLAG_MOUSE_PASSTHROUGH,
 		WINDOW_FLAG_SHARP_CORNERS,
 		WINDOW_FLAG_EXCLUDE_FROM_CAPTURE,
+		WINDOW_FLAG_POPUP_WM_HINT,
 		WINDOW_FLAG_MAX,
 	};
 
@@ -416,6 +419,7 @@ public:
 		WINDOW_FLAG_MOUSE_PASSTHROUGH_BIT = (1 << WINDOW_FLAG_MOUSE_PASSTHROUGH),
 		WINDOW_FLAG_SHARP_CORNERS_BIT = (1 << WINDOW_FLAG_SHARP_CORNERS),
 		WINDOW_FLAG_EXCLUDE_FROM_CAPTURE_BIT = (1 << WINDOW_FLAG_EXCLUDE_FROM_CAPTURE),
+		WINDOW_FLAG_POPUP_WM_HINT_BIT = (1 << WINDOW_FLAG_POPUP_WM_HINT),
 	};
 
 	virtual WindowID create_sub_window(WindowMode p_mode, VSyncMode p_vsync_mode, uint32_t p_flags, const Rect2i &p_rect = Rect2i(), bool p_exclusive = false, WindowID p_transient_parent = INVALID_WINDOW_ID);
@@ -444,6 +448,7 @@ public:
 		WINDOW_EVENT_GO_BACK_REQUEST,
 		WINDOW_EVENT_DPI_CHANGE,
 		WINDOW_EVENT_TITLEBAR_CHANGE,
+		WINDOW_EVENT_FORCE_CLOSE,
 	};
 	virtual void window_set_window_event_callback(const Callable &p_callable, WindowID p_window = MAIN_WINDOW_ID) = 0;
 	virtual void window_set_input_event_callback(const Callable &p_callable, WindowID p_window = MAIN_WINDOW_ID) = 0;
@@ -592,7 +597,9 @@ public:
 		FILE_DIALOG_MODE_SAVE_MAX
 	};
 	virtual Error file_dialog_show(const String &p_title, const String &p_current_directory, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const Callable &p_callback);
+	virtual Error file_dialog_show2(const String &p_title, const String &p_current_directory, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const Callable &p_callback, WindowID p_window_id = MAIN_WINDOW_ID);
 	virtual Error file_dialog_with_options_show(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback);
+	virtual Error file_dialog_with_options_show2(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback, WindowID p_window_id = MAIN_WINDOW_ID);
 
 	virtual void beep() const;
 
@@ -604,6 +611,7 @@ public:
 	virtual Key keyboard_get_keycode_from_physical(Key p_keycode) const;
 	virtual Key keyboard_get_label_from_physical(Key p_keycode) const;
 	virtual void show_emoji_and_symbol_picker() const;
+	virtual bool color_picker(const Callable &p_callback);
 
 	virtual int tablet_get_driver_count() const { return 1; }
 	virtual String tablet_get_driver_name(int p_driver) const { return "default"; }

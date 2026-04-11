@@ -24,6 +24,9 @@
 		<member name="edit_alpha" type="bool" setter="set_edit_alpha" getter="is_editing_alpha" default="true">
 			If [code]true[/code], shows an alpha channel slider (opacity).
 		</member>
+		<member name="edit_intensity" type="bool" setter="set_edit_intensity" getter="is_editing_intensity" default="true">
+			If [code]true[/code], shows an intensity slider. The intensity is applied as follows: multiply the color by [code]2 ** intensity[/code] in linear RGB space, and then convert it back to sRGB.
+		</member>
 		<member name="flat" type="bool" setter="set_flat" getter="is_flat" default="false">
 			Draws the buttons without the styles.
 		</member>

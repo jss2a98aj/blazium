@@ -394,7 +394,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 		for (const String &locale : get_editor_locales()) {
 			// Skip locales which we can't render properly (see above comment).
 			// Test against language code without regional variants (e.g. ur_PK).
-			String lang_code = locale.get_slice("_", 0);
+			String lang_code = locale.get_slicec('_', 0);
 			if (locales_to_skip.has(lang_code)) {
 				continue;
 			}
@@ -532,6 +532,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 
 	EDITOR_SETTING_BASIC(Variant::INT, PROPERTY_HINT_ENUM, "interface/inspector/default_color_picker_mode", (int32_t)ColorPicker::MODE_RGB, "RGB,HSV,RAW,OKHSL")
 	EDITOR_SETTING_BASIC(Variant::INT, PROPERTY_HINT_ENUM, "interface/inspector/default_color_picker_shape", (int32_t)ColorPicker::SHAPE_OKHSL_CIRCLE, "HSV Rectangle,HSV Rectangle Wheel,VHS Circle,OKHSL Circle")
+	EDITOR_SETTING_BASIC(Variant::BOOL, PROPERTY_HINT_NONE, "interface/inspector/color_picker_show_intensity", true, "");
 
 	// Theme
 	EDITOR_SETTING_BASIC(Variant::BOOL, PROPERTY_HINT_ENUM, "interface/theme/follow_system_theme", false, "")
@@ -658,6 +659,8 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	_load_godot2_text_editor_theme();
 
 	// Appearance
+	EDITOR_SETTING_BASIC(Variant::BOOL, PROPERTY_HINT_NONE, "text_editor/appearance/enable_inline_color_picker", true, "");
+
 	// Appearance: Caret
 	EDITOR_SETTING(Variant::INT, PROPERTY_HINT_ENUM, "text_editor/appearance/caret/type", 0, "Line,Block")
 	_initial_set("text_editor/appearance/caret/caret_blink", true, true);

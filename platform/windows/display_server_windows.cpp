@@ -234,38 +234,63 @@ void DisplayServerWindows::_register_raw_input_devices(WindowID p_target_window)
 	}
 }
 
+void DisplayServerWindows::initialize_tts() const {
+	const_cast<DisplayServerWindows *>(this)->tts = memnew(TTS_Windows);
+}
+
 bool DisplayServerWindows::tts_is_speaking() const {
-	ERR_FAIL_NULL_V_MSG(tts, false, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL_V(tts, false);
 	return tts->is_speaking();
 }
 
 bool DisplayServerWindows::tts_is_paused() const {
-	ERR_FAIL_NULL_V_MSG(tts, false, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL_V(tts, false);
 	return tts->is_paused();
 }
 
 TypedArray<Dictionary> DisplayServerWindows::tts_get_voices() const {
-	ERR_FAIL_NULL_V_MSG(tts, TypedArray<Dictionary>(), "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL_V(tts, TypedArray<Dictionary>());
 	return tts->get_voices();
 }
 
 void DisplayServerWindows::tts_speak(const String &p_text, const String &p_voice, int p_volume, float p_pitch, float p_rate, int p_utterance_id, bool p_interrupt) {
-	ERR_FAIL_NULL_MSG(tts, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL(tts);
 	tts->speak(p_text, p_voice, p_volume, p_pitch, p_rate, p_utterance_id, p_interrupt);
 }
 
 void DisplayServerWindows::tts_pause() {
-	ERR_FAIL_NULL_MSG(tts, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL(tts);
 	tts->pause();
 }
 
 void DisplayServerWindows::tts_resume() {
-	ERR_FAIL_NULL_MSG(tts, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL(tts);
 	tts->resume();
 }
 
 void DisplayServerWindows::tts_stop() {
-	ERR_FAIL_NULL_MSG(tts, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL(tts);
 	tts->stop();
 }
 
@@ -273,8 +298,16 @@ Error DisplayServerWindows::file_dialog_show(const String &p_title, const String
 	return _file_dialog_with_options_show(p_title, p_current_directory, String(), p_filename, p_show_hidden, p_mode, p_filters, TypedArray<Dictionary>(), p_callback, false);
 }
 
+Error DisplayServerWindows::file_dialog_show2(const String &p_title, const String &p_current_directory, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const Callable &p_callback, WindowID p_window_id) {
+	return _file_dialog_with_options_show2(p_title, p_current_directory, String(), p_filename, p_show_hidden, p_mode, p_filters, TypedArray<Dictionary>(), p_callback, false, p_window_id);
+}
+
 Error DisplayServerWindows::file_dialog_with_options_show(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback) {
 	return _file_dialog_with_options_show(p_title, p_current_directory, p_root, p_filename, p_show_hidden, p_mode, p_filters, p_options, p_callback, true);
+}
+
+Error DisplayServerWindows::file_dialog_with_options_show2(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback, WindowID p_window_id) {
+	return _file_dialog_with_options_show2(p_title, p_current_directory, p_root, p_filename, p_show_hidden, p_mode, p_filters, p_options, p_callback, true, p_window_id);
 }
 
 // Silence warning due to a COM API weirdness.
@@ -489,7 +522,7 @@ void DisplayServerWindows::_thread_fd_monitor(void *p_ud) {
 			int filter_slice_count = flt.get_slice_count(",");
 			Vector<String> exts;
 			for (int j = 0; j < filter_slice_count; j++) {
-				String str = (flt.get_slice(",", j).strip_edges());
+				String str = (flt.get_slicec(',', j).strip_edges());
 				if (!str.is_empty()) {
 					exts.push_back(str);
 				}
@@ -700,15 +733,13 @@ void DisplayServerWindows::_thread_fd_monitor(void *p_ud) {
 	}
 }
 
-Error DisplayServerWindows::_file_dialog_with_options_show(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback, bool p_options_in_cb) {
-	_THREAD_SAFE_METHOD_
+Error DisplayServerWindows::_file_dialog_with_options_show2(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback, bool p_options_in_cb, WindowID p_window_id, bool p_unsafe) {
+	if (!p_unsafe) {
+		_THREAD_SAFE_METHOD_
 
-	ERR_FAIL_INDEX_V(int(p_mode), FILE_DIALOG_MODE_SAVE_MAX, FAILED);
-
-	WindowID window_id = _get_focused_window_or_popup();
-	if (!windows.has(window_id)) {
-		window_id = MAIN_WINDOW_ID;
+		ERR_FAIL_INDEX_V(int(p_mode), FILE_DIALOG_MODE_SAVE_MAX, FAILED);
 	}
+
 	String appname;
 	if (Engine::get_singleton()->is_editor_hint()) {
 		appname = "Blazium.GodotEditor." + String(VERSION_BRANCH);
@@ -729,8 +760,8 @@ Error DisplayServerWindows::_file_dialog_with_options_show(const String &p_title
 	}
 
 	FileDialogData *fd = memnew(FileDialogData);
-	if (window_id != INVALID_WINDOW_ID) {
-		fd->hwnd_owner = windows[window_id].hWnd;
+	if (windows.has(p_window_id) && !windows[p_window_id].is_popup && p_window_id != INVALID_WINDOW_ID) {
+		fd->hwnd_owner = windows[p_window_id].hWnd;
 		RECT crect;
 		GetWindowRect(fd->hwnd_owner, &crect);
 		fd->wrect = Rect2i(crect.left, crect.top, crect.right - crect.left, crect.bottom - crect.top);
@@ -745,7 +776,7 @@ Error DisplayServerWindows::_file_dialog_with_options_show(const String &p_title
 	fd->filename = p_filename;
 	fd->show_hidden = p_show_hidden;
 	fd->mode = p_mode;
-	fd->window_id = window_id;
+	fd->window_id = p_window_id;
 	fd->filters = p_filters;
 	fd->options = p_options;
 	fd->callback = p_callback;
@@ -6490,8 +6521,8 @@ Vector2i _get_device_ids(const String &p_device_name) {
 			SysFreeString(object_name);
 			if (hr == S_OK) {
 				String device_id = String(V_BSTR(&did));
-				ids.x = device_id.get_slice("&", 0).lstrip("PCI\\VEN_").hex_to_int();
-				ids.y = device_id.get_slice("&", 1).lstrip("DEV_").hex_to_int();
+				ids.x = device_id.get_slicec('&', 0).lstrip("PCI\\VEN_").hex_to_int();
+				ids.y = device_id.get_slicec('&', 1).lstrip("DEV_").hex_to_int();
 			}
 
 			for (ULONG i = 0; i < resultCount; i++) {
@@ -6601,7 +6632,7 @@ DisplayServerWindows::DisplayServerWindows(const String &p_rendering_driver, Win
 	// Init TTS
 	bool tts_enabled = GLOBAL_GET("audio/general/text_to_speech");
 	if (tts_enabled) {
-		tts = memnew(TTS_Windows);
+		initialize_tts();
 	}
 	native_menu = memnew(NativeMenuWindows);
 

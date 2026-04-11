@@ -156,6 +156,9 @@ bool DisplayServerX11::has_feature(Feature p_feature) const {
 		case FEATURE_NATIVE_DIALOG_FILE_MIME: {
 			return (portal_desktop && portal_desktop->is_supported() && portal_desktop->is_file_chooser_supported());
 		} break;
+		case FEATURE_NATIVE_COLOR_PICKER: {
+			return (portal_desktop && portal_desktop->is_supported() && portal_desktop->is_screenshot_supported());
+		} break;
 #endif
 		case FEATURE_SCREEN_CAPTURE: {
 			return !xwayland;
@@ -338,38 +341,63 @@ void DisplayServerX11::_flush_mouse_motion() {
 
 #ifdef SPEECHD_ENABLED
 
+void DisplayServerX11::initialize_tts() const {
+	const_cast<DisplayServerX11 *>(this)->tts = memnew(TTS_Linux);
+}
+
 bool DisplayServerX11::tts_is_speaking() const {
-	ERR_FAIL_NULL_V_MSG(tts, false, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL_V(tts, false);
 	return tts->is_speaking();
 }
 
 bool DisplayServerX11::tts_is_paused() const {
-	ERR_FAIL_NULL_V_MSG(tts, false, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL_V(tts, false);
 	return tts->is_paused();
 }
 
 TypedArray<Dictionary> DisplayServerX11::tts_get_voices() const {
-	ERR_FAIL_NULL_V_MSG(tts, TypedArray<Dictionary>(), "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL_V(tts, TypedArray<Dictionary>());
 	return tts->get_voices();
 }
 
 void DisplayServerX11::tts_speak(const String &p_text, const String &p_voice, int p_volume, float p_pitch, float p_rate, int p_utterance_id, bool p_interrupt) {
-	ERR_FAIL_NULL_MSG(tts, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL(tts);
 	tts->speak(p_text, p_voice, p_volume, p_pitch, p_rate, p_utterance_id, p_interrupt);
 }
 
 void DisplayServerX11::tts_pause() {
-	ERR_FAIL_NULL_MSG(tts, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL(tts);
 	tts->pause();
 }
 
 void DisplayServerX11::tts_resume() {
-	ERR_FAIL_NULL_MSG(tts, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL(tts);
 	tts->resume();
 }
 
 void DisplayServerX11::tts_stop() {
-	ERR_FAIL_NULL_MSG(tts, "Enable the \"audio/general/text_to_speech\" project setting to use text-to-speech.");
+	if (unlikely(!tts)) {
+		initialize_tts();
+	}
+	ERR_FAIL_NULL(tts);
 	tts->stop();
 }
 
@@ -398,30 +426,42 @@ bool DisplayServerX11::is_dark_mode() const {
 	}
 }
 
+Color DisplayServerX11::get_accent_color() const {
+	return portal_desktop->get_appearance_accent_color();
+}
+
 void DisplayServerX11::set_system_theme_change_callback(const Callable &p_callable) {
 	portal_desktop->set_system_theme_change_callback(p_callable);
 }
 
 Error DisplayServerX11::file_dialog_show(const String &p_title, const String &p_current_directory, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const Callable &p_callback) {
-	WindowID window_id = last_focused_window;
+	return file_dialog_show2(p_title, p_current_directory, p_filename, p_show_hidden, p_mode, p_filters, p_callback, last_focused_window);
+}
 
-	if (!windows.has(window_id)) {
+Error DisplayServerX11::file_dialog_show2(const String &p_title, const String &p_current_directory, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const Callable &p_callback, WindowID p_window_id) {
+	WindowID window_id = p_window_id;
+
+	if (!windows.has(window_id) || windows[window_id].is_popup) {
 		window_id = MAIN_WINDOW_ID;
 	}
 
 	String xid = vformat("x11:%x", (uint64_t)windows[window_id].x11_window);
-	return portal_desktop->file_dialog_show(last_focused_window, xid, p_title, p_current_directory, String(), p_filename, p_mode, p_filters, TypedArray<Dictionary>(), p_callback, false);
+	return portal_desktop->file_dialog_show(p_window_id, xid, p_title, p_current_directory, String(), p_filename, p_mode, p_filters, TypedArray<Dictionary>(), p_callback, false);
 }
 
 Error DisplayServerX11::file_dialog_with_options_show(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback) {
-	WindowID window_id = last_focused_window;
+	return file_dialog_with_options_show2(p_title, p_current_directory, p_root, p_filename, p_show_hidden, p_mode, p_filters, p_options, p_callback, last_focused_window);
+}
 
-	if (!windows.has(window_id)) {
+Error DisplayServerX11::file_dialog_with_options_show2(const String &p_title, const String &p_current_directory, const String &p_root, const String &p_filename, bool p_show_hidden, FileDialogMode p_mode, const Vector<String> &p_filters, const TypedArray<Dictionary> &p_options, const Callable &p_callback, WindowID p_window_id) {
+	WindowID window_id = p_window_id;
+
+	if (!windows.has(window_id) || windows[window_id].is_popup) {
 		window_id = MAIN_WINDOW_ID;
 	}
 
 	String xid = vformat("x11:%x", (uint64_t)windows[window_id].x11_window);
-	return portal_desktop->file_dialog_show(last_focused_window, xid, p_title, p_current_directory, p_root, p_filename, p_mode, p_filters, p_options, p_callback, true);
+	return portal_desktop->file_dialog_show(p_window_id, xid, p_title, p_current_directory, p_root, p_filename, p_mode, p_filters, p_options, p_callback, true);
 }
 
 #endif
@@ -3363,6 +3403,10 @@ void DisplayServerX11::cursor_set_custom_image(const Ref<Resource> &p_cursor, Cu
 	}
 }
 
+bool DisplayServerX11::get_swap_cancel_ok() {
+	return swap_cancel_ok;
+}
+
 int DisplayServerX11::keyboard_get_layout_count() const {
 	int _group_count = 0;
 	XkbDescRec *kbd = XkbAllocKeyboard();
@@ -3502,6 +3546,21 @@ Key DisplayServerX11::keyboard_get_label_from_physical(Key p_keycode) const {
 		return p_keycode;
 	}
 	return (Key)(key | modifiers);
+}
+
+bool DisplayServerX11::color_picker(const Callable &p_callback) {
+#ifdef DBUS_ENABLED
+	WindowID window_id = last_focused_window;
+
+	if (!windows.has(window_id)) {
+		window_id = MAIN_WINDOW_ID;
+	}
+
+	String xid = vformat("x11:%x", (uint64_t)windows[window_id].x11_window);
+	return portal_desktop->color_picker(xid, p_callback);
+#else
+	return false;
+#endif
 }
 
 DisplayServerX11::Property DisplayServerX11::_read_property(Display *p_display, Window p_window, Atom p_property) {
@@ -5390,7 +5449,7 @@ void DisplayServerX11::process_events() {
 
 #ifdef DBUS_ENABLED
 	if (portal_desktop) {
-		portal_desktop->process_file_dialog_callbacks();
+		portal_desktop->process_callbacks();
 	}
 #endif
 
@@ -6471,8 +6530,12 @@ static ::XIMStyle _get_best_xim_style(const ::XIMStyle &p_style_a, const ::XIMSt
 DisplayServerX11::DisplayServerX11(const String &p_rendering_driver, WindowMode p_mode, VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Context p_context, int64_t p_parent_window, Error &r_error) {
 	KeyMappingX11::initialize();
 
+	String current_desk = OS::get_singleton()->get_environment("XDG_CURRENT_DESKTOP").to_lower();
+	String session_desk = OS::get_singleton()->get_environment("XDG_SESSION_DESKTOP").to_lower();
+	swap_cancel_ok = (current_desk.contains("kde") || session_desk.contains("kde") || current_desk.contains("lxqt") || session_desk.contains("lxqt"));
+
 	xwayland = OS::get_singleton()->get_environment("XDG_SESSION_TYPE").to_lower() == "wayland";
-	kde5_embed_workaround = OS::get_singleton()->get_environment("XDG_CURRENT_DESKTOP").to_lower() == "kde" && OS::get_singleton()->get_environment("KDE_SESSION_VERSION") == "5";
+	kde5_embed_workaround = current_desk == "kde" && OS::get_singleton()->get_environment("KDE_SESSION_VERSION") == "5";
 
 	native_menu = memnew(NativeMenu);
 	context = p_context;
@@ -6762,7 +6825,7 @@ DisplayServerX11::DisplayServerX11(const String &p_rendering_driver, WindowMode 
 	// Init TTS
 	bool tts_enabled = GLOBAL_GET("audio/general/text_to_speech");
 	if (tts_enabled) {
-		tts = memnew(TTS_Linux);
+		initialize_tts();
 	}
 #endif
 

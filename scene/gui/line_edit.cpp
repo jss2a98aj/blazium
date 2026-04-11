@@ -33,6 +33,7 @@
 #include "core/input/input_map.h"
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
+#include "core/string/alt_codes.h"
 #include "scene/gui/label.h"
 #include "scene/gui/popup_menu.h"
 #include "scene/main/window.h"
@@ -45,6 +46,10 @@
 #endif
 
 void LineEdit::edit() {
+	_edit(true);
+}
+
+void LineEdit::_edit(bool p_show_virtual_keyboard) {
 	if (!is_inside_tree()) {
 		return;
 	}
@@ -69,7 +74,9 @@ void LineEdit::edit() {
 	editing = true;
 	_validate_caret_can_draw();
 
-	show_virtual_keyboard();
+	if (p_show_virtual_keyboard) {
+		show_virtual_keyboard();
+	}
 	queue_redraw();
 
 	emit_signal(SNAME("editing_toggled"), true);
@@ -403,7 +410,7 @@ void LineEdit::gui_input(const Ref<InputEvent> &p_event) {
 
 			if (context_menu_enabled) {
 				_update_context_menu();
-				menu->set_position(get_screen_position() + get_local_mouse_position());
+				menu->set_position(get_screen_transform().xform(get_local_mouse_position()));
 				menu->reset_size();
 				menu->popup();
 			}
@@ -630,7 +637,7 @@ void LineEdit::gui_input(const Ref<InputEvent> &p_event) {
 		if (k->is_action("ui_menu", true)) {
 			_update_context_menu();
 			Point2 pos = Point2(get_caret_pixel_pos().x, (get_size().y + theme_cache.font->get_height(theme_cache.font_size)) / 2);
-			menu->set_position(get_screen_position() + pos);
+			menu->set_position(get_screen_transform().xform(pos));
 			menu->reset_size();
 			menu->popup();
 			menu->grab_focus();
@@ -668,13 +675,14 @@ void LineEdit::gui_input(const Ref<InputEvent> &p_event) {
 		return;
 	}
 
-	// Start Unicode input (hold).
+	// Start Unicode Alt input (hold).
 	if (k->is_alt_pressed() && k->get_keycode() == Key::KP_ADD && !alt_start && !alt_start_no_hold) {
 		if (selection.enabled) {
 			selection_delete();
 		}
 		alt_start = true;
 		alt_code = 0;
+		alt_mode = ALT_INPUT_UNICODE;
 		ime_text = "u";
 		ime_selection = Vector2i(0, -1);
 		_shape();
@@ -690,7 +698,40 @@ void LineEdit::gui_input(const Ref<InputEvent> &p_event) {
 		}
 		alt_start_no_hold = true;
 		alt_code = 0;
+		alt_mode = ALT_INPUT_UNICODE;
 		ime_text = "u";
+		ime_selection = Vector2i(0, -1);
+		_shape();
+		queue_redraw();
+		accept_event();
+		return;
+	}
+
+	// Start OEM Alt input (hold).
+	if (k->is_alt_pressed() && k->get_keycode() >= Key::KP_1 && k->get_keycode() <= Key::KP_9 && !alt_start && !alt_start_no_hold) {
+		if (selection.enabled) {
+			selection_delete();
+		}
+		alt_start = true;
+		alt_code = (uint32_t)(k->get_keycode() - Key::KP_0);
+		alt_mode = ALT_INPUT_OEM;
+		ime_text = vformat("o%s", String::num_int64(alt_code, 10));
+		ime_selection = Vector2i(0, -1);
+		_shape();
+		queue_redraw();
+		accept_event();
+		return;
+	}
+
+	// Start Windows Alt input (hold).
+	if (k->is_alt_pressed() && k->get_keycode() == Key::KP_0 && !alt_start && !alt_start_no_hold) {
+		if (selection.enabled) {
+			selection_delete();
+		}
+		alt_start = true;
+		alt_mode = ALT_INPUT_WIN;
+		alt_code = 0;
+		ime_text = "w";
 		ime_selection = Vector2i(0, -1);
 		_shape();
 		queue_redraw();
@@ -701,34 +742,66 @@ void LineEdit::gui_input(const Ref<InputEvent> &p_event) {
 	// Update Unicode input.
 	if (k->is_pressed() && ((k->is_alt_pressed() && alt_start) || alt_start_no_hold)) {
 		if (k->get_keycode() >= Key::KEY_0 && k->get_keycode() <= Key::KEY_9) {
-			alt_code = alt_code << 4;
+			if (alt_mode == ALT_INPUT_UNICODE) {
+				alt_code = alt_code << 4;
+			} else {
+				alt_code = alt_code * 10;
+			}
 			alt_code += (uint32_t)(k->get_keycode() - Key::KEY_0);
 		} else if (k->get_keycode() >= Key::KP_0 && k->get_keycode() <= Key::KP_9) {
-			alt_code = alt_code << 4;
+			if (alt_mode == ALT_INPUT_UNICODE) {
+				alt_code = alt_code << 4;
+			} else {
+				alt_code = alt_code * 10;
+			}
 			alt_code += (uint32_t)(k->get_keycode() - Key::KP_0);
-		} else if (k->get_keycode() >= Key::A && k->get_keycode() <= Key::F) {
+		} else if (alt_mode == ALT_INPUT_UNICODE && k->get_keycode() >= Key::A && k->get_keycode() <= Key::F) {
 			alt_code = alt_code << 4;
 			alt_code += (uint32_t)(k->get_keycode() - Key::A) + 10;
 		} else if ((Key)k->get_unicode() >= Key::KEY_0 && (Key)k->get_unicode() <= Key::KEY_9) {
-			alt_code = alt_code << 4;
+			if (alt_mode == ALT_INPUT_UNICODE) {
+				alt_code = alt_code << 4;
+			} else {
+				alt_code = alt_code * 10;
+			}
 			alt_code += (uint32_t)((Key)k->get_unicode() - Key::KEY_0);
-		} else if ((Key)k->get_unicode() >= Key::A && (Key)k->get_unicode() <= Key::F) {
+		} else if (alt_mode == ALT_INPUT_UNICODE && (Key)k->get_unicode() >= Key::A && (Key)k->get_unicode() <= Key::F) {
 			alt_code = alt_code << 4;
 			alt_code += (uint32_t)((Key)k->get_unicode() - Key::A) + 10;
 		} else if (k->get_physical_keycode() >= Key::KEY_0 && k->get_physical_keycode() <= Key::KEY_9) {
-			alt_code = alt_code << 4;
+			if (alt_mode == ALT_INPUT_UNICODE) {
+				alt_code = alt_code << 4;
+			} else {
+				alt_code = alt_code * 10;
+			}
 			alt_code += (uint32_t)(k->get_physical_keycode() - Key::KEY_0);
 		}
 		if (k->get_keycode() == Key::BACKSPACE) {
-			alt_code = alt_code >> 4;
+			if (alt_mode == ALT_INPUT_UNICODE) {
+				alt_code = alt_code >> 4;
+			} else {
+				alt_code = alt_code / 10;
+			}
 		}
 		if (alt_code > 0x10ffff) {
 			alt_code = 0x10ffff;
 		}
 		if (alt_code > 0) {
-			ime_text = vformat("u%s", String::num_int64(alt_code, 16, true));
+			if (alt_mode == ALT_INPUT_UNICODE) {
+				ime_text = vformat("u%s", String::num_int64(alt_code, 16, true));
+			} else if (alt_mode == ALT_INPUT_OEM) {
+				ime_text = vformat("o%s", String::num_int64(alt_code, 10));
+			} else if (alt_mode == ALT_INPUT_WIN) {
+				ime_text = vformat("w%s", String::num_int64(alt_code, 10));
+			}
 		} else {
-			ime_text = "u";
+			if (alt_mode == ALT_INPUT_UNICODE) {
+				ime_text = "u";
+			} else if (alt_mode == ALT_INPUT_OEM) {
+				ime_text = "o";
+			} else if (alt_mode == ALT_INPUT_WIN) {
+				ime_text = "w";
+			}
 		}
 		ime_selection = Vector2i(0, -1);
 		_shape();
@@ -741,11 +814,32 @@ void LineEdit::gui_input(const Ref<InputEvent> &p_event) {
 	if ((!k->is_pressed() && alt_start && k->get_keycode() == Key::ALT) || (alt_start_no_hold && (k->is_action("ui_text_submit", true) || k->is_action("ui_accept", true)))) {
 		alt_start = false;
 		alt_start_no_hold = false;
-		if ((alt_code > 0x31 && alt_code < 0xd800) || (alt_code > 0xdfff && alt_code <= 0x10ffff)) {
+		if ((alt_code > 0x31 && alt_code < 0xd800) || (alt_code > 0xdfff)) {
 			ime_text = String();
 			ime_selection = Vector2i();
-			char32_t ucodestr[2] = { (char32_t)alt_code, 0 };
-			insert_text_at_caret(ucodestr);
+			if (alt_mode == ALT_INPUT_UNICODE) {
+				if ((alt_code > 0x31 && alt_code < 0xd800) || (alt_code > 0xdfff)) {
+					char32_t ucodestr[2] = { (char32_t)alt_code, 0 };
+					insert_text_at_caret(ucodestr);
+				}
+			} else if (alt_mode == ALT_INPUT_OEM) {
+				if (alt_code > 0x00 && alt_code <= 0xff) {
+					char32_t ucodestr[2] = { alt_code_oem437[alt_code], 0 };
+					insert_text_at_caret(ucodestr);
+				} else if ((alt_code > 0xff && alt_code < 0xd800) || (alt_code > 0xdfff)) {
+					char32_t ucodestr[2] = { (char32_t)alt_code, 0 };
+					insert_text_at_caret(ucodestr);
+				}
+			} else if (alt_mode == ALT_INPUT_WIN) {
+				if (alt_code > 0x00 && alt_code <= 0xff) {
+					char32_t ucodestr[2] = { alt_code_cp1252[alt_code], 0 };
+					insert_text_at_caret(ucodestr);
+				} else if ((alt_code > 0xff && alt_code < 0xd800) || (alt_code > 0xdfff)) {
+					char32_t ucodestr[2] = { (char32_t)alt_code, 0 };
+					insert_text_at_caret(ucodestr);
+				}
+			}
+			alt_mode = ALT_INPUT_NONE;
 		} else {
 			ime_text = String();
 			ime_selection = Vector2i();
@@ -760,6 +854,7 @@ void LineEdit::gui_input(const Ref<InputEvent> &p_event) {
 	if (alt_start_no_hold && k->is_action("ui_cancel", true)) {
 		alt_start = false;
 		alt_start_no_hold = false;
+		alt_mode = ALT_INPUT_NONE;
 		ime_text = String();
 		ime_selection = Vector2i();
 		_shape();
@@ -1360,7 +1455,7 @@ void LineEdit::_notification(int p_what) {
 
 		case NOTIFICATION_FOCUS_ENTER: {
 			if (Input::get_singleton()->is_mouse_button_pressed(MouseButton::LEFT) || Input::get_singleton()->is_mouse_button_pressed(MouseButton::RIGHT) || Input::get_singleton()->is_mouse_button_pressed(MouseButton::MIDDLE)) {
-				edit();
+				_edit(virtual_keyboard_show_on_focus);
 			}
 		} break;
 
@@ -1739,11 +1834,14 @@ void LineEdit::delete_char() {
 	if (text.is_empty() || caret_column == 0) {
 		return;
 	}
-
-	text = text.left(caret_column - 1) + text.substr(caret_column);
+	int delete_char_offset = 1;
+	if (!caret_mid_grapheme_enabled && backspace_deletes_composite_character_enabled) {
+		delete_char_offset = caret_column - get_previous_composite_character_column(caret_column);
+	}
+	text = text.left(caret_column - delete_char_offset) + text.substr(caret_column);
 	_shape();
 
-	set_caret_column(get_caret_column() - 1);
+	set_caret_column(get_caret_column() - delete_char_offset);
 
 	_text_changed();
 }
@@ -1994,6 +2092,24 @@ int LineEdit::get_caret_column() const {
 	return caret_column;
 }
 
+int LineEdit::get_next_composite_character_column(int p_column) const {
+	ERR_FAIL_INDEX_V(p_column, text.length() + 1, -1);
+	if (p_column == text.length()) {
+		return p_column;
+	} else {
+		return TS->shaped_text_next_character_pos(text_rid, p_column);
+	}
+}
+
+int LineEdit::get_previous_composite_character_column(int p_column) const {
+	ERR_FAIL_INDEX_V(p_column, text.length() + 1, -1);
+	if (p_column == 0) {
+		return 0;
+	} else {
+		return TS->shaped_text_prev_character_pos(text_rid, p_column);
+	}
+}
+
 void LineEdit::set_scroll_offset(float p_pos) {
 	scroll_offset = p_pos;
 	if (scroll_offset < 0.0) {
@@ -2015,7 +2131,7 @@ void LineEdit::insert_text_at_caret(String p_text) {
 		}
 	}
 	String pre = text.substr(0, caret_column);
-	String post = text.substr(caret_column, text.length() - caret_column);
+	String post = text.substr(caret_column);
 	text = pre + p_text + post;
 	_shape();
 	TextServer::Direction dir = TS->shaped_text_get_dominant_direction_in_range(text_rid, caret_column, caret_column + p_text.length());
@@ -2404,6 +2520,14 @@ bool LineEdit::is_emoji_menu_enabled() const {
 	return emoji_menu_enabled;
 }
 
+void LineEdit::set_backspace_deletes_composite_character_enabled(bool p_enabled) {
+	backspace_deletes_composite_character_enabled = p_enabled;
+}
+
+bool LineEdit::is_backspace_deletes_composite_character_enabled() const {
+	return backspace_deletes_composite_character_enabled;
+}
+
 bool LineEdit::is_menu_visible() const {
 	return menu && menu->is_visible();
 }
@@ -2463,6 +2587,14 @@ void LineEdit::set_virtual_keyboard_enabled(bool p_enable) {
 
 bool LineEdit::is_virtual_keyboard_enabled() const {
 	return virtual_keyboard_enabled;
+}
+
+void LineEdit::set_virtual_keyboard_show_on_focus(bool p_show_on_focus) {
+	virtual_keyboard_show_on_focus = p_show_on_focus;
+}
+
+bool LineEdit::get_virtual_keyboard_show_on_focus() const {
+	return virtual_keyboard_show_on_focus;
 }
 
 void LineEdit::set_virtual_keyboard_type(VirtualKeyboardType p_type) {
@@ -2609,7 +2741,7 @@ void LineEdit::_shape() {
 		t = s.repeat(text.length() + ime_text.length());
 	} else {
 		if (!ime_text.is_empty()) {
-			t = text.substr(0, caret_column) + ime_text + text.substr(caret_column, text.length());
+			t = text.substr(0, caret_column) + ime_text + text.substr(caret_column);
 		} else {
 			t = text;
 		}
@@ -2705,7 +2837,6 @@ Key LineEdit::_get_menu_action_accelerator(const String &p_action) {
 void LineEdit::_generate_context_menu() {
 	menu = memnew(PopupMenu);
 	add_child(menu, false, INTERNAL_MODE_FRONT);
-	menu->force_parent_owned();
 
 	menu_dir = memnew(PopupMenu);
 	menu_dir->add_radio_check_item(ETR("Same as Layout Direction"), MENU_DIR_INHERITED);
@@ -2861,6 +2992,8 @@ void LineEdit::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_placeholder"), &LineEdit::get_placeholder);
 	ClassDB::bind_method(D_METHOD("set_caret_column", "position"), &LineEdit::set_caret_column);
 	ClassDB::bind_method(D_METHOD("get_caret_column"), &LineEdit::get_caret_column);
+	ClassDB::bind_method(D_METHOD("get_next_composite_character_column", "column"), &LineEdit::get_next_composite_character_column);
+	ClassDB::bind_method(D_METHOD("get_previous_composite_character_column", "column"), &LineEdit::get_previous_composite_character_column);
 	ClassDB::bind_method(D_METHOD("get_scroll_offset"), &LineEdit::get_scroll_offset);
 	ClassDB::bind_method(D_METHOD("set_expand_to_text_length_enabled", "enabled"), &LineEdit::set_expand_to_text_length_enabled);
 	ClassDB::bind_method(D_METHOD("is_expand_to_text_length_enabled"), &LineEdit::is_expand_to_text_length_enabled);
@@ -2893,8 +3026,12 @@ void LineEdit::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_context_menu_enabled"), &LineEdit::is_context_menu_enabled);
 	ClassDB::bind_method(D_METHOD("set_emoji_menu_enabled", "enable"), &LineEdit::set_emoji_menu_enabled);
 	ClassDB::bind_method(D_METHOD("is_emoji_menu_enabled"), &LineEdit::is_emoji_menu_enabled);
+	ClassDB::bind_method(D_METHOD("set_backspace_deletes_composite_character_enabled", "enable"), &LineEdit::set_backspace_deletes_composite_character_enabled);
+	ClassDB::bind_method(D_METHOD("is_backspace_deletes_composite_character_enabled"), &LineEdit::is_backspace_deletes_composite_character_enabled);
 	ClassDB::bind_method(D_METHOD("set_virtual_keyboard_enabled", "enable"), &LineEdit::set_virtual_keyboard_enabled);
 	ClassDB::bind_method(D_METHOD("is_virtual_keyboard_enabled"), &LineEdit::is_virtual_keyboard_enabled);
+	ClassDB::bind_method(D_METHOD("set_virtual_keyboard_show_on_focus", "show_on_focus"), &LineEdit::set_virtual_keyboard_show_on_focus);
+	ClassDB::bind_method(D_METHOD("get_virtual_keyboard_show_on_focus"), &LineEdit::get_virtual_keyboard_show_on_focus);
 	ClassDB::bind_method(D_METHOD("set_virtual_keyboard_type", "type"), &LineEdit::set_virtual_keyboard_type);
 	ClassDB::bind_method(D_METHOD("get_virtual_keyboard_type"), &LineEdit::get_virtual_keyboard_type);
 	ClassDB::bind_method(D_METHOD("set_clear_button_enabled", "enable"), &LineEdit::set_clear_button_enabled);
@@ -2972,7 +3109,9 @@ void LineEdit::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "expand_to_text_length"), "set_expand_to_text_length_enabled", "is_expand_to_text_length_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "context_menu_enabled"), "set_context_menu_enabled", "is_context_menu_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "emoji_menu_enabled"), "set_emoji_menu_enabled", "is_emoji_menu_enabled");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "backspace_deletes_composite_character_enabled"), "set_backspace_deletes_composite_character_enabled", "is_backspace_deletes_composite_character_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "virtual_keyboard_enabled"), "set_virtual_keyboard_enabled", "is_virtual_keyboard_enabled");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "virtual_keyboard_show_on_focus"), "set_virtual_keyboard_show_on_focus", "get_virtual_keyboard_show_on_focus");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "virtual_keyboard_type", PROPERTY_HINT_ENUM, "Default,Multiline,Number,Decimal,Phone,Email,Password,URL"), "set_virtual_keyboard_type", "get_virtual_keyboard_type");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "clear_button_enabled"), "set_clear_button_enabled", "is_clear_button_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "shortcut_keys_enabled"), "set_shortcut_keys_enabled", "is_shortcut_keys_enabled");

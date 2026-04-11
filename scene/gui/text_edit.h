@@ -161,6 +161,7 @@ private:
 			int line_count = 0;
 			int height = 0;
 			int width = 0;
+			float indent_ofs = -1.0;
 
 			Line() {
 				data_buf.instantiate();
@@ -183,6 +184,7 @@ private:
 		String custom_word_separators;
 		bool use_default_word_separators = true;
 		bool use_custom_word_separators = false;
+		Callable inline_object_parser;
 
 		mutable bool max_line_width_dirty = true;
 		mutable bool max_line_height_dirty = true;
@@ -205,6 +207,7 @@ private:
 		void set_font_size(int p_font_size);
 		void set_direction_and_language(TextServer::Direction p_direction, const String &p_language);
 		void set_draw_control_chars(bool p_enabled);
+		void set_inline_object_parser(const Callable &p_parser);
 
 		int get_line_height() const;
 		int get_line_width(int p_line, int p_wrap_index = -1) const;
@@ -230,6 +233,7 @@ private:
 
 		Vector<Vector2i> get_line_wrap_ranges(int p_line) const;
 		const Ref<TextParagraph> get_line_data(int p_line) const;
+		float get_indent_offset(int p_line, bool p_rtl) const;
 
 		void set(int p_line, const String &p_text, const Array &p_bidi_override);
 		void set_ime(int p_line, const String &p_text, const Array &p_bidi_override);
@@ -278,6 +282,14 @@ private:
 
 	bool setting_text = false;
 
+	enum AltInputMode {
+		ALT_INPUT_NONE,
+		ALT_INPUT_UNICODE,
+		ALT_INPUT_OEM,
+		ALT_INPUT_WIN,
+	};
+
+	AltInputMode alt_mode = ALT_INPUT_NONE;
 	bool alt_start = false;
 	bool alt_start_no_hold = false;
 	uint32_t alt_code = 0;
@@ -320,8 +332,10 @@ private:
 	bool overtype_mode = false;
 	bool context_menu_enabled = true;
 	bool emoji_menu_enabled = true;
+	bool backspace_deletes_composite_character_enabled = false;
 	bool shortcut_keys_enabled = true;
 	bool virtual_keyboard_enabled = true;
+	bool virtual_keyboard_show_on_focus = true;
 	bool middle_mouse_paste_enabled = true;
 	bool empty_selection_clipboard_enabled = true;
 
@@ -332,6 +346,9 @@ private:
 	PopupMenu *menu = nullptr;
 	PopupMenu *menu_dir = nullptr;
 	PopupMenu *menu_ctl = nullptr;
+
+	Callable inline_object_drawer;
+	Callable inline_object_click_handler;
 
 	Key _get_menu_action_accelerator(const String &p_action);
 	void _generate_context_menu();
@@ -776,11 +793,17 @@ public:
 	void set_emoji_menu_enabled(bool p_enabled);
 	bool is_emoji_menu_enabled() const;
 
+	void set_backspace_deletes_composite_character_enabled(bool p_enabled);
+	bool is_backspace_deletes_composite_character_enabled() const;
+
 	void set_shortcut_keys_enabled(bool p_enabled);
 	bool is_shortcut_keys_enabled() const;
 
 	void set_virtual_keyboard_enabled(bool p_enabled);
 	bool is_virtual_keyboard_enabled() const;
+
+	void set_virtual_keyboard_show_on_focus(bool p_show_on_focus);
+	bool get_virtual_keyboard_show_on_focus() const;
 
 	void set_middle_mouse_paste_enabled(bool p_enabled);
 	bool is_middle_mouse_paste_enabled() const;
@@ -821,6 +844,8 @@ public:
 	int get_last_unhidden_line() const;
 	int get_next_visible_line_offset_from(int p_line_from, int p_visible_amount) const;
 	Point2i get_next_visible_line_index_offset_from(int p_line_from, int p_wrap_index_from, int p_visible_amount) const;
+
+	void set_inline_object_handlers(const Callable &p_parser, const Callable &p_drawer, const Callable &p_click_handler);
 
 	// Overridable actions
 	void handle_unicode_input(const uint32_t p_unicode, int p_caret = -1);
@@ -924,6 +949,8 @@ public:
 
 	void set_caret_column(int p_column, bool p_adjust_viewport = true, int p_caret = 0);
 	int get_caret_column(int p_caret = 0) const;
+	int get_next_composite_character_column(int p_line, int p_column) const;
+	int get_previous_composite_character_column(int p_line, int p_column) const;
 
 	int get_caret_wrap_index(int p_caret = 0) const;
 
