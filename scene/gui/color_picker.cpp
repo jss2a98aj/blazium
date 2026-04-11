@@ -1319,13 +1319,11 @@ void ColorPicker::_update_text_value() {
 	if (text_is_constructor || !is_color_valid_hex(color)) {
 		String t = "Color" + color_to_string(color, edit_alpha && color.a < 1, true);
 
-		text_type->set_text("");
 		text_type->set_button_icon(theme_cache.code_icon);
 		text_type->set_disabled(!is_color_valid_hex(color));
 		c_text->set_text(t);
 	} else {
-		text_type->set_text("#");
-		text_type->set_button_icon(nullptr);
+		text_type->set_button_icon(theme_cache.hex_icon);
 		text_type->set_disabled(false);
 		c_text->set_text(color.to_html(edit_alpha && color.a < 1));
 	}

@@ -1085,7 +1085,7 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 	theme->set_icon("picker_cursor", "ColorPicker", icons["color_picker_cursor"]);
 	theme->set_icon("picker_cursor_bg", "ColorPicker", icons["color_picker_cursor_bg"]);
 	theme->set_icon("hex_icon", "ColorPicker", icons["color_picker_hex"]);
-	theme->set_icon("code_icon", "ColorPicker", icons["color_picker_code"]);
+	theme->set_icon("code_icon", "ColorPicker", icons["script"]);
 
 	theme->set_stylebox("sample_focus", "ColorPicker", focus);
 	theme->set_stylebox("picker_focus_rectangle", "ColorPicker", focus);
