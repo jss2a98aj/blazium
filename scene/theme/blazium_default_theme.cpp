@@ -421,7 +421,7 @@ void update_theme_icons(Ref<Theme> &p_theme, const Color &p_font_color, const Co
 	p_theme->set_icon("picker_cursor", "ColorPicker", icons["color_picker_cursor"]);
 	p_theme->set_icon("picker_cursor_bg", "ColorPicker", icons["color_picker_cursor_bg"]);
 	p_theme->set_icon("hex_icon", "ColorPicker", icons["color_picker_hex"]);
-	p_theme->set_icon("code_icon", "ColorPicker", icons["color_picker_hex_code"]);
+	p_theme->set_icon("code_icon", "ColorPicker", icons["script"]);
 
 	p_theme->set_icon("bg", "ColorPickerButton", icons["mini_checkerboard"]);
 	p_theme->set_icon("overbright_indicator", "ColorPickerButton", icons["color_picker_overbright"]);
