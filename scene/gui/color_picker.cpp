@@ -540,14 +540,14 @@ void ColorPicker::create_slider(GridContainer *gc, int idx) {
 		sliders[idx] = slider;
 		values[idx] = val;
 		labels[idx] = lbl;
-	} else if (idx == SLIDER_ALPHA) {
-		alpha_slider = slider;
-		alpha_value = val;
-		alpha_label = lbl;
 	} else if (idx == SLIDER_INTENSITY) {
 		intensity_slider = slider;
 		intensity_value = val;
 		intensity_label = lbl;
+	} else if (idx == SLIDER_ALPHA) {
+		alpha_slider = slider;
+		alpha_value = val;
+		alpha_label = lbl;
 	}
 }
 
@@ -1438,7 +1438,6 @@ void ColorPicker::_text_changed(const String &) {
 	text_changed = true;
 }
 
-// TODO: Add the new 4.4 palette resource and create a popup for it.
 void ColorPicker::_preset_foldable_button_pressed(int p_idx) {
 	if (p_idx == 0) {
 		_add_preset_pressed();

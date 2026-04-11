@@ -129,8 +129,9 @@ public:
 
 	virtual Color get_color() const override;
 
-	virtual void slider_draw(int p_which) override;
 	virtual void _greater_value_inputted() override;
+
+	virtual void slider_draw(int p_which) override;
 
 	ColorModeLinear(ColorPicker *p_color_picker) :
 			ColorMode(p_color_picker) {}
