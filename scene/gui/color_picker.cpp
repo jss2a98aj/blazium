@@ -396,6 +396,9 @@ void ColorPicker::_set_pick_color(const Color &p_color, bool p_update_sliders, b
 }
 
 void ColorPicker::set_pick_color(const Color &p_color) {
+	if (p_color == color) {
+		return;
+	}
 	_set_pick_color(p_color, true, true); // Because setters can't have more arguments.
 }
 
@@ -1792,7 +1795,7 @@ void ColorPicker::_picker_texture_input(const Ref<InputEvent> &p_event) {
 }
 
 void ColorPicker::_html_focus_exit() {
-	if (c_text->is_menu_visible()) {
+	if (c_text->is_menu_visible() || !text_changed) {
 		return;
 	}
 
