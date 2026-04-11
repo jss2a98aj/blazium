@@ -47,14 +47,6 @@ e.g BigNum(0.1, 0)
 // GCC supports most constexpr
 #define MAYBE_CONSTEXPR
 
-// It's safe to use constexpr nextafter if we compile with -fno-trapping-math
-#ifndef NO_TRAPPING_MATH
-
-#ifndef CONSTEXPR_NEXTAFTER_FALLBACK
-#define CONSTEXPR_NEXTAFTER_FALLBACK
-#endif // CONSTEXPR_NEXTAFTER_FALLBACK
-
-#endif // NO_TRAPPING_MATH
 
 #else // Neither _MSC_VER, __clang__, nor __GNUC__
 
