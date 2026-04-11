@@ -65,7 +65,7 @@
 
 // External Version number encoded as hexadecimal int with one byte for each number,
 // for easy comparison from code.
-#define EXTERNAL_VERSION_HEX 0x10000 * EXTERNAL_VERSION_MAJOR + 0x100 * EXTERNAL_VERSION_MINOR + EXTERNAL_VERSION_PATCH
+#define EXTERNAL_VERSION_HEX 0x100000 * EXTERNAL_VERSION_MAJOR + 0x1000 * EXTERNAL_VERSION_MINOR + EXTERNAL_VERSION_PATCH
 
 // Describes the full configuration of that Godot version, including the version number,
 // the status (beta, stable, etc.) and potential module-specific features (e.g. mono).
