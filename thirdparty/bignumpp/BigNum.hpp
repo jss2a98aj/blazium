@@ -38,14 +38,14 @@ e.g BigNum(0.1, 0)
 
 #elif defined(__clang__)
 // Clang supports most constexpr
-#define MAYBE_CONSTEXPR constexpr
+#define MAYBE_CONSTEXPR
 
 // Clang supports constexpr std::nextafter
 
 #elif defined(__GNUC__) // Neither _MSC_VER nor __clang__
 
 // GCC supports most constexpr
-#define MAYBE_CONSTEXPR constexpr
+#define MAYBE_CONSTEXPR
 
 // It's safe to use constexpr nextafter if we compile with -fno-trapping-math
 #ifndef NO_TRAPPING_MATH
@@ -139,23 +139,13 @@ private:
 
   static inline constexpr exp_t MAX_DIV_DIFF = 308;
   // helper functions to convert strings to mantissa/exponent
-  static inline MAYBE_CONSTEXPR man_t strtom(const std::string_view &sv) {
-    man_t m;
-    auto result = std::from_chars(sv.data(), sv.data() + sv.size(), m);
-    if (result.ec != std::errc()) {
-      throw std::invalid_argument("Failed to convert string to mantissa: " +
-                                  std::string(sv));
-    }
-    return m;
+  static inline man_t strtom(const std::string_view &sv) {
+    std::string s(sv);
+    return std::strtod(s.c_str(), nullptr);
   }
-  static inline MAYBE_CONSTEXPR exp_t strtoe(const std::string_view &sv) {
-    exp_t e;
-    auto result = std::from_chars(sv.data(), sv.data() + sv.size(), e);
-    if (result.ec != std::errc()) {
-      throw std::invalid_argument("Failed to convert string to exponent: " +
-                                  std::string(sv));
-    }
-    return e;
+  static inline exp_t strtoe(const std::string_view &sv) {
+    std::string s(sv);
+    return std::strtoull(s.c_str(), nullptr, 10);
   }
 
   // convert the number to a full-precision string
@@ -251,20 +241,15 @@ private:
   }
 
   MAYBE_CONSTEXPR void parseStr(const std::string_view &sv) {
-    try {
-      size_t pos = sv.find('e');
-      if (pos != std::string::npos) {
-        m = strtom(sv.substr(0, pos));
-        e = strtoe(sv.substr(pos + 1));
-      } else {
-        m = strtom(sv);
-        e = 0;
-      }
-      normalize();
-    } catch (const std::invalid_argument &ex) {
-      throw std::invalid_argument(std::string("Failed to parse number: ") +
-                                  ex.what());
+    size_t pos = sv.find('e');
+    if (pos != std::string::npos) {
+      m = strtom(sv.substr(0, pos));
+      e = strtoe(sv.substr(pos + 1));
+    } else {
+      m = strtom(sv);
+      e = 0;
     }
+    normalize();
   }
 
   constexpr void set(const BigNum &other) {
@@ -838,7 +823,7 @@ public:
     }
     if (m == 0) {
       if (power < 0) {
-        throw std::domain_error("Cannot raise 0 to a negative power");
+        return nan();
       }
       return BigNum(static_cast<man_t>(0));
     }
@@ -849,8 +834,7 @@ public:
       bool is_integer_power = std::abs(power - std::round(power)) < 1e-10;
 
       if (!is_integer_power) {
-        throw std::domain_error("Non-integer powers of negative "
-                                "numbers result in complex values");
+        return nan();
       }
 
       // Handle integer powers of negative numbers
@@ -891,7 +875,7 @@ public:
   // Returns num^(1/n), aka the nth root
   MAYBE_CONSTEXPR BigNum root(intmax_t n) const {
     if (n == 0) {
-      throw std::domain_error("Cannot take the zeroth root");
+      return nan();
     }
     if (m == 0) {
       return BigNum(static_cast<man_t>(0));
@@ -899,7 +883,7 @@ public:
 
     bool is_negative = (m < 0);
     if (is_negative && n % 2 == 0) {
-      throw std::domain_error("Even root of a negative number is not defined");
+      return nan();
     }
 
     double abs_log = std::log10(std::abs(m)) + e;
