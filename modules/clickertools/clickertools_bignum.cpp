@@ -57,10 +57,23 @@ void BlaziumBigNum::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_mantissa"), &BlaziumBigNum::get_mantissa);
 	ClassDB::bind_method(D_METHOD("get_exponent"), &BlaziumBigNum::get_exponent);
 
-	ClassDB::bind_method(D_METHOD("as_string", "precision"), &BlaziumBigNum::as_string, DEFVAL(3));
-	ClassDB::bind_method(D_METHOD("to_pretty_string", "precision"), &BlaziumBigNum::to_pretty_string, DEFVAL(3));
+	ClassDB::bind_method(D_METHOD("as_string", "precision"), &BlaziumBigNum::as_string, DEFVAL(-1));
+	ClassDB::bind_method(D_METHOD("to_pretty_string", "precision"), &BlaziumBigNum::to_pretty_string, DEFVAL(-1));
 
 	ClassDB::bind_method(D_METHOD("parse_string", "value"), &BlaziumBigNum::parse_string);
+
+	ClassDB::bind_method(D_METHOD("compare_to", "other"), &BlaziumBigNum::compare_to);
+
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("set_default_max_digits", "max_digits"), &BlaziumBigNum::set_default_max_digits);
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("get_default_max_digits"), &BlaziumBigNum::get_default_max_digits);
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("set_default_print_precision", "precision"), &BlaziumBigNum::set_default_print_precision);
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("get_default_print_precision"), &BlaziumBigNum::get_default_print_precision);
+
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("max_of", "a", "b"), &BlaziumBigNum::max_of);
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("min_of", "a", "b"), &BlaziumBigNum::min_of);
+
+	ClassDB::bind_method(D_METHOD("parse_mantissa_exponent", "mantissa", "exponent"), &BlaziumBigNum::parse_mantissa_exponent);
+	ClassDB::bind_static_method("BlaziumBigNum", D_METHOD("from_mantissa_exponent", "mantissa", "exponent"), &BlaziumBigNum::from_mantissa_exponent);
 
 	ClassDB::bind_method(D_METHOD("pow_float", "power"), &BlaziumBigNum::pow_float);
 	ClassDB::bind_method(D_METHOD("pow_int", "power"), &BlaziumBigNum::pow_int);
@@ -161,10 +174,16 @@ int64_t BlaziumBigNum::get_exponent() const {
 }
 
 String BlaziumBigNum::as_string(int p_precision) const {
+	if (p_precision == -1) {
+		p_precision = BigNumber::DefaultBigNumContext.print_precision;
+	}
 	return String::utf8(bignum.to_string(p_precision).c_str());
 }
 
 String BlaziumBigNum::to_pretty_string(int p_precision) const {
+	if (p_precision == -1) {
+		p_precision = BigNumber::DefaultBigNumContext.print_precision;
+	}
 	return String::utf8(bignum.to_pretty_string(p_precision).c_str());
 }
 
@@ -273,4 +292,61 @@ bool BlaziumBigNum::is_approximately_equal(Ref<BlaziumBigNum> p_other, double p_
 		return false;
 	}
 	return bignum.approximately_equal(p_other->get_bignum(), p_tolerance);
+}
+
+int BlaziumBigNum::compare_to(Ref<BlaziumBigNum> p_other) const {
+	if (p_other.is_null()) {
+		return 1;
+	}
+	return bignum.compareTo(p_other->get_bignum());
+}
+
+void BlaziumBigNum::set_default_max_digits(int p_max_digits) {
+	BigNumber::DefaultBigNumContext.max_digits = p_max_digits > 0 ? p_max_digits : 1;
+}
+
+int BlaziumBigNum::get_default_max_digits() {
+	return BigNumber::DefaultBigNumContext.max_digits;
+}
+
+void BlaziumBigNum::set_default_print_precision(int p_precision) {
+	BigNumber::DefaultBigNumContext.print_precision = p_precision >= 0 ? p_precision : 0;
+}
+
+int BlaziumBigNum::get_default_print_precision() {
+	return BigNumber::DefaultBigNumContext.print_precision;
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::max_of(Ref<BlaziumBigNum> a, Ref<BlaziumBigNum> b) {
+	if (a.is_null()) {
+		return b;
+	}
+	if (b.is_null()) {
+		return a;
+	}
+	if (a->is_greater_than_or_equal_to(b)) {
+		return a;
+	}
+	return b;
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::min_of(Ref<BlaziumBigNum> a, Ref<BlaziumBigNum> b) {
+	if (a.is_null()) {
+		return b;
+	}
+	if (b.is_null()) {
+		return a;
+	}
+	if (a->is_less_than_or_equal_to(b)) {
+		return a;
+	}
+	return b;
+}
+
+void BlaziumBigNum::parse_mantissa_exponent(double p_mantissa, int64_t p_exponent) {
+	bignum = BigNumber::BigNum(p_mantissa, p_exponent);
+}
+
+Ref<BlaziumBigNum> BlaziumBigNum::from_mantissa_exponent(double p_mantissa, int64_t p_exponent) {
+	return memnew(BlaziumBigNum(BigNumber::BigNum(p_mantissa, p_exponent)));
 }

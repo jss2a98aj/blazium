@@ -54,6 +54,19 @@ public:
 	bool is_greater_than(Ref<BlaziumBigNum> p_other) const;
 	bool is_less_than(Ref<BlaziumBigNum> p_other) const;
 	bool is_equal_to(Ref<BlaziumBigNum> p_other) const;
+	int compare_to(Ref<BlaziumBigNum> p_other) const;
+
+	static void set_default_max_digits(int p_max_digits);
+	static int get_default_max_digits();
+	static void set_default_print_precision(int p_precision);
+	static int get_default_print_precision();
+
+	static Ref<BlaziumBigNum> max_of(Ref<BlaziumBigNum> a, Ref<BlaziumBigNum> b);
+	static Ref<BlaziumBigNum> min_of(Ref<BlaziumBigNum> a, Ref<BlaziumBigNum> b);
+
+	void parse_mantissa_exponent(double p_mantissa, int64_t p_exponent);
+	static Ref<BlaziumBigNum> from_mantissa_exponent(double p_mantissa, int64_t p_exponent);
+
 	Ref<BlaziumBigNum> pow_float(double p_power) const;
 	Ref<BlaziumBigNum> pow_int(int64_t p_power) const;
 	Ref<BlaziumBigNum> root(int64_t p_n) const;
@@ -80,8 +93,8 @@ public:
 	double get_mantissa() const;
 	int64_t get_exponent() const;
 
-	String as_string(int p_precision = 3) const;
-	String to_pretty_string(int p_precision = 3) const;
+	String as_string(int p_precision = -1) const;
+	String to_pretty_string(int p_precision = -1) const;
 
 	void parse_string(const String &p_string);
 	void parse_float(double p_val);
