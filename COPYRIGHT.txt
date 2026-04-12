@@ -122,6 +122,19 @@ Copyright: 2020, Manuel Prandini
  2007-2014, Juan Linietsky, Ariel Manzur
 License: Expat
 
+Files: modules/sqlite3/*
+Comment: SQLite Module
+Copyright: 2020-present K. S. Ernest (iFire) Lee
+ 2017 Khairul Hidayat
+ 2020 Godot Engine SQLite module contributors (cf. modules/sqlite3/AUTHORS.md).
+ 2024-present Blazium Contributors.
+License: Expat
+
+Files: modules/sqlite3/spmemvfs/*
+Comment: spmemvfs
+Copyright: 2009 Stephen Liu
+License: BSD-2-Clause
+
 Files: platform/android/java/editor/src/main/java/com/android/*
  platform/android/java/lib/aidl/com/android/*
  platform/android/java/lib/res/layout/status_bar_ongoing_event_progress_bar.xml

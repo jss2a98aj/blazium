@@ -4,6 +4,5 @@ This file aims at listing the developers who contributed significant patches to 
 
 ## Developers
 
-* Blazium Contributors
 * K. S. Ernest (iFire) Lee (fire)
 * Tiger C. (TGRCdev)
