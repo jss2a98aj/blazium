@@ -7,7 +7,35 @@ def configure(env):
 
 
 def get_doc_classes():
-    return []
+    return [
+        "GodotTsonAnimation",
+        "GodotTsonChunk",
+        "GodotTsonEnumDefinition",
+        "GodotTsonEnumValue",
+        "GodotTsonFrame",
+        "GodotTsonGrid",
+        "GodotTsonLayer",
+        "GodotTsonMap",
+        "GodotTsonObject",
+        "GodotTsonProject",
+        "GodotTsonProjectData",
+        "GodotTsonProjectFolder",
+        "GodotTsonProjectPropertyTypes",
+        "GodotTsonProperty",
+        "GodotTsonTerrain",
+        "GodotTsonText",
+        "GodotTsonTile",
+        "GodotTsonTiledClass",
+        "GodotTsonTileObject",
+        "GodotTsonTileset",
+        "GodotTsonTileson",
+        "GodotTsonTransformations",
+        "GodotTsonWangColor",
+        "GodotTsonWangSet",
+        "GodotTsonWangTile",
+        "GodotTsonWorld",
+        "GodotTsonWorldMapData",
+    ]
 
 
 def get_doc_path():
