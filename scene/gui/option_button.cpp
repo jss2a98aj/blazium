@@ -493,6 +493,8 @@ void OptionButton::show_popup() {
 	Rect2 rect = get_screen_rect();
 	rect.position.y += rect.size.height;
 	rect.size.height = 0;
+	popup->set_default_canvas_item_texture_filter(get_viewport()->get_default_canvas_item_texture_filter());
+	popup->set_default_canvas_item_texture_repeat(get_viewport()->get_default_canvas_item_texture_repeat());
 	popup->popup(rect);
 }
 
