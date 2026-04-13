@@ -158,6 +158,10 @@ void JustAMCPServer::_start_server() {
 	}
 #endif
 
+	if (OS::get_singleton()->get_cmdline_args().find("--enable-mcp")) {
+		enabled = true;
+	}
+
 	if (!enabled) {
 		return;
 	}
