@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="BlaziumBigNum" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="abs_num" qualifiers="const">
+			<return type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="add" qualifiers="const">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="as_string" qualifiers="const">
+			<return type="String" />
+			<param index="0" name="precision" type="int" default="-1" />
+			<description>
+			</description>
+		</method>
+		<method name="compare_to" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="div" qualifiers="const">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="exp" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="n" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="from_bignum" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="value" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="from_float" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="value" type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="from_mantissa_exponent" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="mantissa" type="float" />
+			<param index="1" name="exponent" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="from_string" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="value" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="get_default_max_digits" qualifiers="static">
+			<return type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="get_default_print_precision" qualifiers="static">
+			<return type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="get_exponent" qualifiers="const">
+			<return type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="get_inf" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="get_mantissa" qualifiers="const">
+			<return type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="get_max" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="get_min" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="get_nan" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="is_approximately_equal" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<param index="1" name="tolerance" type="float" default="1e-09" />
+			<description>
+			</description>
+		</method>
+		<method name="is_equal_to" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="is_greater_than" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="is_greater_than_or_equal_to" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="is_inf" qualifiers="const">
+			<return type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="is_less_than" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="is_less_than_or_equal_to" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="is_nan" qualifiers="const">
+			<return type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="is_negative" qualifiers="const">
+			<return type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="is_positive" qualifiers="const">
+			<return type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="log10" qualifiers="const">
+			<return type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="max_of" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="a" type="BlaziumBigNum" />
+			<param index="1" name="b" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="min_of" qualifiers="static">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="a" type="BlaziumBigNum" />
+			<param index="1" name="b" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="mul" qualifiers="const">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="negate" qualifiers="const">
+			<return type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="parse_float">
+			<return type="void" />
+			<param index="0" name="value" type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="parse_mantissa_exponent">
+			<return type="void" />
+			<param index="0" name="mantissa" type="float" />
+			<param index="1" name="exponent" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="parse_string">
+			<return type="void" />
+			<param index="0" name="value" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="pow_float" qualifiers="const">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="power" type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="pow_int" qualifiers="const">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="power" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="root" qualifiers="const">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="n" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="set_default_max_digits" qualifiers="static">
+			<return type="void" />
+			<param index="0" name="max_digits" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="set_default_print_precision" qualifiers="static">
+			<return type="void" />
+			<param index="0" name="precision" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="sqroot" qualifiers="const">
+			<return type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="sub" qualifiers="const">
+			<return type="BlaziumBigNum" />
+			<param index="0" name="other" type="BlaziumBigNum" />
+			<description>
+			</description>
+		</method>
+		<method name="to_int" qualifiers="const">
+			<return type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="to_pretty_string" qualifiers="const">
+			<return type="String" />
+			<param index="0" name="precision" type="int" default="-1" />
+			<description>
+			</description>
+		</method>
+	</methods>
+</class>
