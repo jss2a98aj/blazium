@@ -123,9 +123,7 @@ void initialize_justamcp_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(JustAMCPTileMapTools);
 	}
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
-		if (_is_justamcp_enabled()) {
-			EditorPlugins::add_by_type<JustAMCPEditorPlugin>();
-		}
+		EditorPlugins::add_by_type<JustAMCPEditorPlugin>();
 	}
 #endif
 }
