@@ -164,6 +164,12 @@
 		<constant name="SHAPE_NONE" value="4" enum="PickerShapeType">
 			The color space shape and the shape select button are hidden. Can't be selected from the shapes popup.
 		</constant>
+		<constant name="SHAPE_OK_HS_RECTANGLE" value="5" enum="PickerShapeType">
+			OKHSL Color Model rectangle with constant lightness.
+		</constant>
+		<constant name="SHAPE_OK_HL_RECTANGLE" value="6" enum="PickerShapeType">
+			OKHSL Color Model rectangle with constant saturation.
+		</constant>
 	</constants>
 	<theme_items>
 		<theme_item name="focused_not_editing_cursor_color" data_type="color" type="Color" default="Color(1, 1, 1, 0.2)">
@@ -204,6 +210,9 @@
 		</theme_item>
 		<theme_item name="code_icon" data_type="icon" type="Texture2D">
 			The icon displayed when the hex [LineEdit] is showing the color code.
+		</theme_item>
+		<theme_item name="color_copy" data_type="icon" type="Texture2D">
+			The icon for the button that copies the color in text format to the clipboard.
 		</theme_item>
 		<theme_item name="color_hue" data_type="icon" type="Texture2D">
 			Custom texture for the hue selection slider on the right.

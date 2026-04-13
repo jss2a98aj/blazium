@@ -45,9 +45,6 @@ Size2 SpinBox::get_minimum_size() const {
 
 void SpinBox::_update_text(bool p_only_update_if_value_changed) {
 	double step = get_step();
-	if (use_custom_arrow_step && custom_arrow_step != 0.0) {
-		step = custom_arrow_step;
-	}
 	String value = String::num(get_value(), Math::range_step_decimals(step));
 	if (is_localizing_numeral_system()) {
 		value = TS->format_number(value);
@@ -106,8 +103,6 @@ void SpinBox::_text_submitted(const String &p_string) {
 
 	Error err = expr->parse(text);
 
-	use_custom_arrow_step = false;
-
 	if (err != OK) {
 		// If the expression failed try without converting commas to dots - they might have been for parameter separation.
 		text = p_string;
@@ -154,14 +149,17 @@ void SpinBox::_line_edit_input(const Ref<InputEvent> &p_event) {
 
 void SpinBox::_range_click_timeout() {
 	if (!drag.enabled && Input::get_singleton()->is_mouse_button_pressed(MouseButton::LEFT)) {
-		bool up = get_local_mouse_position().y < (get_size().height / 2);
-		double step = get_step();
-		// Arrow button is being pressed, so we also need to set the step to the same value as custom_arrow_step if its not 0.
-		double temp_step = get_custom_arrow_step() != 0.0 ? get_custom_arrow_step() : get_step();
-		_set_step_no_signal(temp_step);
-		set_value(get_value() + (up ? temp_step : -temp_step));
-		_set_step_no_signal(step);
-		use_custom_arrow_step = true;
+		Rect2 up_button_rc = Rect2(sizing_cache.buttons_left, 0, sizing_cache.buttons_width, sizing_cache.button_up_height);
+		Rect2 down_button_rc = Rect2(sizing_cache.buttons_left, sizing_cache.second_button_top, sizing_cache.buttons_width, sizing_cache.button_down_height);
+
+		Vector2 mpos = get_local_mouse_position();
+
+		bool mouse_on_up_button = up_button_rc.has_point(mpos);
+		bool mouse_on_down_button = down_button_rc.has_point(mpos);
+
+		if (mouse_on_up_button || mouse_on_down_button) {
+			_arrow_clicked(mouse_on_up_button);
+		}
 
 		if (range_click_timer->is_one_shot()) {
 			range_click_timer->set_wait_time(0.075);
@@ -180,6 +178,22 @@ void SpinBox::_release_mouse_from_drag_mode() {
 		Input::get_singleton()->set_mouse_mode(Input::MOUSE_MODE_HIDDEN);
 		warp_mouse(drag.capture_pos);
 		Input::get_singleton()->set_mouse_mode(Input::MOUSE_MODE_VISIBLE);
+	}
+}
+
+void SpinBox::_arrow_clicked(bool p_up) {
+	double arrow_step = get_custom_arrow_step() != 0.0 ? get_custom_arrow_step() : get_step();
+	if (custom_arrow_round) {
+		// Arrow button is being pressed, snap the value to next `arrow_step`.
+		// `arrow_step` should be a multiple of `step`, otherwise it may not be able to increase/decrease the value.
+		arrow_step = Math::snapped(arrow_step, get_step());
+		double new_value = _calc_value(get_value(), arrow_step);
+		if ((p_up && new_value <= get_value()) || (!p_up && new_value >= get_value())) {
+			new_value = _calc_value(get_value() + (p_up ? arrow_step : -arrow_step), arrow_step);
+		}
+		set_value(new_value);
+	} else {
+		set_value(get_value() + (p_up ? arrow_step : -arrow_step));
 	}
 }
 
@@ -223,12 +237,7 @@ void SpinBox::gui_input(const Ref<InputEvent> &p_event) {
 				line_edit->grab_focus();
 
 				if (mouse_on_up_button || mouse_on_down_button) {
-					// Arrow button is being pressed, so step is being changed temporarily.
-					double temp_step = get_custom_arrow_step() != 0.0 ? get_custom_arrow_step() : get_step();
-					_set_step_no_signal(temp_step);
-					set_value(get_value() + (mouse_on_up_button ? temp_step : -temp_step));
-					_set_step_no_signal(step);
-					use_custom_arrow_step = true;
+					_arrow_clicked(mouse_on_up_button);
 				}
 				state_cache.up_button_pressed = mouse_on_up_button;
 				state_cache.down_button_pressed = mouse_on_down_button;
@@ -244,20 +253,17 @@ void SpinBox::gui_input(const Ref<InputEvent> &p_event) {
 			case MouseButton::RIGHT: {
 				line_edit->grab_focus();
 				if (mouse_on_up_button || mouse_on_down_button) {
-					use_custom_arrow_step = false;
 					set_value(mouse_on_up_button ? get_max() : get_min());
 				}
 			} break;
 			case MouseButton::WHEEL_UP: {
 				if (line_edit->is_editing()) {
-					use_custom_arrow_step = false;
 					set_value(get_value() + step * mb->get_factor());
 					accept_event();
 				}
 			} break;
 			case MouseButton::WHEEL_DOWN: {
 				if (line_edit->is_editing()) {
-					use_custom_arrow_step = false;
 					set_value(get_value() - step * mb->get_factor());
 					accept_event();
 				}
@@ -297,7 +303,6 @@ void SpinBox::gui_input(const Ref<InputEvent> &p_event) {
 		if (drag.enabled) {
 			drag.diff_y += mm->get_relative().y;
 			double diff_y = -0.01 * Math::pow(Math::abs(drag.diff_y), 1.8) * SIGN(drag.diff_y);
-			use_custom_arrow_step = false;
 			set_value(CLAMP(drag.base_val + step * diff_y, get_min(), get_max()));
 		} else if (drag.allowed && drag.capture_pos.distance_to(mm->get_position()) > 2) {
 			Input::get_singleton()->set_mouse_mode(Input::MOUSE_MODE_CAPTURED);
@@ -559,6 +564,14 @@ double SpinBox::get_custom_arrow_step() const {
 	return custom_arrow_step;
 }
 
+void SpinBox::set_custom_arrow_round(bool p_round) {
+	custom_arrow_round = p_round;
+}
+
+bool SpinBox::is_custom_arrow_rounding() const {
+	return custom_arrow_round;
+}
+
 void SpinBox::_value_changed(double p_value) {
 	_update_buttons_state_for_current_value();
 }
@@ -573,12 +586,6 @@ void SpinBox::_update_buttons_state_for_current_value() {
 		state_cache.down_button_disabled = should_disable_down;
 		queue_redraw();
 	}
-}
-
-void SpinBox::_set_step_no_signal(double p_step) {
-	set_block_signals(true);
-	set_step(p_step);
-	set_block_signals(false);
 }
 
 void SpinBox::_validate_property(PropertyInfo &p_property) const {
@@ -597,6 +604,8 @@ void SpinBox::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_editable", "enabled"), &SpinBox::set_editable);
 	ClassDB::bind_method(D_METHOD("set_custom_arrow_step", "arrow_step"), &SpinBox::set_custom_arrow_step);
 	ClassDB::bind_method(D_METHOD("get_custom_arrow_step"), &SpinBox::get_custom_arrow_step);
+	ClassDB::bind_method(D_METHOD("set_custom_arrow_round", "round"), &SpinBox::set_custom_arrow_round);
+	ClassDB::bind_method(D_METHOD("is_custom_arrow_rounding"), &SpinBox::is_custom_arrow_rounding);
 	ClassDB::bind_method(D_METHOD("is_editable"), &SpinBox::is_editable);
 	ClassDB::bind_method(D_METHOD("set_update_on_text_changed", "enabled"), &SpinBox::set_update_on_text_changed);
 	ClassDB::bind_method(D_METHOD("get_update_on_text_changed"), &SpinBox::get_update_on_text_changed);
@@ -611,6 +620,7 @@ void SpinBox::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "prefix"), "set_prefix", "get_prefix");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "suffix"), "set_suffix", "get_suffix");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "custom_arrow_step", PROPERTY_HINT_RANGE, "0,10000,0.0001,or_greater"), "set_custom_arrow_step", "get_custom_arrow_step");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "custom_arrow_round"), "set_custom_arrow_round", "is_custom_arrow_rounding");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "select_all_on_focus"), "set_select_all_on_focus", "is_select_all_on_focus");
 
 	BIND_THEME_ITEM(Theme::DATA_TYPE_CONSTANT, SpinBox, buttons_vertical_separation);

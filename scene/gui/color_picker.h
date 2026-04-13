@@ -37,10 +37,6 @@
 
 class AspectRatioContainer;
 class ColorMode;
-class ColorModeRGB;
-class ColorModeHSV;
-class ColorModeRAW;
-class ColorModeOKHSL;
 class ColorPickerShape;
 class GridContainer;
 class HSlider;
@@ -78,6 +74,8 @@ class ColorPicker : public VBoxContainer {
 	friend class ColorPickerShapeCircle;
 	friend class ColorPickerShapeVHSCircle;
 	friend class ColorPickerShapeOKHSLCircle;
+	friend class ColorPickerShapeOKHSRectangle;
+	friend class ColorPickerShapeOKHLRectangle;
 
 	friend class ColorModeRGB;
 	friend class ColorModeHSV;
@@ -103,19 +101,49 @@ public:
 		SHAPE_VHS_CIRCLE,
 		SHAPE_OKHSL_CIRCLE,
 		SHAPE_NONE,
+		SHAPE_OK_HS_RECTANGLE,
+		SHAPE_OK_HL_RECTANGLE,
 
 		SHAPE_MAX
 	};
 
-	static const int SLIDER_COUNT = 3;
+private:
+	// Ideally, `SHAPE_NONE` should be -1 so that we don't need to convert shape type to index.
+	// In order to avoid breaking compatibility, we have to use these methods for conversion.
+	inline int get_current_shape_index() {
+		return shape_to_index(current_shape);
+	}
+
+	static inline int shape_to_index(PickerShapeType p_shape) {
+		if (p_shape == SHAPE_NONE) {
+			return -1;
+		}
+		if (p_shape > SHAPE_NONE) {
+			return p_shape - 1;
+		}
+		return p_shape;
+	}
+
+	static inline PickerShapeType index_to_shape(int p_index) {
+		if (p_index == -1) {
+			return SHAPE_NONE;
+		}
+		if (p_index >= SHAPE_NONE) {
+			return (PickerShapeType)(p_index + 1);
+		}
+		return (PickerShapeType)p_index;
+	}
+
+public:
+	static const int MODE_SLIDER_COUNT = 3;
+
 	enum SLIDER_EXTRA {
-		SLIDER_ALPHA = 3,
+		SLIDER_ALPHA = MODE_SLIDER_COUNT,
 		SLIDER_INTENSITY,
 
 		SLIDER_MAX
 	};
 
-private:
 	enum class MenuOption {
 		MENU_SAVE,
 		MENU_SAVE_AS,
@@ -124,17 +152,15 @@ private:
 		MENU_CLEAR,
 	};
 
-	static Ref<Shader> wheel_shader;
-	static Ref<Shader> circle_shader;
-	static Ref<Shader> circle_ok_color_shader;
-	static List<Color> preset_cache;
-	static List<Color> recent_preset_cache;
+private:
+	static inline List<Color> preset_cache;
+	static inline List<Color> recent_preset_cache;
 
 #ifdef TOOLS_ENABLED
 	Object *editor_settings = nullptr;
 #endif
 
-	int current_slider_count = SLIDER_COUNT;
+	int current_slider_count = MODE_SLIDER_COUNT;
 
 	const float DEFAULT_GAMEPAD_EVENT_DELAY_MS = 1.0 / 2;
 	const float GAMEPAD_EVENT_REPEAT_RATE_MS = 1.0 / 30;
@@ -176,7 +202,7 @@ private:
 	HBoxContainer *mode_hbc = nullptr;
 	HBoxContainer *sample_hbc = nullptr;
 	PanelContainer *sliders_panel = nullptr;
-	VBoxContainer *slider_vbc = nullptr;
+	VBoxContainer *color_mode_vbc = nullptr;
 	GridContainer *slider_gc = nullptr;
 	HBoxContainer *hex_hbc = nullptr;
 	Button *mode_btns[MODE_MAX];
@@ -203,6 +229,7 @@ private:
 
 	Button *text_type = nullptr;
 	LineEdit *c_text = nullptr;
+	Button *text_copy = nullptr;
 
 	HSlider *alpha_slider = nullptr;
 	SpinBox *alpha_value = nullptr;
@@ -299,6 +326,7 @@ private:
 
 		Ref<Texture2D> hex_icon;
 		Ref<Texture2D> code_icon;
+		Ref<Texture2D> color_copy;
 
 		Ref<StyleBox> sample_focus;
 		Ref<StyleBox> picker_focus_rectangle;
@@ -308,6 +336,7 @@ private:
 		Ref<StyleBox> mode_button_normal;
 		Ref<StyleBox> mode_button_pressed;
 		Ref<StyleBox> mode_button_hover;
+		Ref<StyleBox> mode_button_hover_pressed;
 		Ref<StyleBox> mode_button_focus;
 
 		Ref<StyleBox> sliders_panel;
@@ -329,6 +358,7 @@ private:
 	void _update_color(bool p_update_sliders = true);
 	void _update_text_value();
 	void _text_type_toggled();
+	void _text_copy_pressed();
 	void _sample_input(const Ref<InputEvent> &p_event);
 	void _sample_draw();
 	void _slider_draw(int p_which);
@@ -387,11 +417,12 @@ public:
 	void _quick_open_palette_file_selected(const String &p_path);
 #endif // TOOLS_ENABLED
 
+	_ALWAYS_INLINE_ VBoxContainer *get_color_mode_vbox() const {
+		return color_mode_vbc;
+	}
+
 	HSlider *get_slider(int idx);
 	Vector<float> get_active_slider_values();
-
-	static void init_shaders();
-	static void finish_shaders();
 
 	void add_mode(ColorMode *p_mode);
 	void add_shape(ColorPickerShape *p_shape);
@@ -478,6 +509,7 @@ class ColorPickerButton : public Button {
 	Color color;
 	bool edit_alpha = true;
 	bool edit_intensity = true;
+	bool popup_was_open = false;
 
 	struct ThemeCache {
 		Ref<StyleBox> normal_style;
@@ -498,6 +530,7 @@ protected:
 	void _validate_property(PropertyInfo &p_property) const;
 	void _notification(int);
 	static void _bind_methods();
+	virtual void gui_input(const Ref<InputEvent> &p_event) override;
 
 public:
 	void set_pick_color(const Color &p_color);
