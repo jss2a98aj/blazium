@@ -15,7 +15,7 @@ generous deed immortalized in the next stable release of Godot Engine.
     POGR <https://pogr.gg>
     DigitalOcean <https://www.digitalocean.com/?refcode=c9796b8f52e2>
     Docker <https://www.docker.com>
-    Google <https://google.com>
+    Google <https://opensource.google>
     GitHub <https://github.com>
 
 ## Patrons
