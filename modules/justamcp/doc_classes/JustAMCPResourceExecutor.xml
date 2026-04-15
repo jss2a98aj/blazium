@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPResourceExecutor" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Handles native resolution mapped resources mapping wildcards across files streams safely externally routing schemas explicitly.
+	</brief_description>
+	<description>
+		Tracks a robust dynamic Array securely resolving [JustAMCPResource] instances strictly matching template paths natively globally handling execution natively mapping back through standard RPC calls!
+		[codeblock]
+		var res_exec = JustAMCPResourceExecutor.new()
+		var logs = res_exec.read_resource("godot://system/logs")
+
+		# Expected failure traversing strictly natively isolated out of band.
+		var bad_call = res_exec.read_resource("fake://invalid_path.res")
+		[/codeblock]
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="add_resource">
+			<return type="void" />
+			<param index="0" name="resource" type="JustAMCPResource" />
+			<description>
+				Adds explicitly mapped resource wrappers cleanly generating native tracking behaviors implicitly.
+			</description>
+		</method>
+		<method name="list_resource_templates">
+			<return type="Dictionary" />
+			<param index="0" name="cursor" type="String" default="&quot;&quot;" />
+			<description>
+				Fetches schemas returning templates dynamically dynamically defining URI bindings explicitly globally routing logic loops.
+			</description>
+		</method>
+		<method name="list_resources">
+			<return type="Dictionary" />
+			<param index="0" name="cursor" type="String" default="&quot;&quot;" />
+			<description>
+				Returns raw standard static files securely wrapping contents blocks mapping schema bindings nicely tracking values logically globally securely natively externally.
+			</description>
+		</method>
+		<method name="read_resource">
+			<return type="Dictionary" />
+			<param index="0" name="uri" type="String" />
+			<description>
+				Interrogates templates identifying correct URI mappings capturing and generating content securely parsing strings out cleanly explicitly wrapping error checks mapping failures!
+			</description>
+		</method>
+	</methods>
+</class>

@@ -302,22 +302,34 @@ Array JustAMCPToolExecutor::get_tool_schemas(bool p_register_only, bool p_ignore
 		Dictionary schema;
 		schema["type"] = "object";
 		Dictionary props;
-		for (int i = 0; i < p_props.size(); i += 2) {
-			Dictionary p;
-			p["type"] = p_props[i + 1];
-			if (p_props[i + 1] == "array") {
-				Dictionary items_dict;
-				items_dict["type"] = "any";
-				p["items"] = items_dict;
+
+		if (!p_props.is_empty()) {
+			for (int i = 0; i < p_props.size(); i += 2) {
+				Dictionary p;
+				p["type"] = p_props[i + 1];
+				if (p_props[i + 1] == "any") {
+					p["type"] = "string";
+				} else if (p_props[i + 1] == "object") {
+					p["properties"] = Dictionary();
+				} else if (p_props[i + 1] == "array") {
+					Dictionary items_dict;
+					items_dict["type"] = "object";
+					items_dict["properties"] = Dictionary();
+					p["items"] = items_dict;
+				}
+				props[p_props[i]] = p;
 			}
-			props[p_props[i]] = p;
 		}
+
 		schema["properties"] = props;
+
 		Array req;
 		for (int i = 0; i < p_req.size(); i++) {
 			req.push_back(p_req[i]);
 		}
-		schema["required"] = req;
+		if (!req.is_empty()) {
+			schema["required"] = req;
+		}
 		t["inputSchema"] = schema;
 		tools.push_back(t);
 	};
@@ -346,6 +358,8 @@ Array JustAMCPToolExecutor::get_tool_schemas(bool p_register_only, bool p_ignore
 			Vector<String>{ "scene_path", "string", "node_path", "string", "new_parent_path", "string" }, Vector<String>{ "scene_path", "node_path", "new_parent_path" });
 	add_schema("set_node_properties", "Modifies the internal properties of a specified node.",
 			Vector<String>{ "scene_path", "string", "node_path", "string", "properties", "object" }, Vector<String>{ "scene_path", "node_path", "properties" });
+	add_schema("set_node_property", "Sets a specific property value precisely onto a node.",
+			Vector<String>{ "scene_path", "string", "node_path", "string", "property_name", "string", "value", "string" }, Vector<String>{ "scene_path", "node_path", "property_name", "value" });
 	add_schema("get_node_properties", "Retrieves the parameters and properties of a specified node.",
 			Vector<String>{ "scene_path", "string", "node_path", "string" }, Vector<String>{ "scene_path", "node_path" });
 	add_schema("load_sprite", "Loads and sets a texture onto a Sprite node.",
@@ -376,9 +390,9 @@ Array JustAMCPToolExecutor::get_tool_schemas(bool p_register_only, bool p_ignore
 			Vector<String>{ "resource_path", "string" }, Vector<String>{ "resource_path" });
 	add_schema("set_tilemap_cells", "Modifies bulk tilemap data.",
 			Vector<String>{ "scene_path", "string", "node_path", "string", "cells", "array" }, Vector<String>{ "scene_path", "node_path", "cells" });
-	add_schema("set_theme_color", "Configures theme colors natively.",
+	add_schema("set_theme_resource_color", "Configures theme colors natively.",
 			Vector<String>{ "resource_path", "string", "theme_type", "string", "color_name", "string", "color", "object" }, Vector<String>{ "resource_path", "color_name" });
-	add_schema("set_theme_font_size", "Configures theme font sizes natively.",
+	add_schema("set_theme_resource_font_size", "Configures theme font sizes natively.",
 			Vector<String>{ "resource_path", "string", "theme_type", "string", "font_size_name", "string", "size", "number" }, Vector<String>{ "resource_path", "font_size_name" });
 	add_schema("apply_theme_shader", "Applies shaders to UI theme elements natively.",
 			Vector<String>{ "resource_path", "string", "shader_path", "string" }, Vector<String>{ "resource_path", "shader_path" });
@@ -414,7 +428,7 @@ Array JustAMCPToolExecutor::get_tool_schemas(bool p_register_only, bool p_ignore
 	add_schema("get_project_settings", "Reads the project.godot configuration dynamically.",
 			Vector<String>{ "section", "string", "key", "string" }, Vector<String>{});
 	add_schema("set_project_setting", "Sets a specific global setting in project.godot.",
-			Vector<String>{ "key", "string", "value", "any" }, Vector<String>{ "key", "value" });
+			Vector<String>{ "key", "string", "value", "string" }, Vector<String>{ "key", "value" });
 	add_schema("uid_to_project_path", "Resolves a Godot UID representation to an absolute res:// path.",
 			Vector<String>{ "uid", "string" }, Vector<String>{ "uid" });
 	add_schema("project_path_to_uid", "Converts a godot absolute res:// path to its UUID equivalent.",
@@ -479,33 +493,33 @@ Array JustAMCPToolExecutor::get_tool_schemas(bool p_register_only, bool p_ignore
 	// Node Tools
 	current_category = "node_tools";
 	is_core = false;
-	add_schema("add_node", "Spawns a godot node natively onto a target structural anchor.",
+	add_schema("node_add", "Spawns a godot node natively onto a target structural anchor.",
 			Vector<String>{ "type", "string", "parent_path", "string", "name", "string", "properties", "object" }, Vector<String>{ "type" });
-	add_schema("delete_node", "Removes a godot node structural anchor.",
+	add_schema("node_delete", "Removes a godot node structural anchor.",
 			Vector<String>{ "node_path", "string" }, Vector<String>{ "node_path" });
-	add_schema("duplicate_node", "Clones a node struct into the scene graph dynamically.",
+	add_schema("node_duplicate", "Clones a node struct into the scene graph dynamically.",
 			Vector<String>{ "node_path", "string", "name", "string" }, Vector<String>{ "node_path" });
-	add_schema("move_node", "Alters structural ownership hierarchy within the Scene Tree.",
+	add_schema("node_move", "Alters structural ownership hierarchy within the Scene Tree.",
 			Vector<String>{ "node_path", "string", "new_parent_path", "string" }, Vector<String>{ "node_path", "new_parent_path" });
-	add_schema("update_property", "Explicitly manages individual Variant properties assigned onto a node.",
+	add_schema("node_update_property", "Explicitly manages individual Variant properties assigned onto a node.",
 			Vector<String>{ "node_path", "string", "property", "string", "value", "any" }, Vector<String>{ "node_path", "property", "value" });
-	add_schema("get_node_properties", "Interrogates internal parameters within Node bindings structurally.",
+	add_schema("node_get_properties", "Interrogates internal parameters within Node bindings structurally.",
 			Vector<String>{ "node_path", "string", "category", "string" }, Vector<String>{ "node_path" });
-	add_schema("add_resource", "Embeds a godot Resource directly assigned directly onto a node structure natively.",
+	add_schema("node_add_resource", "Embeds a godot Resource directly assigned directly onto a node structure natively.",
 			Vector<String>{ "node_path", "string", "property", "string", "resource_type", "string", "resource_properties", "object" }, Vector<String>{ "node_path", "property", "resource_type" });
-	add_schema("set_anchor_preset", "Enables UI layout modifications bound towards native godot PRESET flags.",
+	add_schema("node_set_anchor_preset", "Enables UI layout modifications bound towards native godot PRESET flags.",
 			Vector<String>{ "node_path", "string", "preset", "string", "keep_offsets", "boolean" }, Vector<String>{ "node_path", "preset" });
-	add_schema("rename_node", "Edits node semantic names directly within godot structures.",
+	add_schema("node_rename", "Edits node semantic names directly within godot structures.",
 			Vector<String>{ "node_path", "string", "new_name", "string" }, Vector<String>{ "node_path", "new_name" });
-	add_schema("connect_signal", "Binds callable events between source nodes bounding into target instances natively.",
+	add_schema("node_connect_signal", "Binds callable events between source nodes bounding into target instances natively.",
 			Vector<String>{ "source_path", "string", "signal_name", "string", "target_path", "string", "method_name", "string" }, Vector<String>{ "source_path", "signal_name", "target_path", "method_name" });
-	add_schema("disconnect_signal", "Snaps off existing bounding callable events recursively mapped over nodes.",
+	add_schema("node_disconnect_signal", "Snaps off existing bounding callable events recursively mapped over nodes.",
 			Vector<String>{ "source_path", "string", "signal_name", "string", "target_path", "string", "method_name", "string" }, Vector<String>{ "source_path", "signal_name", "target_path", "method_name" });
-	add_schema("get_node_groups", "Aggregates internal Godot Groups strings assigned over standard instances.",
+	add_schema("node_get_groups", "Aggregates internal Godot Groups strings assigned over standard instances.",
 			Vector<String>{ "node_path", "string" }, Vector<String>{ "node_path" });
-	add_schema("set_node_groups", "Mutates overlapping assignment instances mapped per godot string node groups.",
+	add_schema("node_set_groups", "Mutates overlapping assignment instances mapped per godot string node groups.",
 			Vector<String>{ "node_path", "string", "groups", "array" }, Vector<String>{ "node_path", "groups" });
-	add_schema("find_nodes_in_group", "Provides lookup access globally towards Godot instance sets natively spanning specific groups.",
+	add_schema("node_find_in_group", "Provides lookup access globally towards Godot instance sets natively spanning specific groups.",
 			Vector<String>{ "group", "string" }, Vector<String>{ "group" });
 
 	// Audio Tools
@@ -605,11 +619,11 @@ Array JustAMCPToolExecutor::get_tool_schemas(bool p_register_only, bool p_ignore
 	is_core = false;
 	add_schema("create_theme", "Generates a new Theme resource struct caching visual configuration layouts natively.",
 			Vector<String>{ "path", "string", "default_font_size", "number" }, Vector<String>{ "path" });
-	add_schema("set_theme_color", "Injects property mappings explicitly setting color maps inside control nodes.",
+	add_schema("set_control_theme_color", "Injects property mappings explicitly setting color maps inside control nodes.",
 			Vector<String>{ "node_path", "string", "name", "string", "color", "string", "theme_type", "string" }, Vector<String>{ "node_path", "name", "color" });
 	add_schema("set_theme_constant", "Maps godot uniform parameter spacings assigning values inside active nodes.",
 			Vector<String>{ "node_path", "string", "name", "string", "value", "number" }, Vector<String>{ "node_path", "name" });
-	add_schema("set_theme_font_size", "Overrides localized godot font sizes overriding global default assignments.",
+	add_schema("set_control_theme_font_size", "Overrides localized godot font sizes overriding global default assignments.",
 			Vector<String>{ "node_path", "string", "name", "string", "size", "number" }, Vector<String>{ "node_path", "name" });
 	add_schema("set_theme_stylebox", "Constructs standard StyleBoxFlat representations drawing boundaries over Control structures natively.",
 			Vector<String>{ "node_path", "string", "name", "string", "bg_color", "string", "border_color", "string", "border_width", "number", "corner_radius", "number", "padding", "number" }, Vector<String>{ "node_path", "name" });
@@ -680,17 +694,89 @@ Dictionary JustAMCPToolExecutor::execute_tool(const String &p_tool_name, const D
 	if (internal_name.begins_with("blazium_")) {
 		internal_name = internal_name.substr(8);
 	}
+	String full_name = "blazium_" + internal_name;
+
+	// Runtime Tool Payload Validation
+	Array schemas = get_tool_schemas(false, false);
+	Dictionary target_schema;
+	bool tool_found = false;
+	for (int i = 0; i < schemas.size(); i++) {
+		Dictionary schema_entry = schemas[i];
+		if (String(schema_entry["name"]) == full_name) {
+			target_schema = schema_entry;
+			tool_found = true;
+			break;
+		}
+	}
+
+	if (!tool_found) {
+		Dictionary err;
+		err["code"] = -32601;
+		err["message"] = "Tool not found or disabled: " + p_tool_name;
+		result["ok"] = false;
+		result["error"] = err;
+		return result;
+	}
+
+	if (target_schema.has("inputSchema")) {
+		Dictionary inputSchema = target_schema["inputSchema"];
+		if (inputSchema.has("required")) {
+			Array req = inputSchema["required"];
+			for (int i = 0; i < req.size(); i++) {
+				String req_arg = req[i];
+				if (!p_args.has(req_arg)) {
+					Dictionary err;
+					err["code"] = -32602;
+					err["message"] = "Missing required parameter for tool " + p_tool_name + ": " + req_arg;
+					result["ok"] = false;
+					result["error"] = err;
+					return result;
+				}
+			}
+		}
+
+		if (inputSchema.has("properties")) {
+			Dictionary props = inputSchema["properties"];
+			Array prop_keys = props.keys();
+			for (int i = 0; i < prop_keys.size(); i++) {
+				String key = prop_keys[i];
+				if (!p_args.has(key)) {
+					continue;
+				}
+				Dictionary prop_def = props[key];
+				if (prop_def.has("type")) {
+					String exp_type = prop_def["type"];
+					Variant val = p_args[key];
+					bool valid = true;
+					if (exp_type == "string" && val.get_type() != Variant::STRING) {
+						valid = false;
+					} else if (exp_type == "number" && val.get_type() != Variant::INT && val.get_type() != Variant::FLOAT) {
+						valid = false;
+					} else if (exp_type == "boolean" && val.get_type() != Variant::BOOL) {
+						valid = false;
+					} else if (exp_type == "object" && val.get_type() != Variant::DICTIONARY) {
+						valid = false;
+					} else if (exp_type == "array") {
+						if (val.get_type() != Variant::ARRAY && val.get_type() != Variant::PACKED_STRING_ARRAY && val.get_type() != Variant::PACKED_INT32_ARRAY && val.get_type() != Variant::PACKED_INT64_ARRAY && val.get_type() != Variant::PACKED_FLOAT32_ARRAY && val.get_type() != Variant::PACKED_FLOAT64_ARRAY && val.get_type() != Variant::PACKED_BYTE_ARRAY) {
+							valid = false;
+						}
+					}
+
+					if (!valid) {
+						Dictionary err;
+						err["code"] = -32602;
+						err["message"] = "Invalid type for parameter '" + key + "'. Expected " + exp_type + ".";
+						result["ok"] = false;
+						result["error"] = err;
+						return result;
+					}
+				}
+			}
+		}
+	}
 
 	// Meta Tools
 	if (internal_name == "search_tools") {
-		if (!p_args.has("query")) {
-			Dictionary err;
-			err["code"] = -32602;
-			err["message"] = "Missing required parameter: query";
-			result["ok"] = false;
-			result["error"] = err;
-			return result;
-		}
 		String query = p_args.get("query", "");
 		Array all_schemas = get_tool_schemas(false, true); // true = bypass ProjectSettings UI filters
 		Array matched;
@@ -707,14 +793,6 @@ Dictionary JustAMCPToolExecutor::execute_tool(const String &p_tool_name, const D
 		return result;
 	}
 	if (internal_name == "execute_tool") {
-		if (!p_args.has("tool_name") || !p_args.has("arguments")) {
-			Dictionary err;
-			err["code"] = -32602;
-			err["message"] = "Missing required parameter: tool_name or arguments";
-			result["ok"] = false;
-			result["error"] = err;
-			return result;
-		}
 		String target_tool = p_args.get("tool_name", "");
 		Dictionary target_args = p_args.get("arguments", Dictionary());
 		return execute_tool(target_tool, target_args);
@@ -831,46 +909,46 @@ Dictionary JustAMCPToolExecutor::execute_tool(const String &p_tool_name, const D
 	}
 
 	// Node Tool Routes
-	if (internal_name == "add_node") {
+	if (internal_name == "node_add") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "delete_node") {
+	if (internal_name == "node_delete") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "duplicate_node") {
+	if (internal_name == "node_duplicate") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "move_node") {
+	if (internal_name == "node_move") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "update_property") {
+	if (internal_name == "node_update_property") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "get_node_properties") {
+	if (internal_name == "node_get_properties") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "add_resource") {
+	if (internal_name == "node_add_resource") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "set_anchor_preset") {
+	if (internal_name == "node_set_anchor_preset") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "rename_node") {
+	if (internal_name == "node_rename") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "connect_signal") {
+	if (internal_name == "node_connect_signal") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "disconnect_signal") {
+	if (internal_name == "node_disconnect_signal") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "get_node_groups") {
+	if (internal_name == "node_get_groups") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "set_node_groups") {
+	if (internal_name == "node_set_groups") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "find_nodes_in_group") {
+	if (internal_name == "node_find_in_group") {
 		return node_tools->execute_tool(internal_name, p_args);
 	}
 
@@ -992,14 +1070,14 @@ Dictionary JustAMCPToolExecutor::execute_tool(const String &p_tool_name, const D
 	if (internal_name == "create_theme") {
 		return theme_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "set_theme_color") {
-		return theme_tools->execute_tool(internal_name, p_args);
+	if (internal_name == "set_control_theme_color") {
+		return theme_tools->execute_tool("set_theme_color", p_args);
 	}
 	if (internal_name == "set_theme_constant") {
 		return theme_tools->execute_tool(internal_name, p_args);
 	}
-	if (internal_name == "set_theme_font_size") {
-		return theme_tools->execute_tool(internal_name, p_args);
+	if (internal_name == "set_control_theme_font_size") {
+		return theme_tools->execute_tool("set_theme_font_size", p_args);
 	}
 	if (internal_name == "set_theme_stylebox") {
 		return theme_tools->execute_tool(internal_name, p_args);
@@ -1110,10 +1188,10 @@ Dictionary JustAMCPToolExecutor::execute_tool(const String &p_tool_name, const D
 	if (internal_name == "set_tilemap_cells") {
 		return resource_tools->set_tilemap_cells(p_args);
 	}
-	if (internal_name == "set_theme_color") {
+	if (internal_name == "set_theme_resource_color") {
 		return resource_tools->set_theme_color(p_args);
 	}
-	if (internal_name == "set_theme_font_size") {
+	if (internal_name == "set_theme_resource_font_size") {
 		return resource_tools->set_theme_font_size(p_args);
 	}
 	if (internal_name == "apply_theme_shader") {

@@ -415,7 +415,11 @@ void HTTPServer::_dispatch_request(int p_client_id, ClientConnection &p_client, 
 		sse_conn->set_peer(p_client.peer);
 		sse_conn->set_connection_id(sse_id);
 		sse_conn->set_path(p_context->get_path());
-		sse_connections[sse_id] = sse_conn;
+
+		{
+			MutexLock sse_lk(sse_lock);
+			sse_connections[sse_id] = sse_conn;
+		}
 
 		emit_signal("sse_connection_opened", sse_id, p_context->get_path(), p_context->get_headers());
 		return;
@@ -656,11 +660,14 @@ void HTTPServer::stop() {
 	clients.clear();
 
 	// Close all SSE connections
-	for (KeyValue<int, Ref<SSEConnection>> &E : sse_connections) {
-		E.value->close_connection();
-		emit_signal("sse_connection_closed", E.key);
+	{
+		MutexLock sse_lk(sse_lock);
+		for (KeyValue<int, Ref<SSEConnection>> &E : sse_connections) {
+			E.value->close_connection();
+			emit_signal("sse_connection_closed", E.key);
+		}
+		sse_connections.clear();
 	}
-	sse_connections.clear();
 }
 
 bool HTTPServer::is_listening() const {
@@ -717,7 +724,7 @@ bool HTTPServer::is_directory_listing_enabled() const {
 }
 
 Error HTTPServer::send_sse_event(int p_connection_id, const String &p_event, const String &p_data) {
-	MutexLock lock(server_lock);
+	MutexLock lock(sse_lock);
 
 	if (!sse_connections.has(p_connection_id)) {
 		return ERR_DOES_NOT_EXIST;
@@ -738,7 +745,7 @@ Error HTTPServer::send_sse_data(int p_connection_id, const String &p_data) {
 }
 
 void HTTPServer::close_sse_connection(int p_connection_id) {
-	MutexLock lock(server_lock);
+	MutexLock lock(sse_lock);
 
 	if (!sse_connections.has(p_connection_id)) {
 		return;
@@ -752,7 +759,7 @@ void HTTPServer::close_sse_connection(int p_connection_id) {
 }
 
 Array HTTPServer::get_active_sse_connections() const {
-	MutexLock lock(server_lock);
+	MutexLock lock(sse_lock);
 
 	Array result;
 	for (const KeyValue<int, Ref<SSEConnection>> &E : sse_connections) {

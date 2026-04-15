@@ -31,6 +31,16 @@ def get_doc_classes():
         "JustAMCPShaderTools",
         "JustAMCPThemeTools",
         "JustAMCPTileMapTools",
+        "JustAMCPPrompt",
+        "JustAMCPPromptBlaziumContext",
+        "JustAMCPPromptEditorState",
+        "JustAMCPPromptExecutor",
+        "JustAMCPPromptProjectInfo",
+        "JustAMCPResource",
+        "JustAMCPResourceExecutor",
+        "JustAMCPResourceProjectFile",
+        "JustAMCPResourceSystemLogs",
+        "JustAMCPTaskManager",
     ]
 
 

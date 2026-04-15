@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPPromptEditorState" inherits="JustAMCPPrompt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Parses editor bounds returning explicit current tree structures natively mapping directly back visually dynamically.
+	</brief_description>
+	<description>
+		Inherits [JustAMCPPrompt] allowing MCP connected agents real-time introspection into what exact Nodes are actively selected and tracking current scene root boundaries organically running directly in godot editor!
+	</description>
+	<tutorials>
+		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>
+	</tutorials>
+</class>

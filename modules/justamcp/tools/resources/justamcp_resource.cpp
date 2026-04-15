@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  justamcp_editor_plugin.h                                              */
+/*  justamcp_resource.cpp                                                 */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             BLAZIUM ENGINE                             */
@@ -27,72 +27,18 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#pragma once
-
 #ifdef TOOLS_ENABLED
+#include "justamcp_resource.h"
 
-#include "editor/editor_inspector.h"
-#include "editor/plugins/editor_plugin.h"
-#include "justamcp_server.h"
-#include "tools/justamcp_tool_executor.h"
+void JustAMCPResource::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_uri"), &JustAMCPResource::get_uri);
+	ClassDB::bind_method(D_METHOD("get_name"), &JustAMCPResource::get_name);
+	ClassDB::bind_method(D_METHOD("is_template"), &JustAMCPResource::is_template);
+	ClassDB::bind_method(D_METHOD("get_schema"), &JustAMCPResource::get_schema);
+	ClassDB::bind_method(D_METHOD("read_resource", "uri"), &JustAMCPResource::read_resource);
+}
 
-#include "scene/gui/button.h"
-#include "scene/gui/label.h"
-#include "scene/gui/margin_container.h"
-#include "scene/gui/text_edit.h"
-
-class JustAMCPConfigUI : public MarginContainer {
-	GDCLASS(JustAMCPConfigUI, MarginContainer);
-
-	TextEdit *text_edit = nullptr;
-	Button *copy_button = nullptr;
-
-	void _update_config();
-	void _copy_pressed();
-	void _on_settings_changed();
-
-protected:
-	static void _bind_methods();
-	void _notification(int p_what);
-
-public:
-	JustAMCPConfigUI();
-};
-
-class JustAMCPConfigInspectorPlugin : public EditorInspectorPlugin {
-	GDCLASS(JustAMCPConfigInspectorPlugin, EditorInspectorPlugin);
-
-public:
-	virtual bool can_handle(Object *p_object) override;
-	virtual bool parse_property(Object *p_object, const Variant::Type p_type, const String &p_path, const PropertyHint p_hint, const String &p_hint_text, const BitField<PropertyUsageFlags> p_usage, const bool p_wide) override;
-};
-
-class JustAMCPEditorPlugin : public EditorPlugin {
-	GDCLASS(JustAMCPEditorPlugin, EditorPlugin);
-
-private:
-	JustAMCPServer *mcp_server = nullptr;
-	JustAMCPToolExecutor *tool_executor = nullptr;
-	Label *status_label = nullptr;
-	Ref<JustAMCPConfigInspectorPlugin> inspector_plugin;
-
-	void _setup_status_indicator();
-	void _show_configuration_dialog();
-	void _on_server_status_changed(bool p_started);
-
-	void _on_tool_requested(const Variant &p_request_id, const String &p_tool_name, const Dictionary &p_args);
-
-protected:
-	static void _bind_methods();
-	void _notification(int p_what);
-
-public:
-	virtual String get_plugin_name() const override { return "JustAMCP"; }
-	bool has_main_screen() const override { return false; }
-	static String get_mcp_config_json();
-
-	JustAMCPEditorPlugin();
-	~JustAMCPEditorPlugin();
-};
+JustAMCPResource::JustAMCPResource() {}
+JustAMCPResource::~JustAMCPResource() {}
 
 #endif // TOOLS_ENABLED

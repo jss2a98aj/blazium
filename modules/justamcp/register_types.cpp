@@ -48,20 +48,41 @@
 #include "tools/justamcp_physics_tools.h"
 #include "tools/justamcp_profiling_tools.h"
 #include "tools/justamcp_project_tools.h"
+#include "tools/justamcp_prompt_executor.h"
+#include "tools/justamcp_resource_executor.h"
 #include "tools/justamcp_resource_tools.h"
 #include "tools/justamcp_scene_3d_tools.h"
 #include "tools/justamcp_scene_tools.h"
 #include "tools/justamcp_script_tools.h"
 #include "tools/justamcp_shader_tools.h"
+#include "tools/justamcp_task_manager.h"
 #include "tools/justamcp_theme_tools.h"
 #include "tools/justamcp_tilemap_tools.h"
-#include "tools/justamcp_tool_executor.h"
+#include "tools/prompts/justamcp_prompt.h"
+#include "tools/prompts/justamcp_prompt_blazium_context.h"
+#include "tools/prompts/justamcp_prompt_editor_state.h"
+#include "tools/prompts/justamcp_prompt_project_info.h"
+#include "tools/resources/justamcp_resource.h"
+#include "tools/resources/justamcp_resource_project_file.h"
+#include "tools/resources/justamcp_resource_system_logs.h"
 #endif
 
 #ifndef TOOLS_ENABLED
 #include "core/config/project_settings.h"
 #include "core/os/os.h"
 #endif
+
+#include "servers/display_server.h"
+
+static bool _is_headless() {
+	if (DisplayServer::get_singleton() != nullptr) {
+		return DisplayServer::get_singleton()->get_name() == "headless";
+	}
+	if (OS::get_singleton() && OS::get_singleton()->get_cmdline_args().find("--headless")) {
+		return true;
+	}
+	return false;
+}
 
 static bool _is_justamcp_enabled() {
 	if (OS::get_singleton()->get_cmdline_args().find("--enable-mcp")) {
@@ -71,6 +92,10 @@ static bool _is_justamcp_enabled() {
 	bool use_project_override = false;
 	if (ProjectSettings::get_singleton() && ProjectSettings::get_singleton()->has_setting("blazium/justamcp/override_editor_settings")) {
 		use_project_override = GLOBAL_GET("blazium/justamcp/override_editor_settings");
+	}
+
+	if (_is_headless()) {
+		use_project_override = true;
 	}
 
 #ifdef TOOLS_ENABLED
@@ -121,6 +146,16 @@ void initialize_justamcp_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(JustAMCPShaderTools);
 		GDREGISTER_CLASS(JustAMCPThemeTools);
 		GDREGISTER_CLASS(JustAMCPTileMapTools);
+		GDREGISTER_CLASS(JustAMCPPrompt);
+		GDREGISTER_CLASS(JustAMCPPromptBlaziumContext);
+		GDREGISTER_CLASS(JustAMCPPromptProjectInfo);
+		GDREGISTER_CLASS(JustAMCPPromptEditorState);
+		GDREGISTER_CLASS(JustAMCPPromptExecutor);
+		GDREGISTER_CLASS(JustAMCPResource);
+		GDREGISTER_CLASS(JustAMCPResourceSystemLogs);
+		GDREGISTER_CLASS(JustAMCPResourceProjectFile);
+		GDREGISTER_CLASS(JustAMCPResourceExecutor);
+		GDREGISTER_CLASS(JustAMCPTaskManager);
 	}
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
 		EditorPlugins::add_by_type<JustAMCPEditorPlugin>();

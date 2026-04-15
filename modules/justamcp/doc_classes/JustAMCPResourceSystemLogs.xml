@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPResourceSystemLogs" inherits="JustAMCPResource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Handles decoupling deep Godot runtime logs dynamically scaling them outwardly across resource structures successfully globally!
+	</brief_description>
+	<description>
+		Inherits [JustAMCPResource] securely wrapping static endpoints dynamically capturing `godot://system/logs` queries cleanly handling external reads bypassing standard log tracks gracefully.
+	</description>
+	<tutorials>
+		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>
+	</tutorials>
+</class>

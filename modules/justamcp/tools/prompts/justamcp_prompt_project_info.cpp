@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  justamcp_editor_plugin.h                                              */
+/*  justamcp_prompt_project_info.cpp                                      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             BLAZIUM ENGINE                             */
@@ -27,72 +27,55 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#pragma once
-
 #ifdef TOOLS_ENABLED
 
-#include "editor/editor_inspector.h"
-#include "editor/plugins/editor_plugin.h"
-#include "justamcp_server.h"
-#include "tools/justamcp_tool_executor.h"
+#include "justamcp_prompt_project_info.h"
+#include "core/config/project_settings.h"
 
-#include "scene/gui/button.h"
-#include "scene/gui/label.h"
-#include "scene/gui/margin_container.h"
-#include "scene/gui/text_edit.h"
+void JustAMCPPromptProjectInfo::_bind_methods() {}
 
-class JustAMCPConfigUI : public MarginContainer {
-	GDCLASS(JustAMCPConfigUI, MarginContainer);
+JustAMCPPromptProjectInfo::JustAMCPPromptProjectInfo() {}
+JustAMCPPromptProjectInfo::~JustAMCPPromptProjectInfo() {}
 
-	TextEdit *text_edit = nullptr;
-	Button *copy_button = nullptr;
+String JustAMCPPromptProjectInfo::get_name() const {
+	return "project_info";
+}
 
-	void _update_config();
-	void _copy_pressed();
-	void _on_settings_changed();
+Dictionary JustAMCPPromptProjectInfo::get_prompt() const {
+	Dictionary result;
+	result["name"] = "project_info";
+	result["title"] = "Godot Project Info";
+	result["description"] = "Retrieves the core Godot Project metadata natively.";
+	result["arguments"] = Array();
+	return result;
+}
 
-protected:
-	static void _bind_methods();
-	void _notification(int p_what);
+Dictionary JustAMCPPromptProjectInfo::get_messages(const Dictionary &p_args) {
+	Dictionary result;
+	result["description"] = "Project Context";
 
-public:
-	JustAMCPConfigUI();
-};
+	Array messages;
+	Dictionary msg;
+	msg["role"] = "user";
 
-class JustAMCPConfigInspectorPlugin : public EditorInspectorPlugin {
-	GDCLASS(JustAMCPConfigInspectorPlugin, EditorInspectorPlugin);
+	Dictionary content;
+	content["type"] = "text";
+	String pname = ProjectSettings::get_singleton() ? ProjectSettings::get_singleton()->get("application/config/name") : "Unknown";
+	content["text"] = "Project Name: " + pname;
+	msg["content"] = content;
 
-public:
-	virtual bool can_handle(Object *p_object) override;
-	virtual bool parse_property(Object *p_object, const Variant::Type p_type, const String &p_path, const PropertyHint p_hint, const String &p_hint_text, const BitField<PropertyUsageFlags> p_usage, const bool p_wide) override;
-};
+	messages.push_back(msg);
+	result["messages"] = messages;
+	result["ok"] = true;
+	return result;
+}
 
-class JustAMCPEditorPlugin : public EditorPlugin {
-	GDCLASS(JustAMCPEditorPlugin, EditorPlugin);
-
-private:
-	JustAMCPServer *mcp_server = nullptr;
-	JustAMCPToolExecutor *tool_executor = nullptr;
-	Label *status_label = nullptr;
-	Ref<JustAMCPConfigInspectorPlugin> inspector_plugin;
-
-	void _setup_status_indicator();
-	void _show_configuration_dialog();
-	void _on_server_status_changed(bool p_started);
-
-	void _on_tool_requested(const Variant &p_request_id, const String &p_tool_name, const Dictionary &p_args);
-
-protected:
-	static void _bind_methods();
-	void _notification(int p_what);
-
-public:
-	virtual String get_plugin_name() const override { return "JustAMCP"; }
-	bool has_main_screen() const override { return false; }
-	static String get_mcp_config_json();
-
-	JustAMCPEditorPlugin();
-	~JustAMCPEditorPlugin();
-};
+Dictionary JustAMCPPromptProjectInfo::complete(const Dictionary &p_argument) {
+	Dictionary completion;
+	completion["values"] = Array();
+	completion["total"] = 0;
+	completion["hasMore"] = false;
+	return completion;
+}
 
 #endif // TOOLS_ENABLED

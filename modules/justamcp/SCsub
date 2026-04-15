@@ -9,6 +9,8 @@ env_justamcp = env_modules.Clone()
 # Blazium source files
 env_justamcp.add_source_files(env.modules_sources, "*.cpp")
 env_justamcp.add_source_files(env.modules_sources, "tools/*.cpp")
+env_justamcp.add_source_files(env.modules_sources, "tools/prompts/*.cpp")
+env_justamcp.add_source_files(env.modules_sources, "tools/resources/*.cpp")
 
 
 # Editor only sources can be separated if needed, but since we use `#ifdef TOOLS_ENABLED` inline or in `register_types.cpp`

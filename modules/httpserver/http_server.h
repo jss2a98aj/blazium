@@ -81,6 +81,7 @@ private:
 
 	SafeFlag server_quit;
 	Mutex server_lock;
+	Mutex sse_lock;
 	Thread server_thread;
 
 	// Configuration

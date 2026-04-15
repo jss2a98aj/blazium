@@ -1,22 +1,41 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPServer" inherits="Node" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
+		The core Model Context Protocol (MCP) server managing SSE transmission internally globally.
 	</brief_description>
 	<description>
+		Wraps external streams safely handling JSON RPC negotiation natively. Emits core binding signals mapping Elicitation completions gracefully handling Editor integrations safely natively.
 	</description>
 	<tutorials>
+		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>
 	</tutorials>
 	<signals>
+		<signal name="elicitation_completed">
+			<param index="0" name="request_id" type="Variant" />
+			<param index="1" name="result" type="Dictionary" />
+			<description>
+				Standard mapped native execution pipeline resolving internal bounds tracking structurally securely!
+			</description>
+		</signal>
+		<signal name="request_cancelled">
+			<param index="0" name="request_id" type="Variant" />
+			<param index="1" name="reason" type="String" />
+			<description>
+				Standard mapped native execution pipeline resolving internal bounds tracking structurally securely!
+			</description>
+		</signal>
 		<signal name="server_status_changed">
 			<param index="0" name="started" type="bool" />
 			<description>
+				Standard mapped native execution pipeline resolving internal bounds tracking structurally securely!
 			</description>
 		</signal>
 		<signal name="tool_requested">
-			<param index="0" name="request_id" type="String" />
+			<param index="0" name="request_id" type="Variant" />
 			<param index="1" name="tool_name" type="String" />
 			<param index="2" name="args" type="Dictionary" />
 			<description>
+				Standard mapped native execution pipeline resolving internal bounds tracking structurally securely!
 			</description>
 		</signal>
 	</signals>

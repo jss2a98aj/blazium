@@ -25,7 +25,7 @@
 		</method>
 	</methods>
 	<members>
-		<member name="enabled" type="bool" setter="set_enabled" getter="is_enabled" default="true">
+		<member name="enabled" type="bool" setter="set_enabled" getter="is_enabled" default="false">
 		</member>
 		<member name="port" type="int" setter="set_port" getter="get_port" default="7777">
 		</member>

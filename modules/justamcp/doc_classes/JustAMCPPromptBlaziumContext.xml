@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPPromptBlaziumContext" inherits="JustAMCPPrompt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Natively tracks active Blazium and Godot module configuration environments explicitly inside MCP structures.
+	</brief_description>
+	<description>
+		Inherits [JustAMCPPrompt] returning static structural states explicitly tracking Engine versions properly mapping them securely inside MCP prompts.
+	</description>
+	<tutorials>
+		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>
+	</tutorials>
+</class>

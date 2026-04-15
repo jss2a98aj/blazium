@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPPromptProjectInfo" inherits="JustAMCPPrompt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Returns the generalized properties inside `project.godot` dynamically mapped securely into prompt schemas.
+	</brief_description>
+	<description>
+		Inherits [JustAMCPPrompt] isolating generic active `project.godot` definitions mapping implicitly over external dependencies safely exposing name, version, and default run targets over LLMs.
+	</description>
+	<tutorials>
+		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>
+	</tutorials>
+</class>

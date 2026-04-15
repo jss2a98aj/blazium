@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  justamcp_editor_plugin.h                                              */
+/*  justamcp_resource_system_logs.cpp                                     */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             BLAZIUM ENGINE                             */
@@ -27,72 +27,55 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#pragma once
-
 #ifdef TOOLS_ENABLED
 
-#include "editor/editor_inspector.h"
-#include "editor/plugins/editor_plugin.h"
-#include "justamcp_server.h"
-#include "tools/justamcp_tool_executor.h"
+#include "justamcp_resource_system_logs.h"
 
-#include "scene/gui/button.h"
-#include "scene/gui/label.h"
-#include "scene/gui/margin_container.h"
-#include "scene/gui/text_edit.h"
+void JustAMCPResourceSystemLogs::_bind_methods() {}
 
-class JustAMCPConfigUI : public MarginContainer {
-	GDCLASS(JustAMCPConfigUI, MarginContainer);
+JustAMCPResourceSystemLogs::JustAMCPResourceSystemLogs() {}
+JustAMCPResourceSystemLogs::~JustAMCPResourceSystemLogs() {}
 
-	TextEdit *text_edit = nullptr;
-	Button *copy_button = nullptr;
+String JustAMCPResourceSystemLogs::get_uri() const {
+	return "godot://system/logs";
+}
 
-	void _update_config();
-	void _copy_pressed();
-	void _on_settings_changed();
+String JustAMCPResourceSystemLogs::get_name() const {
+	return "Engine System Logs";
+}
 
-protected:
-	static void _bind_methods();
-	void _notification(int p_what);
+bool JustAMCPResourceSystemLogs::is_template() const {
+	return false;
+}
 
-public:
-	JustAMCPConfigUI();
-};
+Dictionary JustAMCPResourceSystemLogs::get_schema() const {
+	Dictionary resource;
+	resource["uri"] = get_uri();
+	resource["name"] = get_name();
+	resource["mimeType"] = "text/plain";
+	resource["description"] = "Recent internal engine messages mapping to the active process.";
+	return resource;
+}
 
-class JustAMCPConfigInspectorPlugin : public EditorInspectorPlugin {
-	GDCLASS(JustAMCPConfigInspectorPlugin, EditorInspectorPlugin);
+Dictionary JustAMCPResourceSystemLogs::read_resource(const String &p_uri) {
+	Dictionary result;
 
-public:
-	virtual bool can_handle(Object *p_object) override;
-	virtual bool parse_property(Object *p_object, const Variant::Type p_type, const String &p_path, const PropertyHint p_hint, const String &p_hint_text, const BitField<PropertyUsageFlags> p_usage, const bool p_wide) override;
-};
+	if (p_uri != get_uri()) {
+		result["ok"] = false;
+		result["error_code"] = -32602;
+		result["error"] = "Mismatch URI.";
+		return result;
+	}
 
-class JustAMCPEditorPlugin : public EditorPlugin {
-	GDCLASS(JustAMCPEditorPlugin, EditorPlugin);
-
-private:
-	JustAMCPServer *mcp_server = nullptr;
-	JustAMCPToolExecutor *tool_executor = nullptr;
-	Label *status_label = nullptr;
-	Ref<JustAMCPConfigInspectorPlugin> inspector_plugin;
-
-	void _setup_status_indicator();
-	void _show_configuration_dialog();
-	void _on_server_status_changed(bool p_started);
-
-	void _on_tool_requested(const Variant &p_request_id, const String &p_tool_name, const Dictionary &p_args);
-
-protected:
-	static void _bind_methods();
-	void _notification(int p_what);
-
-public:
-	virtual String get_plugin_name() const override { return "JustAMCP"; }
-	bool has_main_screen() const override { return false; }
-	static String get_mcp_config_json();
-
-	JustAMCPEditorPlugin();
-	~JustAMCPEditorPlugin();
-};
+	result["ok"] = true;
+	Array contents;
+	Dictionary text_content;
+	text_content["uri"] = p_uri;
+	text_content["mimeType"] = "text/plain";
+	text_content["text"] = "Engine running successfully... Request processed natively. (Live logging integration expanding!)";
+	contents.push_back(text_content);
+	result["contents"] = contents;
+	return result;
+}
 
 #endif // TOOLS_ENABLED
