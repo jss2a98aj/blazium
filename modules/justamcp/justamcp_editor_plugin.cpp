@@ -215,7 +215,7 @@ void JustAMCPEditorPlugin::_show_configuration_dialog() {
 	dialog->popup_centered();
 }
 
-void JustAMCPEditorPlugin::_on_tool_requested(const String &p_request_id, const String &p_tool_name, const Dictionary &p_args) {
+void JustAMCPEditorPlugin::_on_tool_requested(const Variant &p_request_id, const String &p_tool_name, const Dictionary &p_args) {
 	if (!tool_executor || !mcp_server) {
 		return;
 	}
@@ -229,7 +229,9 @@ void JustAMCPEditorPlugin::_on_tool_requested(const String &p_request_id, const 
 		mcp_server->send_tool_result(p_request_id, true, payload, "");
 	} else {
 		String error_msg = result.get("error", "Unknown error");
-		mcp_server->send_tool_result(p_request_id, false, Variant(), error_msg);
+		// If "error" is actually a dictionary with a "code", we pass that exactly as the result Variant for the Server to parse as a protocol error.
+		Variant payload = result.get("error", Variant());
+		mcp_server->send_tool_result(p_request_id, false, payload, error_msg);
 	}
 }
 

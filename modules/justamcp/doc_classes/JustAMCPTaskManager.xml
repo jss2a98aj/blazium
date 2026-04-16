@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPTaskManager" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Manages asynchronous background execution tasks securely mapping lifecycle boundaries natively mapping back via the MCP.
+	</brief_description>
+	<description>
+		Dynamically routes, isolates, and terminates background tasks asynchronously globally. It handles basic routing safely avoiding blocking UI components strictly natively mapping hooks.
+		[codeblock]
+		var manager = JustAMCPTaskManager.new()
+		manager.create_task("task_001", 100000)
+
+		var gt = manager.get_task("task_001")
+		print(gt["status"]) # working
+
+		manager.complete_task("task_001", {"content": [{"type": "text", "text": "Task Completed"}]})
+
+		var cx = manager.create_task("task_cancel", 900)
+		manager.cancel_task("task_cancel")
+		[/codeblock]
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="cancel_task">
+			<return type="Dictionary" />
+			<param index="0" name="task_id" type="String" />
+			<description>
+				Safely issues a cancellation token targeting an active task id implicitly mapping cancellation flows explicitly dynamically updating state!
+			</description>
+		</method>
+		<method name="complete_task">
+			<return type="void" />
+			<param index="0" name="task_id" type="String" />
+			<param index="1" name="result" type="Dictionary" />
+			<description>
+				Mutates an active job bounds globally assigning completed result contents mapping implicitly effectively.
+			</description>
+		</method>
+		<method name="create_task">
+			<return type="Dictionary" />
+			<param index="0" name="task_id" type="String" />
+			<param index="1" name="ttl" type="int" default="60000" />
+			<description>
+				Instantiates an active job definition explicitly safely generating standard initialization state maps effectively mapped natively.
+			</description>
+		</method>
+		<method name="fail_task">
+			<return type="void" />
+			<param index="0" name="task_id" type="String" />
+			<param index="1" name="error" type="String" />
+			<description>
+				Forcefully flags existing jobs explicitly generating failure trace strings cleanly across pipelines.
+			</description>
+		</method>
+		<method name="get_task">
+			<return type="Dictionary" />
+			<param index="0" name="task_id" type="String" />
+			<description>
+				Identifies and resolves active tracking meta mappings fetching live status dynamically globally.
+			</description>
+		</method>
+		<method name="get_task_result">
+			<return type="Dictionary" />
+			<param index="0" name="task_id" type="String" />
+			<description>
+				Extracts the explicitly passed result block cleanly throwing errors when tasks are actively actively working safely.
+			</description>
+		</method>
+		<method name="list_tasks">
+			<return type="Dictionary" />
+			<param index="0" name="cursor" type="String" default="&quot;&quot;" />
+			<description>
+				Returns all mapped jobs handling tracking structures globally directly handling arrays natively.
+			</description>
+		</method>
+	</methods>
+</class>

@@ -37,6 +37,7 @@
 #include "core/object/message_queue.h"
 #include "core/os/os.h"
 #include "core/os/time.h"
+#include "editor/editor_settings.h"
 #include "main/performance.h"
 #include "scene/main/viewport.h"
 #include "scene/main/window.h"
@@ -186,6 +187,42 @@ void JustAMCPRuntime::_start_server() {
 				arg == "--check-only" || arg.begins_with("--export")) {
 			return; // Do not start Server thread during CLI tools or testing workflows
 		}
+	}
+
+#ifdef TOOLS_ENABLED
+	bool is_headless = false;
+	if (OS::get_singleton() && OS::get_singleton()->get_cmdline_args().find("--headless")) {
+		is_headless = true;
+	}
+
+	bool use_project_override = GLOBAL_GET("blazium/justamcp/override_editor_settings");
+
+	if (is_headless) {
+		use_project_override = true;
+	}
+
+	if (use_project_override || !EditorSettings::get_singleton()) {
+		enabled = GLOBAL_GET("blazium/justamcp/server_enabled");
+		port = GLOBAL_GET("blazium/justamcp/server_port");
+	} else {
+		if (EditorSettings::get_singleton()->has_setting("blazium/justamcp/server_enabled")) {
+			enabled = EditorSettings::get_singleton()->get_setting("blazium/justamcp/server_enabled");
+		}
+		if (EditorSettings::get_singleton()->has_setting("blazium/justamcp/server_port")) {
+			port = EditorSettings::get_singleton()->get_setting("blazium/justamcp/server_port");
+		}
+	}
+#else
+	enabled = GLOBAL_GET("blazium/justamcp/server_enabled");
+	port = GLOBAL_GET("blazium/justamcp/server_port");
+#endif
+
+	if (OS::get_singleton()->get_cmdline_args().find("--enable-mcp")) {
+		enabled = true;
+	}
+
+	if (!enabled) {
+		return;
 	}
 
 	if (server.is_valid() && server->is_listening()) {

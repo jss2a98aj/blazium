@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="JustAMCPResource" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Base abstraction layer scaling Native MCP Resources internally safely resolving custom URI matches globally.
+	</brief_description>
+	<description>
+		Abstract template decoupling external MCP resource handlers directly from monolithic systems recursively routing string templates mapped over generic execution vectors iteratively securely via [method JustAMCPResourceExecutor.add_resource].
+	</description>
+	<tutorials>
+		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>
+	</tutorials>
+	<methods>
+		<method name="get_name" qualifiers="const">
+			<return type="String" />
+			<description>
+				Safely identifies and maps custom schemas structurally routing human-readable descriptors mapping external bindings seamlessly.
+			</description>
+		</method>
+		<method name="get_schema" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Generates the strict standard schema maps bounding the URL templates cleanly generating definitions implicitly!
+			</description>
+		</method>
+		<method name="get_uri" qualifiers="const">
+			<return type="String" />
+			<description>
+				Returns the defined standard bindings effectively pointing to either explicit `uri` or dynamic `uriTemplate` strings effectively spanning the mappings gracefully safely!
+			</description>
+		</method>
+		<method name="is_template" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns `true` dynamically specifying whether the resource maps wildcards inherently returning specific schemas matching definitions securely internally!
+			</description>
+		</method>
+		<method name="read_resource">
+			<return type="Dictionary" />
+			<param index="0" name="uri" type="String" />
+			<description>
+				Parses and loads the corresponding native string resolving paths dynamically returning standard byte strings mapping explicitly externally handling parsing!
+			</description>
+		</method>
+	</methods>
+</class>

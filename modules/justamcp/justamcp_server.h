@@ -33,6 +33,8 @@
 #include "scene/main/node.h"
 
 #if defined(MODULE_HTTPSERVER_ENABLED)
+#include "core/os/mutex.h"
+#include "core/os/semaphore.h"
 #include "modules/httpserver/http_request_context.h"
 #include "modules/httpserver/http_response.h"
 #include "modules/httpserver/http_server.h"
@@ -43,9 +45,17 @@ class JustAMCPServer : public Node {
 
 private:
 	Ref<HTTPResponse> pending_stateless_response;
+	Semaphore pending_stateless_semaphore;
+	Mutex pending_stateless_mutex;
+	Dictionary pending_stateless_result;
 
 	int current_sse_connection_id = -1;
 	bool server_started = false;
+	String current_log_level = "info";
+
+	class JustAMCPPromptExecutor *prompt_executor = nullptr;
+	class JustAMCPResourceExecutor *resource_executor = nullptr;
+	class JustAMCPTaskManager *task_manager = nullptr;
 
 	void _setup_settings();
 	void _start_server();
@@ -66,7 +76,17 @@ protected:
 	void _notification(int p_what);
 
 public:
-	void send_tool_result(const String &p_request_id, bool p_success, const Variant &p_result = Variant(), const String &p_error = "");
+	void send_tool_result(const Variant &p_request_id, bool p_success, const Variant &p_result = Variant(), const String &p_error = "");
+	void send_elicitation_request(const String &p_request_id, const String &p_mode, const String &p_message, const Variant &p_url_or_schema);
+	void send_url_elicitation_error(const String &p_request_id, const String &p_elicitation_id, const String &p_url, const String &p_message);
+	void broadcast_prompts_list_changed();
+	void broadcast_tools_list_changed();
+	void broadcast_resources_list_changed();
+	void broadcast_resource_updated(const String &p_uri);
+	void send_log_message(const String &p_level, const String &p_logger, const Variant &p_data);
+	void send_progress_notification(const String &p_token, double p_progress, double p_total, const String &p_message);
+	void broadcast_task_status(const String &p_task_id);
+
 	bool is_server_started() const { return server_started; }
 
 	JustAMCPServer();

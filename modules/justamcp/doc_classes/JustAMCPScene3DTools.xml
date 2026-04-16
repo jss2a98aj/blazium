@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPScene3DTools" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
+		Exposes native Godot Scene3D utilities routing out to MCP schemas seamlessly.
 	</brief_description>
 	<description>
+		Inherits base bindings to automatically register Scene3D-related methods into the MCP registry globally. These specific tool endpoints allow connected LLMs to natively instrument Scene3D data directly within Godot's bounds.
 	</description>
 	<tutorials>
+		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>
 	</tutorials>
 </class>

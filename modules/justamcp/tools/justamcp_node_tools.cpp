@@ -125,46 +125,46 @@ void JustAMCPNodeTools::_set_owner_recursive(Node *p_node, Node *p_owner) {
 }
 
 Dictionary JustAMCPNodeTools::execute_tool(const String &p_tool_name, const Dictionary &p_args) {
-	if (p_tool_name == "add_node") {
+	if (p_tool_name == "node_add") {
 		return _add_node(p_args);
 	}
-	if (p_tool_name == "delete_node") {
+	if (p_tool_name == "node_delete") {
 		return _delete_node(p_args);
 	}
-	if (p_tool_name == "duplicate_node") {
+	if (p_tool_name == "node_duplicate") {
 		return _duplicate_node(p_args);
 	}
-	if (p_tool_name == "move_node") {
+	if (p_tool_name == "node_move") {
 		return _move_node(p_args);
 	}
-	if (p_tool_name == "update_property") {
+	if (p_tool_name == "node_update_property") {
 		return _update_property(p_args);
 	}
-	if (p_tool_name == "get_node_properties") {
+	if (p_tool_name == "node_get_properties") {
 		return _get_node_properties(p_args);
 	}
-	if (p_tool_name == "add_resource") {
+	if (p_tool_name == "node_add_resource") {
 		return _add_resource(p_args);
 	}
-	if (p_tool_name == "set_anchor_preset") {
+	if (p_tool_name == "node_set_anchor_preset") {
 		return _set_anchor_preset(p_args);
 	}
-	if (p_tool_name == "rename_node") {
+	if (p_tool_name == "node_rename") {
 		return _rename_node(p_args);
 	}
-	if (p_tool_name == "connect_signal") {
+	if (p_tool_name == "node_connect_signal") {
 		return _connect_signal(p_args);
 	}
-	if (p_tool_name == "disconnect_signal") {
+	if (p_tool_name == "node_disconnect_signal") {
 		return _disconnect_signal(p_args);
 	}
-	if (p_tool_name == "get_node_groups") {
+	if (p_tool_name == "node_get_groups") {
 		return _get_node_groups(p_args);
 	}
-	if (p_tool_name == "set_node_groups") {
+	if (p_tool_name == "node_set_groups") {
 		return _set_node_groups(p_args);
 	}
-	if (p_tool_name == "find_nodes_in_group") {
+	if (p_tool_name == "node_find_in_group") {
 		return _find_nodes_in_group(p_args);
 	}
 

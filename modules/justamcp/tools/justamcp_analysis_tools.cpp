@@ -232,6 +232,9 @@ Dictionary JustAMCPAnalysisTools::find_unused_resources(const Dictionary &p_para
 }
 
 void JustAMCPAnalysisTools::_collect_signal_data(Node *p_node, Node *p_root, Array &r_out) {
+	if (!p_node || !p_root) {
+		return;
+	}
 	String node_path = p_root->get_path_to(p_node);
 	Array signals_emitted;
 	Array signals_connected_to;
@@ -318,7 +321,9 @@ void JustAMCPAnalysisTools::_analyze_node(Node *p_node, Node *p_root, int p_dept
 		String script_path = node_script->get_path();
 		if (!script_path.is_empty()) {
 			Dictionary sd;
-			sd["node"] = String(p_root->get_path_to(p_node));
+			if (p_root && p_node) {
+				sd["node"] = String(p_root->get_path_to(p_node));
+			}
 			sd["script"] = script_path;
 			r_scripts.push_back(sd);
 		}
