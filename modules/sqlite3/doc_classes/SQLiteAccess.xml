@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="SQLiteAccess" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Wrapper class for SQLite databases.
+	</brief_description>
+	<description>
+		A wrapper class that lets you perform SQL statements on an SQLite database file.
+		For queries that involve arbitrary user input, you should use methods that end in [code]*_with_args[/code], as these protect against SQL injection.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="backup">
+			<return type="bool" />
+			<param index="0" name="path" type="String" />
+			<description>
+				Creates a backup of the database at the given path.
+			</description>
+		</method>
+		<method name="backup_async">
+			<return type="SQLiteBackup" />
+			<param index="0" name="path" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="close">
+			<return type="bool" />
+			<description>
+				Closes the database handle.
+			</description>
+		</method>
+		<method name="create_collation">
+			<return type="bool" />
+			<param index="0" name="name" type="String" />
+			<param index="1" name="callable" type="Callable" />
+			<description>
+			</description>
+		</method>
+		<method name="create_function">
+			<return type="bool" />
+			<param index="0" name="name" type="String" />
+			<param index="1" name="argc" type="int" />
+			<param index="2" name="callable" type="Callable" />
+			<description>
+			</description>
+		</method>
+		<method name="create_query">
+			<return type="SQLiteQuery" />
+			<param index="0" name="statement" type="String" />
+			<param index="1" name="arguments" type="Array" default="[]" />
+			<description>
+				Creates a new query object.
+			</description>
+		</method>
+		<method name="enable_load_extension">
+			<return type="bool" />
+			<param index="0" name="enabled" type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="execute_script">
+			<return type="bool" />
+			<param index="0" name="path" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="get_changes" qualifiers="const">
+			<return type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="get_database_filename" qualifiers="const">
+			<return type="String" />
+			<param index="0" name="db_name" type="String" default="&quot;main&quot;" />
+			<description>
+			</description>
+		</method>
+		<method name="get_db_config" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="op" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="get_db_status" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="op" type="int" />
+			<param index="1" name="reset" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="get_global_status" qualifiers="static">
+			<return type="int" />
+			<param index="0" name="op" type="int" />
+			<param index="1" name="reset" type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="get_last_error_code" qualifiers="const">
+			<return type="int" />
+			<description>
+				Gets the last error code.
+			</description>
+		</method>
+		<method name="get_last_error_message" qualifiers="const">
+			<return type="String" />
+			<description>
+				Gets the last error message.
+			</description>
+		</method>
+		<method name="get_last_insert_rowid" qualifiers="const">
+			<return type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="get_limit" qualifiers="const">
+			<return type="int" />
+			<param index="0" name="id" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="get_total_changes" qualifiers="const">
+			<return type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="interrupt">
+			<return type="void" />
+			<description>
+			</description>
+		</method>
+		<method name="is_autocommit" qualifiers="const">
+			<return type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="is_readonly" qualifiers="const">
+			<return type="bool" />
+			<param index="0" name="db_name" type="String" default="&quot;main&quot;" />
+			<description>
+			</description>
+		</method>
+		<method name="open">
+			<return type="bool" />
+			<param index="0" name="database" type="String" />
+			<description>
+				Opens the database file at the given path. Returns [code]true[/code] if the database was successfully opened, [code]false[/code] otherwise.
+				If the path starts with "res://", it will use [method open_buffered] implicitly.
+			</description>
+		</method>
+		<method name="open_blob">
+			<return type="SQLiteBlob" />
+			<param index="0" name="db_name" type="String" />
+			<param index="1" name="table_name" type="String" />
+			<param index="2" name="column_name" type="String" />
+			<param index="3" name="rowid" type="int" />
+			<param index="4" name="read_write" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="open_buffered">
+			<return type="bool" />
+			<param index="0" name="path" type="String" />
+			<param index="1" name="buffers" type="PackedByteArray" />
+			<param index="2" name="size" type="int" />
+			<description>
+				Opens a temporary database with the data in [code]buffer[/code]. Used for opening databases stored in res:// or compressed databases. Returns [code]true[/code] if the database was opened successfully.
+				Can be written to, but the changes are NOT saved!
+			</description>
+		</method>
+		<method name="open_in_memory">
+			<return type="bool" />
+			<description>
+				Opens an in-memory database.
+			</description>
+		</method>
+		<method name="release_memory" qualifiers="static">
+			<return type="int" />
+			<param index="0" name="bytes" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="restore">
+			<return type="bool" />
+			<param index="0" name="path" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="restore_async">
+			<return type="SQLiteBackup" />
+			<param index="0" name="path" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="set_authorizer">
+			<return type="void" />
+			<param index="0" name="callable" type="Callable" />
+			<description>
+			</description>
+		</method>
+		<method name="set_busy_timeout">
+			<return type="bool" />
+			<param index="0" name="ms" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="set_db_config">
+			<return type="bool" />
+			<param index="0" name="op" type="int" />
+			<param index="1" name="val" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="set_foreign_keys_enabled">
+			<return type="void" />
+			<param index="0" name="enabled" type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="set_limit">
+			<return type="int" />
+			<param index="0" name="id" type="int" />
+			<param index="1" name="new_val" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="set_progress_handler">
+			<return type="void" />
+			<param index="0" name="instructions" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="set_soft_heap_limit" qualifiers="static">
+			<return type="void" />
+			<param index="0" name="bytes" type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="set_trace">
+			<return type="void" />
+			<param index="0" name="enabled" type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="vacuum">
+			<return type="bool" />
+			<description>
+			</description>
+		</method>
+		<method name="wal_checkpoint">
+			<return type="bool" />
+			<param index="0" name="db_name" type="String" default="&quot;main&quot;" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<signals>
+		<signal name="query_profiled">
+			<param index="0" name="query_string" type="String" />
+			<param index="1" name="execution_time_ns" type="int" />
+			<description>
+			</description>
+		</signal>
+		<signal name="query_progress">
+			<description>
+			</description>
+		</signal>
+		<signal name="row_updated">
+			<param index="0" name="update_operation" type="int" />
+			<param index="1" name="db_name" type="String" />
+			<param index="2" name="table_name" type="String" />
+			<param index="3" name="rowid" type="int" />
+			<description>
+			</description>
+		</signal>
+		<signal name="transaction_committed">
+			<description>
+			</description>
+		</signal>
+		<signal name="transaction_rolled_back">
+			<description>
+			</description>
+		</signal>
+		<signal name="wal_updated">
+			<param index="0" name="db_name" type="String" />
+			<param index="1" name="pages_in_wal" type="int" />
+			<description>
+			</description>
+		</signal>
+	</signals>
+</class>
