@@ -58,6 +58,8 @@ protected:
 	AutoworkTestMethodResult current_test;
 	Vector<AutoworkTestMethodResult> test_results;
 
+	String _xml_indent(int p_level);
+
 public:
 	AutoworkLogger();
 	~AutoworkLogger();
@@ -85,4 +87,7 @@ public:
 	const Vector<AutoworkTestMethodResult> &get_test_results() const { return test_results; }
 
 	void print_summary();
+
+	bool export_json(const String &p_file_path);
+	bool export_xml(const String &p_file_path);
 };

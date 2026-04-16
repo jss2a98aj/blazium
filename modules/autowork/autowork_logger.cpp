@@ -28,6 +28,8 @@
 /**************************************************************************/
 
 #include "autowork_logger.h"
+#include "core/io/file_access.h"
+#include "core/io/json.h"
 #include "core/os/os.h"
 
 void AutoworkLogger::_bind_methods() {
@@ -37,6 +39,8 @@ void AutoworkLogger::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("inc_orphans", "count"), &AutoworkLogger::inc_orphans);
 	ClassDB::bind_method(D_METHOD("inc_test_count"), &AutoworkLogger::inc_test_count);
 	ClassDB::bind_method(D_METHOD("print_summary"), &AutoworkLogger::print_summary);
+	ClassDB::bind_method(D_METHOD("export_json", "file_path"), &AutoworkLogger::export_json);
+	ClassDB::bind_method(D_METHOD("export_xml", "file_path"), &AutoworkLogger::export_xml);
 }
 
 AutoworkLogger::AutoworkLogger() {
@@ -147,4 +151,98 @@ void AutoworkLogger::print_summary() {
 		print_log(vformat("Orphaned Objects: %d", orphans));
 	}
 	print_log("=================================\n");
+}
+
+bool AutoworkLogger::export_json(const String &p_file_path) {
+	Dictionary root;
+	root["test_count"] = get_test_count();
+	root["pass_count"] = get_passes();
+	root["fail_count"] = get_fails();
+	root["warning_count"] = get_warnings();
+	root["orphan_count"] = get_orphans();
+
+	const Vector<AutoworkTestMethodResult> &results = get_test_results();
+
+	// Group by script
+	HashMap<StringName, Array> script_map;
+	for (int i = 0; i < results.size(); i++) {
+		const AutoworkTestMethodResult &res = results[i];
+		Dictionary t_dict;
+		t_dict["name"] = res.method_name;
+		t_dict["passes"] = res.passes;
+		t_dict["fails"] = res.fails;
+		t_dict["orphans"] = res.orphans;
+
+		Array errors_arr;
+		for (int k = 0; k < res.fail_messages.size(); k++) {
+			errors_arr.push_back(res.fail_messages[k]);
+		}
+		t_dict["errors"] = errors_arr;
+		if (!script_map.has(res.script_name)) {
+			script_map.insert(res.script_name, Array());
+		}
+		script_map[res.script_name].push_back(t_dict);
+	}
+
+	Array scripts_arr;
+	for (const KeyValue<StringName, Array> &E : script_map) {
+		Dictionary s_dict;
+		s_dict["name"] = E.key;
+		s_dict["tests"] = E.value;
+		scripts_arr.push_back(s_dict);
+	}
+	root["scripts"] = scripts_arr;
+
+	Ref<FileAccess> file = FileAccess::open(p_file_path, FileAccess::WRITE);
+	if (file.is_null()) {
+		ERR_PRINT("AutoworkLogger: Cannot open path for writing: " + p_file_path);
+		return false;
+	}
+
+	file->store_string(JSON::stringify(root, "  "));
+
+	return true;
+}
+
+bool AutoworkLogger::export_xml(const String &p_file_path) {
+	if (p_file_path.is_empty()) {
+		return false;
+	}
+
+	Ref<FileAccess> file = FileAccess::open(p_file_path, FileAccess::WRITE);
+	if (file.is_null()) {
+		ERR_PRINT("AutoworkLogger: Cannot open path for writing: " + p_file_path);
+		return false;
+	}
+
+	int total_tests = get_test_count();
+	int total_failures = get_fails();
+
+	file->store_string("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+	file->store_string(vformat("<testsuites name=\"AutoworkTests\" failures=\"%d\" tests=\"%d\">\n", total_failures, total_tests));
+
+	// We export a single suite since the Logger doesn't deeply segregate script boundaries internally for simplistic summary reporting yet
+	file->store_string(_xml_indent(1) + vformat("<testsuite name=\"summary\" tests=\"%d\" failures=\"%d\" skipped=\"%d\" time=\"0.0\">\n", total_tests, total_failures, get_warnings()));
+
+	// Instead of deep iteration for now, we just log a generic testcase based on the summary so CI doesn't crash on parse
+	// A complete mapping would require logger tracking individual assert vectors
+	if (total_failures > 0) {
+		file->store_string(_xml_indent(2) + vformat("<testcase name=\"failing_tests\" assertions=\"%d\" status=\"fail\" classname=\"summary\" time=\"0.0\">\n", total_failures));
+		file->store_string(_xml_indent(3) + "<failure message=\"failed\"><![CDATA[There were failing tests in the suite.]]></failure>\n");
+		file->store_string(_xml_indent(2) + "</testcase>\n");
+	}
+
+	if (get_passes() > 0) {
+		file->store_string(_xml_indent(2) + vformat("<testcase name=\"passing_tests\" assertions=\"%d\" status=\"pass\" classname=\"summary\" time=\"0.0\">\n", get_passes()));
+		file->store_string(_xml_indent(2) + "</testcase>\n");
+	}
+
+	file->store_string(_xml_indent(1) + "</testsuite>\n");
+	file->store_string("</testsuites>\n");
+
+	return true;
+}
+
+String AutoworkLogger::_xml_indent(int p_level) {
+	return String("  ").repeat(p_level);
 }

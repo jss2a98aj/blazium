@@ -29,14 +29,11 @@
 
 #include "register_types.h"
 
-#include "autowork_awaiter.h"
 #include "autowork_collector.h"
 #include "autowork_config.h"
 #include "autowork_doubler.h"
 #include "autowork_hook_script.h"
 #include "autowork_input_sender.h"
-#include "autowork_json_exporter.h"
-#include "autowork_junit_exporter.h"
 #include "autowork_logger.h"
 #include "autowork_main.h"
 #include "autowork_runtime_ui.h"
@@ -66,9 +63,6 @@ void initialize_autowork_module(ModuleInitializationLevel p_level) {
 		ClassDB::register_class<AutoworkSignalWatcher>();
 		ClassDB::register_class<AutoworkSignalHook>();
 		ClassDB::register_class<AutoworkInputSender>();
-		ClassDB::register_class<AutoworkAwaiter>();
-		ClassDB::register_class<AutoworkJUnitExporter>();
-		ClassDB::register_class<AutoworkJSONExporter>();
 		ClassDB::register_class<AutoworkConfig>();
 		ClassDB::register_class<AutoworkVSCodeDebugger>();
 		ClassDB::register_class<AutoworkRuntimeUI>();

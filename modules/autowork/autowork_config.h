@@ -31,6 +31,7 @@
 
 #include "core/object/ref_counted.h"
 #include "core/variant/dictionary.h"
+#include "modules/autowork/autowork_main.h"
 
 class AutoworkConfig : public RefCounted {
 	GDCLASS(AutoworkConfig, RefCounted);
@@ -47,7 +48,7 @@ public:
 
 	void load_options(const String &p_file_path);
 	void write_options(const String &p_file_path);
-	void apply_options(Object *p_runner);
+	void apply_options(Autowork *p_runner);
 
 	Dictionary get_options() const { return options; }
 	void set_options(const Dictionary &p_options) { options = p_options; }

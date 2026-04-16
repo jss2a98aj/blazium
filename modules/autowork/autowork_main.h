@@ -34,10 +34,14 @@
 #include "autowork_logger.h"
 #include "autowork_spy.h"
 #include "autowork_stubber.h"
+#include "autowork_test.h"
 #include "scene/main/node.h"
 
 class Autowork : public Node {
 	GDCLASS(Autowork, Node);
+
+	AutoworkTest *_get_test_instance(Dictionary script_info);
+	void _on_test_over();
 
 protected:
 	static void _bind_methods();
@@ -54,14 +58,8 @@ public:
 
 	void add_directory(const String &p_path, const String &p_prefix = "", const String &p_suffix = "");
 	void add_script(const String &p_path);
-	void set_select(const String &p_test_name);
-	void run_tests(bool p_run_rest = false);
-
-	void maximize() {}
-	void clear_text() {}
-	void pause_before_teardown() {}
-	void show_orphans(bool p_should) {}
-	void p(const String &p_text, int p_level = 0) {}
+	void set_test(const String &p_test_name);
+	void run_tests();
 
 	int get_test_count() { return logger.is_valid() ? logger->get_test_count() : 0; }
 	int get_assert_count() { return logger.is_valid() ? (logger->get_passes() + logger->get_fails()) : 0; }

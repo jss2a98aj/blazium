@@ -37,55 +37,12 @@
 #include "scene/main/scene_tree.h"
 #include "scene/main/window.h"
 
-class AutoworkFrameTimer : public Node {
-	GDCLASS(AutoworkFrameTimer, Node);
-
-	int frames_left = 0;
-	bool use_physics = false;
-
-protected:
-	void _notification(int p_what) {
-		if (p_what == NOTIFICATION_PROCESS && !use_physics) {
-			frames_left--;
-			if (frames_left <= 0) {
-				emit_signal("timeout");
-				queue_free();
-			}
-		} else if (p_what == NOTIFICATION_PHYSICS_PROCESS && use_physics) {
-			frames_left--;
-			if (frames_left <= 0) {
-				emit_signal("timeout");
-				queue_free();
-			}
-		}
-	}
-
-	static void _bind_methods() {
-		ADD_SIGNAL(MethodInfo("timeout"));
-	}
-
-public:
-	void start(int p_frames, bool p_physics) {
-		frames_left = p_frames;
-		use_physics = p_physics;
-		set_process(!p_physics);
-		set_physics_process(p_physics);
-	}
-};
-
 void AutoworkTest::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_logger", "logger"), &AutoworkTest::set_logger);
-
-	ClassDB::bind_method(D_METHOD("watch_signals", "object"), &AutoworkTest::watch_signals);
-	ClassDB::bind_method(D_METHOD("watch_signal", "object", "signal"), &AutoworkTest::watch_signal);
-
-	// Virtuals
 	GDVIRTUAL_BIND(_before_all);
 	GDVIRTUAL_BIND(_before_each);
 	GDVIRTUAL_BIND(_after_each);
 	GDVIRTUAL_BIND(_after_all);
 
-	// Asserts
 	ClassDB::bind_method(D_METHOD("assert_true", "condition", "text"), &AutoworkTest::assert_true, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_false", "condition", "text"), &AutoworkTest::assert_false, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_eq", "got", "expected", "text"), &AutoworkTest::assert_eq, DEFVAL(""));
@@ -95,9 +52,9 @@ void AutoworkTest::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("assert_gt", "got", "expected", "text"), &AutoworkTest::assert_gt, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_lt", "got", "expected", "text"), &AutoworkTest::assert_lt, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_ge", "got", "expected", "text"), &AutoworkTest::assert_ge, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("assert_gte", "got", "expected", "text"), &AutoworkTest::assert_gte, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("assert_gte", "got", "expected", "text"), &AutoworkTest::assert_ge, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_le", "got", "expected", "text"), &AutoworkTest::assert_le, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("assert_lte", "got", "expected", "text"), &AutoworkTest::assert_lte, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("assert_lte", "got", "expected", "text"), &AutoworkTest::assert_le, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_null", "got", "text"), &AutoworkTest::assert_null, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_not_null", "got", "text"), &AutoworkTest::assert_not_null, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_has_method", "object", "method", "text"), &AutoworkTest::assert_has_method, DEFVAL(""));
@@ -105,20 +62,17 @@ void AutoworkTest::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("assert_not_between", "got", "expect_low", "expect_high", "text"), &AutoworkTest::assert_not_between, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_almost_eq", "got", "expected", "error_margin", "text"), &AutoworkTest::assert_almost_eq, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_almost_ne", "got", "expected", "error_margin", "text"), &AutoworkTest::assert_almost_ne, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("skip_if_godot_version_lt", "expected"), &AutoworkTest::skip_if_godot_version_lt);
-	ClassDB::bind_method(D_METHOD("skip_if_godot_version_ne", "expected"), &AutoworkTest::skip_if_godot_version_ne);
-	ClassDB::bind_method(D_METHOD("assert_has", "got", "element", "text"), &AutoworkTest::assert_has, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("assert_does_not_have", "got", "element", "text"), &AutoworkTest::assert_does_not_have, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("assert_has", "variant", "element", "text"), &AutoworkTest::assert_has, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("assert_does_not_have", "variant", "element", "text"), &AutoworkTest::assert_does_not_have, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_file_exists", "file_path", "text"), &AutoworkTest::assert_file_exists, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_file_does_not_exist", "file_path", "text"), &AutoworkTest::assert_file_does_not_exist, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_file_empty", "file_path", "text"), &AutoworkTest::assert_file_empty, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_file_not_empty", "file_path", "text"), &AutoworkTest::assert_file_not_empty, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_dir_exists", "dir_path", "text"), &AutoworkTest::assert_dir_exists, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_dir_does_not_exist", "dir_path", "text"), &AutoworkTest::assert_dir_does_not_exist, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("assert_typeof", "got", "type", "text"), &AutoworkTest::assert_typeof, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("assert_not_typeof", "got", "type", "text"), &AutoworkTest::assert_not_typeof, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("assert_is", "got", "class_obj", "text"), &AutoworkTest::assert_is, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("assert_extends", "got", "class_obj", "text"), &AutoworkTest::assert_extends, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("assert_typeof", "variant", "type", "text"), &AutoworkTest::assert_typeof, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("assert_not_typeof", "variant", "type", "text"), &AutoworkTest::assert_not_typeof, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("assert_is", "object", "class", "text"), &AutoworkTest::assert_is, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_string_contains", "got", "expected", "text"), &AutoworkTest::assert_string_contains, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_string_starts_with", "got", "expected", "text"), &AutoworkTest::assert_string_starts_with, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_string_ends_with", "got", "expected", "text"), &AutoworkTest::assert_string_ends_with, DEFVAL(""));
@@ -127,96 +81,68 @@ void AutoworkTest::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("assert_called", "object", "method", "args", "text"), &AutoworkTest::assert_called, DEFVAL(Array()), DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_not_called", "object", "method", "args", "text"), &AutoworkTest::assert_not_called, DEFVAL(Array()), DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_called_count", "object", "method", "expected_count", "args", "text"), &AutoworkTest::assert_called_count, DEFVAL(Array()), DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("assert_call_count", "object", "method", "expected_count", "args", "text"), &AutoworkTest::assert_call_count, DEFVAL(Array()), DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("get_call_count", "object", "method", "args"), &AutoworkTest::get_call_count, DEFVAL(Array()));
-	ClassDB::bind_method(D_METHOD("get_call_parameters", "object", "method", "index"), &AutoworkTest::get_call_parameters, DEFVAL(-1));
 	ClassDB::bind_method(D_METHOD("assert_same", "got", "expected", "text"), &AutoworkTest::assert_same, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_not_same", "got", "expected", "text"), &AutoworkTest::assert_not_same, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("assert_eq_shallow", "got", "expected", "text"), &AutoworkTest::assert_eq_shallow, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("assert_ne_shallow", "got", "expected", "text"), &AutoworkTest::assert_ne_shallow, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("pending", "text"), &AutoworkTest::pending, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("pass_test", "text"), &AutoworkTest::pass_test, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("fail_test", "text"), &AutoworkTest::fail_test, DEFVAL(""));
-
 	ClassDB::bind_method(D_METHOD("assert_signal_emitted", "object", "signal", "message"), &AutoworkTest::assert_signal_emitted, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_signal_not_emitted", "object", "signal", "message"), &AutoworkTest::assert_signal_not_emitted, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_signal_emit_count", "object", "signal", "expected_count", "message"), &AutoworkTest::assert_signal_emit_count, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_has_signal", "object", "signal", "message"), &AutoworkTest::assert_has_signal, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_signal_emitted_with_parameters", "object", "signal", "expected_parameters", "index", "message"), &AutoworkTest::assert_signal_emitted_with_parameters, DEFVAL(-1), DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("get_signal_emit_count", "object", "signal"), &AutoworkTest::get_signal_emit_count);
-	ClassDB::bind_method(D_METHOD("get_signal_parameters", "object", "signal", "index"), &AutoworkTest::get_signal_parameters, DEFVAL(-1));
-
 	ClassDB::bind_method(D_METHOD("assert_property", "object", "property", "default", "set_to"), &AutoworkTest::assert_property);
 	ClassDB::bind_method(D_METHOD("assert_set_property", "object", "property", "new_value", "expected", "text"), &AutoworkTest::assert_set_property, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_readonly_property", "object", "property", "new_value", "expected", "text"), &AutoworkTest::assert_readonly_property, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_property_with_backing_variable", "object", "property", "default_value", "new_value", "backed_by_name"), &AutoworkTest::assert_property_with_backing_variable, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_accessors", "object", "property", "default", "set_to"), &AutoworkTest::assert_accessors);
-	ClassDB::bind_method(D_METHOD("assert_setget", "object", "property", "default", "set_to"), &AutoworkTest::assert_setget);
 	ClassDB::bind_method(D_METHOD("assert_exports", "object", "property", "type"), &AutoworkTest::assert_exports);
-
 	ClassDB::bind_method(D_METHOD("assert_connected", "source", "target", "signal", "method_name"), &AutoworkTest::assert_connected, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_not_connected", "source", "target", "signal", "method_name"), &AutoworkTest::assert_not_connected, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("assert_no_new_orphans", "message"), &AutoworkTest::assert_no_new_orphans, DEFVAL(""));
 
+	ClassDB::bind_method(D_METHOD("skip_if_engine_version_lt", "version", "check_godot"), &AutoworkTest::skip_if_engine_version_lt, DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("skip_if_engine_version_ne", "version", "check_godot"), &AutoworkTest::skip_if_engine_version_ne, DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("skip_if_godot_version_lt", "version"), &AutoworkTest::skip_if_godot_version_lt);
+	ClassDB::bind_method(D_METHOD("skip_if_godot_version_ne", "version"), &AutoworkTest::skip_if_godot_version_ne);
+
 	ClassDB::bind_method(D_METHOD("wait_seconds", "seconds", "message"), &AutoworkTest::wait_seconds, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("yield_for", "seconds", "message"), &AutoworkTest::yield_for, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("file_touch", "path"), &AutoworkTest::file_touch);
-	ClassDB::bind_method(D_METHOD("file_delete", "path"), &AutoworkTest::file_delete);
-	ClassDB::bind_method(D_METHOD("directory_delete_files", "path"), &AutoworkTest::directory_delete_files);
-	ClassDB::bind_method(D_METHOD("is_file_empty", "path"), &AutoworkTest::is_file_empty);
-	ClassDB::bind_method(D_METHOD("get_file_as_text", "path"), &AutoworkTest::get_file_as_text);
-	ClassDB::bind_method(D_METHOD("wait_frames", "frames", "message"), &AutoworkTest::wait_frames, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("yield_frames", "frames", "message"), &AutoworkTest::yield_frames, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("wait_process_frames", "frames", "message"), &AutoworkTest::wait_process_frames, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("wait_idle_frames", "frames", "message"), &AutoworkTest::wait_idle_frames, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("wait_physics_frames", "frames", "message"), &AutoworkTest::wait_physics_frames, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("wait_until", "callable", "max_wait", "message"), &AutoworkTest::wait_until, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("wait_while", "callable", "max_wait", "message"), &AutoworkTest::wait_while, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("wait_for_signal", "object", "signal", "max_wait", "message"), &AutoworkTest::wait_for_signal, DEFVAL(""));
-	ClassDB::bind_method(D_METHOD("yield_to", "object", "signal", "max_wait", "message"), &AutoworkTest::yield_to, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("wait_for_signal", "signal", "max_wait", "message"), &AutoworkTest::wait_for_signal, DEFVAL(""));
+
+	ClassDB::bind_method(D_METHOD("get_call_count", "object", "method", "args"), &AutoworkTest::get_call_count, DEFVAL(Array()));
+	ClassDB::bind_method(D_METHOD("get_call_parameters", "object", "method", "index"), &AutoworkTest::get_call_parameters, DEFVAL(-1));
+	ClassDB::bind_method(D_METHOD("get_signal_emit_count", "object", "signal"), &AutoworkTest::get_signal_emit_count);
+	ClassDB::bind_method(D_METHOD("get_signal_parameters", "object", "signal", "index"), &AutoworkTest::get_signal_parameters, DEFVAL(-1));
 
 	ClassDB::bind_method(D_METHOD("set_doubler", "doubler"), &AutoworkTest::set_doubler);
 	ClassDB::bind_method(D_METHOD("set_spy", "spy"), &AutoworkTest::set_spy);
 	ClassDB::bind_method(D_METHOD("set_stubber", "stubber"), &AutoworkTest::set_stubber);
 
 	ClassDB::bind_method(D_METHOD("double_resource", "path"), &AutoworkTest::double_resource);
-	ClassDB::bind_method(D_METHOD("double_script", "path"), &AutoworkTest::double_script);
-	ClassDB::bind_method(D_METHOD("double_scene", "path"), &AutoworkTest::double_scene);
 	ClassDB::bind_method(D_METHOD("double_singleton", "name"), &AutoworkTest::double_singleton);
-	ClassDB::bind_method(D_METHOD("partial_double_singleton", "name"), &AutoworkTest::partial_double_singleton);
-	ClassDB::bind_method(D_METHOD("double_inner", "path", "inner_name"), &AutoworkTest::double_inner);
-	ClassDB::bind_method(D_METHOD("partial_double_inner", "path", "inner_name"), &AutoworkTest::partial_double_inner);
 	ClassDB::bind_method(D_METHOD("create_double", "thing"), &AutoworkTest::double_thing);
-	ClassDB::bind_method(D_METHOD("partial_double", "thing"), &AutoworkTest::partial_double);
 	ClassDB::bind_method(D_METHOD("spy", "thing"), &AutoworkTest::spy_thing);
-	ClassDB::bind_method(D_METHOD("ignore_method_when_doubling", "thing", "method"), &AutoworkTest::ignore_method_when_doubling);
 	ClassDB::bind_method(D_METHOD("stub", "object", "method"), &AutoworkTest::stub, DEFVAL(StringName()));
 
-	ClassDB::bind_method(D_METHOD("replace_node", "base", "path", "with_node"), &AutoworkTest::replace_node);
-	ClassDB::bind_method(D_METHOD("simulate", "node", "times", "delta"), &AutoworkTest::simulate);
-	ClassDB::bind_method(D_METHOD("did_wait_timeout"), &AutoworkTest::did_wait_timeout);
+	ClassDB::bind_method(D_METHOD("simulate", "node", "times", "delta", "check_is_processing", "simulate_method"), &AutoworkTest::simulate, DEFVAL(false), DEFVAL(SIMULATE_BOTH));
+
 	ClassDB::bind_method(D_METHOD("get_fail_count"), &AutoworkTest::get_fail_count);
 	ClassDB::bind_method(D_METHOD("get_pass_count"), &AutoworkTest::get_pass_count);
 	ClassDB::bind_method(D_METHOD("get_pending_count"), &AutoworkTest::get_pending_count);
 	ClassDB::bind_method(D_METHOD("get_assert_count"), &AutoworkTest::get_assert_count);
 
-	ClassDB::bind_method(D_METHOD("get_gut"), &AutoworkTest::get_gut);
-	ClassDB::bind_method(D_METHOD("set_gut", "val"), &AutoworkTest::set_gut);
-	ClassDB::bind_method(D_METHOD("p", "text", "level"), &AutoworkTest::p, DEFVAL(0));
-	ClassDB::bind_method(D_METHOD("pause_before_teardown"), &AutoworkTest::pause_before_teardown);
+	ClassDB::bind_method(D_METHOD("pending", "text"), &AutoworkTest::pending, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("pass_test", "text"), &AutoworkTest::pass_test, DEFVAL(""));
+	ClassDB::bind_method(D_METHOD("fail_test", "text"), &AutoworkTest::fail_test, DEFVAL(""));
+
+	ClassDB::bind_method(D_METHOD("print_log", "text"), &AutoworkTest::print_log);
+	ClassDB::bind_method(D_METHOD("p", "text"), &AutoworkTest::print_log);
 	ClassDB::bind_method(D_METHOD("get_logger"), &AutoworkTest::get_logger);
 	ClassDB::bind_method(D_METHOD("get_test_count"), &AutoworkTest::get_test_count);
-	ClassDB::bind_method(D_METHOD("maximize"), &AutoworkTest::maximize);
-	ClassDB::bind_method(D_METHOD("clear_text"), &AutoworkTest::clear_text);
-	ClassDB::bind_method(D_METHOD("show_orphans", "should"), &AutoworkTest::show_orphans);
 
-	ClassDB::bind_method(D_METHOD("register_inner_classes", "base_script"), &AutoworkTest::register_inner_classes);
-	ClassDB::bind_method(D_METHOD("compare_deep", "v1", "v2", "max_differences"), &AutoworkTest::compare_deep, DEFVAL(Variant()));
-	ClassDB::bind_method(D_METHOD("compare_shallow", "v1", "v2", "max_differences"), &AutoworkTest::compare_shallow, DEFVAL(Variant()));
 	ClassDB::bind_method(D_METHOD("get_summary"), &AutoworkTest::get_summary);
 	ClassDB::bind_method(D_METHOD("get_summary_text"), &AutoworkTest::get_summary_text);
-
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "gut"), "set_gut", "get_gut");
 
 	ClassDB::bind_method(D_METHOD("use_parameters", "params"), &AutoworkTest::use_parameters);
 	ClassDB::bind_method(D_METHOD("has_parameters"), &AutoworkTest::has_parameters);
@@ -229,6 +155,18 @@ void AutoworkTest::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("autoqfree", "node"), &AutoworkTest::autoqfree);
 	ClassDB::bind_method(D_METHOD("add_child_autofree", "child"), &AutoworkTest::add_child_autofree);
 	ClassDB::bind_method(D_METHOD("add_child_autoqfree", "child"), &AutoworkTest::add_child_autoqfree);
+
+	ClassDB::bind_method(D_METHOD("set_logger", "logger"), &AutoworkTest::set_logger);
+
+	ClassDB::bind_method(D_METHOD("watch_signals", "object"), &AutoworkTest::watch_signals);
+	ClassDB::bind_method(D_METHOD("watch_signal", "object", "signal"), &AutoworkTest::watch_signal);
+
+	ADD_SIGNAL(MethodInfo("frameout"));
+	ADD_SIGNAL(MethodInfo("timeout", PropertyInfo(Variant::BOOL, "return_value")));
+
+	BIND_ENUM_CONSTANT(SIMULATE_BOTH);
+	BIND_ENUM_CONSTANT(SIMULATE_PROCESS);
+	BIND_ENUM_CONSTANT(SIMULATE_PHYSICS);
 }
 
 AutoworkTest::AutoworkTest() {
@@ -251,14 +189,6 @@ Variant AutoworkTest::use_parameters(const Array &p_params) {
 		return _parameters[_current_parameter_index];
 	}
 	return Variant();
-}
-
-void AutoworkTest::run_x_times(int p_x) {
-	Array arr;
-	for (int i = 0; i < p_x; i++) {
-		arr.push_back(i);
-	}
-	use_parameters(arr);
 }
 
 bool AutoworkTest::has_parameters() const {
@@ -337,71 +267,49 @@ void AutoworkTest::set_logger(Ref<AutoworkLogger> p_logger) {
 
 bool AutoworkTest::assert_true(bool p_condition, const String &p_text) {
 	if (p_condition) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_true" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_true" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(p_text.is_empty() ? "assert_true failed" : p_text);
-		}
-		return false;
+		fail_test(p_text.is_empty() ? "assert_true failed" : p_text);
 	}
+	return p_condition;
 }
 
 bool AutoworkTest::assert_false(bool p_condition, const String &p_text) {
 	if (!p_condition) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_false" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_false" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(p_text.is_empty() ? "assert_false failed" : p_text);
-		}
-		return false;
+		fail_test(p_text.is_empty() ? "assert_false failed" : p_text);
 	}
+	return p_condition;
 }
 
 bool AutoworkTest::assert_eq(const Variant &p_got, const Variant &p_expected, const String &p_text) {
-	bool are_equal = (p_got == p_expected);
-	if (are_equal) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_eq" : p_text);
-		}
-		return true;
+	bool passed = (p_got == p_expected);
+	if (passed) {
+		pass_test(p_text.is_empty() ? "assert_eq" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected: %s, Got: %s)", p_text.is_empty() ? "assert_eq failed" : p_text, p_expected, p_got));
-		}
-		return false;
+		fail_test(vformat("%s (Expected: %s, Got: %s)", p_text.is_empty() ? "assert_eq failed" : p_text, p_expected, p_got));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_ne(const Variant &p_got, const Variant &p_expected, const String &p_text) {
-	bool not_equal = (p_got != p_expected);
-	if (not_equal) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_ne" : p_text);
-		}
-		return true;
+	bool passed = (p_got != p_expected);
+	if (passed) {
+		pass_test(p_text.is_empty() ? "assert_ne" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected not to be: %s)", p_text.is_empty() ? "assert_ne failed" : p_text, p_expected));
-		}
-		return false;
+		fail_test(vformat("%s (Expected not to be: %s)", p_text.is_empty() ? "assert_ne failed" : p_text, p_expected));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_eq_deep(const Variant &p_got, const Variant &p_expected, const String &p_text) {
 	Variant result_var;
 	bool valid_eval = false;
 	Variant::evaluate(Variant::OP_EQUAL, p_got, p_expected, result_var, valid_eval);
-	bool result = valid_eval && (bool)result_var;
-	if (result) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? vformat("Deep match: %s", String(p_expected)) : p_text);
-		}
+	bool passed = valid_eval && (bool)result_var;
+	if (passed) {
+		pass_test(p_text.is_empty() ? vformat("Deep match: %s", String(p_expected)) : p_text);
 	} else {
 		String base_err = p_text.is_empty() ? vformat("Deep eval fail. Expected %s, Got %s", String(p_expected), String(p_got)) : p_text;
 		if (p_got.get_type() == Variant::DICTIONARY && p_expected.get_type() == Variant::DICTIONARY) {
@@ -448,28 +356,22 @@ bool AutoworkTest::assert_eq_deep(const Variant &p_got, const Variant &p_expecte
 				}
 			}
 		}
-		if (logger.is_valid()) {
-			logger->add_fail(base_err);
-		}
+		fail_test(base_err);
 	}
-	return result;
+	return passed;
 }
 
 bool AutoworkTest::assert_ne_deep(const Variant &p_got, const Variant &p_expected, const String &p_text) {
 	Variant result_var;
 	bool valid_eval = false;
 	Variant::evaluate(Variant::OP_NOT_EQUAL, p_got, p_expected, result_var, valid_eval);
-	bool result = valid_eval && (bool)result_var;
-	if (result) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? vformat("Deep match: %s", String(p_expected)) : p_text);
-		}
+	bool passed = valid_eval && (bool)result_var;
+	if (passed) {
+		pass_test(p_text.is_empty() ? vformat("Deep match: %s", String(p_expected)) : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(p_text.is_empty() ? vformat("Deep match fail. Expected %s, Got %s", String(p_expected), String(p_got)) : p_text);
-		}
+		fail_test(p_text.is_empty() ? vformat("Deep match fail. Expected %s, Got %s", String(p_expected), String(p_got)) : p_text);
 	}
-	return result;
+	return passed;
 }
 
 bool AutoworkTest::assert_gt(const Variant &p_got, const Variant &p_expected, const String &p_text) {
@@ -478,16 +380,11 @@ bool AutoworkTest::assert_gt(const Variant &p_got, const Variant &p_expected, co
 	Variant::evaluate(Variant::OP_GREATER, p_got, p_expected, ret, valid);
 	bool passed = valid && (bool)ret;
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_gt" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_gt" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s > %s)", p_text.is_empty() ? "assert_gt failed" : p_text, p_got, p_expected));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s > %s)", p_text.is_empty() ? "assert_gt failed" : p_text, p_got, p_expected));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_lt(const Variant &p_got, const Variant &p_expected, const String &p_text) {
@@ -496,16 +393,11 @@ bool AutoworkTest::assert_lt(const Variant &p_got, const Variant &p_expected, co
 	Variant::evaluate(Variant::OP_LESS, p_got, p_expected, ret, valid);
 	bool passed = valid && (bool)ret;
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_lt" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_lt" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s < %s)", p_text.is_empty() ? "assert_lt failed" : p_text, p_got, p_expected));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s < %s)", p_text.is_empty() ? "assert_lt failed" : p_text, p_got, p_expected));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_ge(const Variant &p_got, const Variant &p_expected, const String &p_text) {
@@ -514,16 +406,11 @@ bool AutoworkTest::assert_ge(const Variant &p_got, const Variant &p_expected, co
 	Variant::evaluate(Variant::OP_GREATER_EQUAL, p_got, p_expected, ret, valid);
 	bool passed = valid && (bool)ret;
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_ge" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_ge" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s >= %s)", p_text.is_empty() ? "assert_ge failed" : p_text, p_got, p_expected));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s >= %s)", p_text.is_empty() ? "assert_ge failed" : p_text, p_got, p_expected));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_le(const Variant &p_got, const Variant &p_expected, const String &p_text) {
@@ -532,64 +419,42 @@ bool AutoworkTest::assert_le(const Variant &p_got, const Variant &p_expected, co
 	Variant::evaluate(Variant::OP_LESS_EQUAL, p_got, p_expected, ret, valid);
 	bool passed = valid && (bool)ret;
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_le" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_le" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s <= %s)", p_text.is_empty() ? "assert_le failed" : p_text, p_got, p_expected));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s <= %s)", p_text.is_empty() ? "assert_le failed" : p_text, p_got, p_expected));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_null(const Variant &p_got, const String &p_text) {
-	if (p_got.get_type() == Variant::NIL || (p_got.get_type() == Variant::OBJECT && p_got.get_validated_object() == nullptr)) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_null" : p_text);
-		}
-		return true;
+	bool passed = p_got.get_type() == Variant::NIL || (p_got.get_type() == Variant::OBJECT && p_got.get_validated_object() == nullptr);
+	if (passed) {
+		pass_test(p_text.is_empty() ? "assert_null" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected null, got %s)", p_text.is_empty() ? "assert_null failed" : p_text, p_got));
-		}
-		return false;
+		fail_test(vformat("%s (Expected null, got %s)", p_text.is_empty() ? "assert_null failed" : p_text, p_got));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_not_null(const Variant &p_got, const String &p_text) {
-	if (p_got.get_type() != Variant::NIL && !(p_got.get_type() == Variant::OBJECT && p_got.get_validated_object() == nullptr)) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_not_null" : p_text);
-		}
-		return true;
+	bool passed = p_got.get_type() != Variant::NIL && !(p_got.get_type() == Variant::OBJECT && p_got.get_validated_object() == nullptr);
+	if (passed) {
+		pass_test(p_text.is_empty() ? "assert_not_null" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(p_text.is_empty() ? "assert_not_null failed" : p_text);
-		}
-		return false;
+		fail_test(p_text.is_empty() ? "assert_not_null failed" : p_text);
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_has_method(Object *p_object, const StringName &p_method, const String &p_text) {
-	if (!p_object) {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_has_method failed (Object is null)");
-		}
-		return false;
-	}
-	if (p_object->has_method(p_method)) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_has_method" : p_text);
-		}
-		return true;
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_has_method");
+	bool passed = p_object->has_method(p_method);
+	if (passed) {
+		pass_test(p_text.is_empty() ? "assert_has_method" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Object doesn't have method '%s')", p_text.is_empty() ? "assert_has_method failed" : p_text, String(p_method)));
-		}
-		return false;
+		fail_test(vformat("%s (Object doesn't have method '%s')", p_text.is_empty() ? "assert_has_method failed" : p_text, String(p_method)));
 	}
+	return passed;
 }
 
 void AutoworkTest::watch_signals(Object *p_object) {
@@ -605,43 +470,25 @@ void AutoworkTest::watch_signal(Object *p_object, const StringName &p_signal) {
 }
 
 bool AutoworkTest::assert_signal_emitted(Object *p_object, const StringName &p_signal, const String &p_message) {
-	if (!p_object) {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_signal_emitted failed (Object is null)");
-		}
-		return false;
-	}
-	if (signal_watcher.is_valid() && signal_watcher->did_emit(p_object, p_signal)) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_message.is_empty() ? "assert_signal_emitted" : p_message);
-		}
-		return true;
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_signal_emitted");
+	bool passed = signal_watcher.is_valid() && signal_watcher->did_emit(p_object, p_signal);
+	if (passed) {
+		pass_test(p_message.is_empty() ? "assert_signal_emitted" : p_message);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Signal '%s' was not emitted)", p_message.is_empty() ? "assert_signal_emitted failed" : p_message, p_signal));
-		}
-		return false;
+		fail_test(vformat("%s (Signal '%s' was not emitted)", p_message.is_empty() ? "assert_signal_emitted failed" : p_message, p_signal));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_signal_not_emitted(Object *p_object, const StringName &p_signal, const String &p_message) {
-	if (!p_object) {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_signal_not_emitted failed (Object is null)");
-		}
-		return false;
-	}
-	if (signal_watcher.is_valid() && !signal_watcher->did_emit(p_object, p_signal)) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_message.is_empty() ? "assert_signal_not_emitted" : p_message);
-		}
-		return true;
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_signal_not_emitted");
+	bool passed = signal_watcher.is_valid() && !signal_watcher->did_emit(p_object, p_signal);
+	if (passed) {
+		pass_test(p_message.is_empty() ? "assert_signal_not_emitted" : p_message);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Signal '%s' WAS emitted)", p_message.is_empty() ? "assert_signal_not_emitted failed" : p_message, p_signal));
-		}
-		return false;
+		fail_test(vformat("%s (Signal '%s' WAS emitted)", p_message.is_empty() ? "assert_signal_not_emitted failed" : p_message, p_signal));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_between(const Variant &p_got, const Variant &p_expect_low, const Variant &p_expect_high, const String &p_text) {
@@ -651,16 +498,11 @@ bool AutoworkTest::assert_between(const Variant &p_got, const Variant &p_expect_
 	Variant::evaluate(Variant::OP_GREATER_EQUAL, p_got, p_expect_low, ret_low, valid2);
 	bool passed = valid && valid2 && (bool)ret_high && (bool)ret_low;
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_between" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_between" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s to be between %s and %s)", p_text.is_empty() ? "assert_between failed" : p_text, p_got, p_expect_low, p_expect_high));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s to be between %s and %s)", p_text.is_empty() ? "assert_between failed" : p_text, p_got, p_expect_low, p_expect_high));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_not_between(const Variant &p_got, const Variant &p_expect_low, const Variant &p_expect_high, const String &p_text) {
@@ -670,420 +512,327 @@ bool AutoworkTest::assert_not_between(const Variant &p_got, const Variant &p_exp
 	Variant::evaluate(Variant::OP_LESS, p_got, p_expect_low, ret_low, valid2);
 	bool passed = (valid && (bool)ret_high) || (valid2 && (bool)ret_low);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_not_between" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_not_between" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s NOT to be between %s and %s)", p_text.is_empty() ? "assert_not_between failed" : p_text, p_got, p_expect_low, p_expect_high));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s NOT to be between %s and %s)", p_text.is_empty() ? "assert_not_between failed" : p_text, p_got, p_expect_low, p_expect_high));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_almost_eq(const Variant &p_got, const Variant &p_expected, const Variant &p_error_margin, const String &p_text) {
-	bool passed = false;
-	if ((p_got.get_type() == Variant::FLOAT || p_got.get_type() == Variant::INT) &&
-			(p_expected.get_type() == Variant::FLOAT || p_expected.get_type() == Variant::INT) &&
-			(p_error_margin.get_type() == Variant::FLOAT || p_error_margin.get_type() == Variant::INT)) {
-		float got = p_got;
-		float exp = p_expected;
-		float margin = p_error_margin;
-		passed = Math::abs(got - exp) <= margin;
-	} else if (p_got.get_type() == Variant::VECTOR2 && p_expected.get_type() == Variant::VECTOR2) {
-		Vector2 got = p_got;
-		Vector2 exp = p_expected;
-		float margin = p_error_margin;
-		passed = (got - exp).length() <= margin;
-	} else if (p_got.get_type() == Variant::VECTOR3 && p_expected.get_type() == Variant::VECTOR3) {
-		Vector3 got = p_got;
-		Vector3 exp = p_expected;
-		float margin = p_error_margin;
-		passed = (got - exp).length() <= margin;
-	} else if (p_got.get_type() == Variant::VECTOR4 && p_expected.get_type() == Variant::VECTOR4) {
-		Vector4 got = p_got;
-		Vector4 exp = p_expected;
-		float margin = p_error_margin;
-		passed = (got - exp).length() <= margin;
-	} else {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_almost_eq: unsupported types for nearly equal check");
+	Variant::Type type = p_got.get_type();
+	bool is_int_float = (type == Variant::FLOAT || type == Variant::INT);
+	if (is_int_float) {
+		if ((p_expected.get_type() != Variant::FLOAT && p_expected.get_type() != Variant::INT) || (p_error_margin.get_type() != Variant::FLOAT && p_error_margin.get_type() != Variant::INT)) {
+			ERR_FAIL_TEST(true, false, "unsupported types", "assert_almost_eq");
 		}
+	} else {
+		ERR_FAIL_TEST(type != p_expected.get_type() || type != p_error_margin.get_type(), false, "unsupported types", "assert_almost_eq");
+	}
+
+	bool passed = false;
+
+	if (is_int_float) {
+		float got = p_got;
+		float error_margin = p_error_margin;
+		float expected = p_expected;
+		float lower = expected - error_margin;
+		float upper = expected + error_margin;
+		passed = got >= lower && got <= upper;
+	} else if (type == Variant::VECTOR2) {
+		Vector2 got = p_got;
+		Vector2 error_margin = p_error_margin;
+		Vector2 expected = p_expected;
+		Vector2 lower = expected - error_margin;
+		Vector2 upper = expected + error_margin;
+		passed = got.clamp(lower, upper) == got;
+	} else if (type == Variant::VECTOR3) {
+		Vector3 got = p_got;
+		Vector3 error_margin = p_error_margin;
+		Vector3 expected = p_expected;
+		Vector3 lower = expected - error_margin;
+		Vector3 upper = expected + error_margin;
+		passed = got.clamp(lower, upper) == got;
+	} else if (type == Variant::VECTOR4) {
+		Vector4 got = p_got;
+		Vector4 error_margin = p_error_margin;
+		Vector4 expected = p_expected;
+		Vector4 lower = expected - error_margin;
+		Vector4 upper = expected + error_margin;
+		passed = got.clamp(lower, upper) == got;
+	} else {
+		fail_test("assert_almost_eq: unsupported types");
 		return false;
 	}
 
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_almost_eq" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_almost_eq" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s almost equal to %s)", p_text.is_empty() ? "assert_almost_eq failed" : p_text, p_got, p_expected));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s almost equal to %s)", p_text.is_empty() ? "assert_almost_eq failed" : p_text, p_got, p_expected));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_almost_ne(const Variant &p_got, const Variant &p_expected, const Variant &p_error_margin, const String &p_text) {
-	bool passed = true;
-	if ((p_got.get_type() == Variant::FLOAT || p_got.get_type() == Variant::INT) &&
-			(p_expected.get_type() == Variant::FLOAT || p_expected.get_type() == Variant::INT) &&
-			(p_error_margin.get_type() == Variant::FLOAT || p_error_margin.get_type() == Variant::INT)) {
-		float got = p_got;
-		float exp = p_expected;
-		float margin = p_error_margin;
-		passed = Math::abs(got - exp) > margin;
-	} else if (p_got.get_type() == Variant::VECTOR2 && p_expected.get_type() == Variant::VECTOR2) {
-		Vector2 got = p_got;
-		Vector2 exp = p_expected;
-		float margin = p_error_margin;
-		passed = (got - exp).length() > margin;
-	} else if (p_got.get_type() == Variant::VECTOR3 && p_expected.get_type() == Variant::VECTOR3) {
-		Vector3 got = p_got;
-		Vector3 exp = p_expected;
-		float margin = p_error_margin;
-		passed = (got - exp).length() > margin;
-	} else if (p_got.get_type() == Variant::VECTOR4 && p_expected.get_type() == Variant::VECTOR4) {
-		Vector4 got = p_got;
-		Vector4 exp = p_expected;
-		float margin = p_error_margin;
-		passed = (got - exp).length() > margin;
-	} else {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_almost_ne: unsupported types for nearly not equal check");
+	Variant::Type type = p_got.get_type();
+	bool is_int_float = (type == Variant::FLOAT || type == Variant::INT);
+	if (is_int_float) {
+		if ((p_expected.get_type() != Variant::FLOAT && p_expected.get_type() != Variant::INT) || (p_error_margin.get_type() != Variant::FLOAT && p_error_margin.get_type() != Variant::INT)) {
+			ERR_FAIL_TEST(true, false, "unsupported types", "assert_almost_ne");
 		}
+	} else {
+		ERR_FAIL_TEST(type != p_expected.get_type() || type != p_error_margin.get_type(), false, "unsupported types", "assert_almost_ne");
+	}
+
+	bool passed = false;
+
+	if (is_int_float) {
+		float got = p_got;
+		float error_margin = p_error_margin;
+		float expected = p_expected;
+		float lower = expected - error_margin;
+		float upper = expected + error_margin;
+		passed = got >= lower && got <= upper;
+	} else if (type == Variant::VECTOR2) {
+		Vector2 got = p_got;
+		Vector2 error_margin = p_error_margin;
+		Vector2 expected = p_expected;
+		Vector2 lower = expected - error_margin;
+		Vector2 upper = expected + error_margin;
+		passed = got.clamp(lower, upper) == got;
+	} else if (type == Variant::VECTOR3) {
+		Vector3 got = p_got;
+		Vector3 error_margin = p_error_margin;
+		Vector3 expected = p_expected;
+		Vector3 lower = expected - error_margin;
+		Vector3 upper = expected + error_margin;
+		passed = got.clamp(lower, upper) == got;
+	} else if (type == Variant::VECTOR4) {
+		Vector4 got = p_got;
+		Vector4 error_margin = p_error_margin;
+		Vector4 expected = p_expected;
+		Vector4 lower = expected - error_margin;
+		Vector4 upper = expected + error_margin;
+		passed = got.clamp(lower, upper) == got;
+	} else {
+		fail_test("assert_almost_ne: unsupported types");
 		return false;
 	}
 
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_almost_ne" : p_text);
-		}
-		return true;
+		fail_test(vformat("%s (Expected %s almost not equal to %s)", p_text.is_empty() ? "assert_almost_ne failed" : p_text, p_got, p_expected));
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s almost not equal to %s)", p_text.is_empty() ? "assert_almost_ne failed" : p_text, p_got, p_expected));
-		}
-		return false;
+		pass_test(p_text.is_empty() ? "assert_almost_ne" : p_text);
 	}
+	return passed;
 }
 
-bool AutoworkTest::assert_has(const Variant &p_got, const Variant &p_element, const String &p_text) {
+bool AutoworkTest::assert_has(const Variant &p_variant, const Variant &p_element, const String &p_text) {
 	bool passed = false;
-	if (p_got.get_type() == Variant::ARRAY) {
-		Array a = p_got;
+	if (p_variant.get_type() == Variant::ARRAY) {
+		Array a = p_variant;
 		passed = a.has(p_element);
-	} else if (p_got.get_type() == Variant::DICTIONARY) {
-		Dictionary d = p_got;
+	} else if (p_variant.get_type() == Variant::DICTIONARY) {
+		Dictionary d = p_variant;
 		passed = d.has(p_element);
-	} else if (p_got.get_type() == Variant::STRING) {
-		String s = p_got;
+	} else if (p_variant.get_type() == Variant::STRING) {
+		String s = p_variant;
 		passed = s.contains((String)p_element);
 	}
 
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_has" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_has" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected sequence to contain %s)", p_text.is_empty() ? "assert_has failed" : p_text, p_element));
-		}
-		return false;
+		fail_test(vformat("%s (Expected sequence to contain %s)", p_text.is_empty() ? "assert_has failed" : p_text, p_element));
 	}
+	return passed;
 }
 
-bool AutoworkTest::assert_does_not_have(const Variant &p_got, const Variant &p_element, const String &p_text) {
+bool AutoworkTest::assert_does_not_have(const Variant &p_variant, const Variant &p_element, const String &p_text) {
 	bool passed = true;
-	if (p_got.get_type() == Variant::ARRAY) {
-		Array a = p_got;
+	if (p_variant.get_type() == Variant::ARRAY) {
+		Array a = p_variant;
 		passed = !a.has(p_element);
-	} else if (p_got.get_type() == Variant::DICTIONARY) {
-		Dictionary d = p_got;
+	} else if (p_variant.get_type() == Variant::DICTIONARY) {
+		Dictionary d = p_variant;
 		passed = !d.has(p_element);
-	} else if (p_got.get_type() == Variant::STRING) {
-		String s = p_got;
+	} else if (p_variant.get_type() == Variant::STRING) {
+		String s = p_variant;
 		passed = !s.contains((String)p_element);
 	}
 
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_does_not_have" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_does_not_have" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected sequence to not contain %s)", p_text.is_empty() ? "assert_does_not_have failed" : p_text, p_element));
-		}
-		return false;
+		fail_test(vformat("%s (Expected sequence to not contain %s)", p_text.is_empty() ? "assert_does_not_have failed" : p_text, p_element));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_file_exists(const String &p_file_path, const String &p_text) {
 	bool passed = FileAccess::exists(p_file_path);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_file_exists" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_file_exists" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (File does not exist: %s)", p_text.is_empty() ? "assert_file_exists failed" : p_text, p_file_path));
-		}
-		return false;
+		fail_test(vformat("%s (File does not exist: %s)", p_text.is_empty() ? "assert_file_exists failed" : p_text, p_file_path));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_file_does_not_exist(const String &p_file_path, const String &p_text) {
 	bool passed = !FileAccess::exists(p_file_path);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_file_does_not_exist" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_file_does_not_exist" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (File exists: %s)", p_text.is_empty() ? "assert_file_does_not_exist failed" : p_text, p_file_path));
-		}
-		return false;
+		fail_test(vformat("%s (File exists: %s)", p_text.is_empty() ? "assert_file_does_not_exist failed" : p_text, p_file_path));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_file_empty(const String &p_file_path, const String &p_text) {
-	bool passed = false;
-	if (FileAccess::exists(p_file_path)) {
-		Ref<FileAccess> f = FileAccess::open(p_file_path, FileAccess::READ);
-		if (f.is_valid()) {
-			passed = f->get_length() == 0;
-		}
-	}
+	ERR_FAIL_TEST(!FileAccess::exists(p_file_path), false, "invalid file path", "assert_file_empty");
+	Ref<FileAccess> file = FileAccess::open(p_file_path, FileAccess::READ);
+	bool passed = file.is_valid() && file->get_length() == 0;
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_file_empty" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_file_empty" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (File not empty: %s)", p_text.is_empty() ? "assert_file_empty failed" : p_text, p_file_path));
-		}
-		return false;
+		fail_test(vformat("%s (File not empty: %s)", p_text.is_empty() ? "assert_file_empty failed" : p_text, p_file_path));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_file_not_empty(const String &p_file_path, const String &p_text) {
-	bool passed = false;
-	if (FileAccess::exists(p_file_path)) {
-		Ref<FileAccess> f = FileAccess::open(p_file_path, FileAccess::READ);
-		if (f.is_valid()) {
-			passed = f->get_length() > 0;
-		}
-	}
+	ERR_FAIL_TEST(!FileAccess::exists(p_file_path), false, "invalid file path", "assert_file_not_empty");
+	Ref<FileAccess> file = FileAccess::open(p_file_path, FileAccess::READ);
+	bool passed = file.is_valid() && file->get_length() > 0;
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_file_not_empty" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_file_not_empty" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (File empty: %s)", p_text.is_empty() ? "assert_file_not_empty failed" : p_text, p_file_path));
-		}
-		return false;
+		fail_test(vformat("%s (File empty: %s)", p_text.is_empty() ? "assert_file_not_empty failed" : p_text, p_file_path));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_dir_exists(const String &p_dir_path, const String &p_text) {
 	bool passed = DirAccess::exists(p_dir_path);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_dir_exists" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_dir_exists" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Dir does not exist: %s)", p_text.is_empty() ? "assert_dir_exists failed" : p_text, p_dir_path));
-		}
-		return false;
+		fail_test(vformat("%s (Dir does not exist: %s)", p_text.is_empty() ? "assert_dir_exists failed" : p_text, p_dir_path));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_dir_does_not_exist(const String &p_dir_path, const String &p_text) {
 	bool passed = !DirAccess::exists(p_dir_path);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_dir_does_not_exist" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_dir_does_not_exist" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Dir exists: %s)", p_text.is_empty() ? "assert_dir_does_not_exist failed" : p_text, p_dir_path));
-		}
-		return false;
+		fail_test(vformat("%s (Dir exists: %s)", p_text.is_empty() ? "assert_dir_does_not_exist failed" : p_text, p_dir_path));
 	}
+	return passed;
 }
 
-bool AutoworkTest::assert_typeof(const Variant &p_got, int p_type, const String &p_text) {
-	bool passed = (p_got.get_type() == (Variant::Type)p_type);
+bool AutoworkTest::assert_typeof(const Variant &p_variant, Variant::Type p_type, const String &p_text) {
+	bool passed = p_variant.get_type() == p_type;
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_typeof" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_typeof" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected type %s, got %s)", p_text.is_empty() ? "assert_typeof failed" : p_text, Variant::get_type_name((Variant::Type)p_type), Variant::get_type_name(p_got.get_type())));
-		}
-		return false;
+		fail_test(vformat("%s (Expected type %s, got %s)", p_text.is_empty() ? "assert_typeof failed" : p_text, Variant::get_type_name(p_type), Variant::get_type_name(p_variant.get_type())));
 	}
+	return passed;
 }
 
-bool AutoworkTest::assert_not_typeof(const Variant &p_got, int p_type, const String &p_text) {
-	bool passed = (p_got.get_type() != (Variant::Type)p_type);
+bool AutoworkTest::assert_not_typeof(const Variant &p_variant, Variant::Type p_type, const String &p_text) {
+	bool passed = p_variant.get_type() != p_type;
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_not_typeof" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_not_typeof" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected type NOT to be %s)", p_text.is_empty() ? "assert_not_typeof failed" : p_text, Variant::get_type_name((Variant::Type)p_type)));
-		}
-		return false;
+		fail_test(vformat("%s (Expected type not to be %s)", p_text.is_empty() ? "assert_not_typeof failed" : p_text, Variant::get_type_name(p_type)));
 	}
+	return passed;
 }
 
-bool AutoworkTest::assert_is(const Variant &p_got, Object *p_class, const String &p_text) {
-	bool passed = false;
-	if (p_got.get_type() == Variant::OBJECT) {
-		Object *obj = p_got.get_validated_object();
-		if (obj && p_class && obj->is_class(p_class->get_class())) {
-			passed = true;
-		}
-	}
+bool AutoworkTest::assert_is(Object *p_object, const String &p_class, const String &p_text) {
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_is");
+	bool passed = p_object->is_class(p_class);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_is" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_is" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(p_text.is_empty() ? "assert_is failed" : p_text);
-		}
-		return false;
+		fail_test(vformat("%s (Expected class to be %s got %s)", p_text.is_empty() ? "assert_is failed" : p_text, p_class, p_object->get_class()));
 	}
-}
-
-bool AutoworkTest::assert_extends(const Variant &p_got, Object *p_class, const String &p_text) {
-	return assert_is(p_got, p_class, p_text);
+	return passed;
 }
 
 bool AutoworkTest::assert_string_contains(const String &p_got, const String &p_expected, const String &p_text) {
 	bool passed = p_got.contains(p_expected);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_string_contains" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_string_contains" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s to contain %s)", p_text.is_empty() ? "assert_string_contains failed" : p_text, p_got, p_expected));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s to contain %s)", p_text.is_empty() ? "assert_string_contains failed" : p_text, p_got, p_expected));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_string_starts_with(const String &p_got, const String &p_expected, const String &p_text) {
 	bool passed = p_got.begins_with(p_expected);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_string_starts_with" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_string_starts_with" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s to start with %s)", p_text.is_empty() ? "assert_string_starts_with failed" : p_text, p_got, p_expected));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s to start with %s)", p_text.is_empty() ? "assert_string_starts_with failed" : p_text, p_got, p_expected));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_string_ends_with(const String &p_got, const String &p_expected, const String &p_text) {
 	bool passed = p_got.ends_with(p_expected);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_string_ends_with" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_string_ends_with" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s to end with %s)", p_text.is_empty() ? "assert_string_ends_with failed" : p_text, p_got, p_expected));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s to end with %s)", p_text.is_empty() ? "assert_string_ends_with failed" : p_text, p_got, p_expected));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_freed(Object *p_object, const String &p_text) {
 	bool passed = (p_object == nullptr);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_freed" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_freed" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected object %s to be freed)", p_text.is_empty() ? "assert_freed failed" : p_text, p_object));
-		}
-		return false;
+		fail_test(vformat("%s (Expected object %s to be freed)", p_text.is_empty() ? "assert_freed failed" : p_text, p_object));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_not_freed(Object *p_object, const String &p_text) {
 	bool passed = (p_object != nullptr);
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_not_freed" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_not_freed" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(p_text.is_empty() ? "assert_not_freed failed" : p_text);
-		}
-		return false;
+		fail_test(p_text.is_empty() ? "assert_not_freed failed" : p_text);
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_called(Object *p_object, const StringName &p_method, const Array &p_args, const String &p_text) {
-	if (logger.is_valid()) {
-		logger->add_pass(p_text.is_empty() ? "assert_called proxy trigger" : p_text);
-	}
-	return true;
+	ERR_PRINT("Not implemented.");
+	return false;
 }
 
 bool AutoworkTest::assert_not_called(Object *p_object, const StringName &p_method, const Array &p_args, const String &p_text) {
-	if (logger.is_valid()) {
-		logger->add_pass(p_text.is_empty() ? "assert_not_called proxy trigger" : p_text);
-	}
-	return true;
+	ERR_PRINT("Not implemented.");
+	return false;
 }
 
 bool AutoworkTest::assert_called_count(Object *p_object, const StringName &p_method, int p_expected_count, const Array &p_args, const String &p_text) {
-	int calls = 0;
-	if (spy.is_valid()) {
-		calls = spy->call_count(p_object, p_method, p_args);
-	}
-	if (calls == p_expected_count) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_called_count" : p_text);
-		}
-		return true;
+	int calls = get_call_count(p_object, p_method, p_args);
+	bool passed = calls == p_expected_count;
+	if (passed) {
+		pass_test(p_text.is_empty() ? "assert_called_count" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected %s calls, got %s)", p_text.is_empty() ? "assert_called_count failed" : p_text, p_expected_count, calls));
-		}
-		return false;
+		fail_test(vformat("%s (Expected %s calls, got %s)", p_text.is_empty() ? "assert_called_count failed" : p_text, p_expected_count, calls));
 	}
+	return passed;
 }
 
 int AutoworkTest::get_call_count(Object *p_object, const StringName &p_method, const Array &p_args) {
@@ -1103,39 +852,21 @@ Array AutoworkTest::get_call_parameters(Object *p_object, const StringName &p_me
 bool AutoworkTest::assert_same(const Variant &p_got, const Variant &p_expected, const String &p_text) {
 	bool passed = p_got.hash() == p_expected.hash();
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_same" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_same" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected same %s, got %s)", p_text.is_empty() ? "assert_same failed" : p_text, p_expected, p_got));
-		}
-		return false;
+		fail_test(vformat("%s (Expected same %s, got %s)", p_text.is_empty() ? "assert_same failed" : p_text, p_expected, p_got));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_not_same(const Variant &p_got, const Variant &p_expected, const String &p_text) {
 	bool passed = p_got.hash() != p_expected.hash();
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_not_same" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_not_same" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected not same %s, got %s)", p_text.is_empty() ? "assert_not_same failed" : p_text, p_expected, p_got));
-		}
-		return false;
+		fail_test(vformat("%s (Expected not same %s, got %s)", p_text.is_empty() ? "assert_not_same failed" : p_text, p_expected, p_got));
 	}
-}
-
-bool AutoworkTest::assert_eq_shallow(const Variant &p_got, const Variant &p_expected, const String &p_text) {
-	return assert_same(p_got, p_expected, p_text.is_empty() ? "assert_eq_shallow" : p_text);
-}
-
-bool AutoworkTest::assert_ne_shallow(const Variant &p_got, const Variant &p_expected, const String &p_text) {
-	return assert_not_same(p_got, p_expected, p_text.is_empty() ? "assert_ne_shallow" : p_text);
+	return passed;
 }
 
 void AutoworkTest::pending(const String &p_text) {
@@ -1157,83 +888,50 @@ void AutoworkTest::fail_test(const String &p_text) {
 }
 
 bool AutoworkTest::assert_signal_emit_count(Object *p_object, const StringName &p_signal, int p_expected_count, const String &p_text) {
-	if (!p_object) {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_signal_emit_count failed (Object is null)");
-		}
-		return false;
-	}
-	int count = 0;
-	if (signal_watcher.is_valid()) {
-		count = signal_watcher->get_emit_count(p_object, p_signal);
-	}
-	if (count == p_expected_count) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_signal_emit_count" : p_text);
-		}
-		return true;
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_signal_emit_count");
+	int count = get_signal_emit_count(p_object, p_signal);
+	bool passed = count == p_expected_count;
+	if (passed) {
+		pass_test(p_text.is_empty() ? "assert_signal_emit_count" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Expected signal '%s' to be emitted %d times, was emitted %d times)", p_text.is_empty() ? "assert_signal_emit_count failed" : p_text, p_signal, p_expected_count, count));
-		}
-		return false;
+		fail_test(vformat("%s (Expected signal '%s' to be emitted %d times, was emitted %d times)", p_text.is_empty() ? "assert_signal_emit_count failed" : p_text, p_signal, p_expected_count, count));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_has_signal(Object *p_object, const StringName &p_signal, const String &p_text) {
-	if (!p_object) {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_has_signal failed (Object is null)");
-		}
-		return false;
-	}
-	bool has = false;
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_has_signal");
+	bool passed = false;
 	List<MethodInfo> signals;
 	p_object->get_signal_list(&signals);
 	for (const MethodInfo &mi : signals) {
 		if (mi.name == p_signal) {
-			has = true;
+			passed = true;
 			break;
 		}
 	}
-	if (has) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_has_signal" : p_text);
-		}
-		return true;
+	if (passed) {
+		pass_test(p_text.is_empty() ? "assert_has_signal" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(vformat("%s (Object does not have signal '%s')", p_text.is_empty() ? "assert_has_signal failed" : p_text, p_signal));
-		}
-		return false;
+		fail_test(vformat("%s (Object does not have signal '%s')", p_text.is_empty() ? "assert_has_signal failed" : p_text, p_signal));
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_signal_emitted_with_parameters(Object *p_object, const StringName &p_signal, const Array &p_expected_parameters, int p_index, const String &p_text) {
-	if (!p_object) {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_signal_emitted_with_parameters failed (Object is null)");
-		}
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_signal_emitted_with_parameters");
+	if (!signal_watcher.is_valid() || !signal_watcher->did_emit(p_object, p_signal)) {
+		fail_test(vformat("%s (Signal '%s' was not emitted)", p_text.is_empty() ? "assert_signal_emitted_with_parameters failed" : p_text, p_signal));
 		return false;
 	}
-	if (signal_watcher.is_valid() && signal_watcher->did_emit(p_object, p_signal)) {
-		Array got = signal_watcher->get_signal_parameters(p_object, p_signal, p_index);
-		if (got == p_expected_parameters) {
-			if (logger.is_valid()) {
-				logger->add_pass(p_text.is_empty() ? "assert_signal_emitted_with_parameters" : p_text);
-			}
-			return true;
-		} else {
-			if (logger.is_valid()) {
-				logger->add_fail(vformat("%s (Parameters mismatch for '%s'. Expected %s, got %s)", p_text.is_empty() ? "assert_signal_emitted_with_parameters failed" : p_text, p_signal, p_expected_parameters, got));
-			}
-			return false;
-		}
+	Array got = signal_watcher->get_signal_parameters(p_object, p_signal, p_index);
+	bool passed = got == p_expected_parameters;
+	if (passed) {
+		pass_test(p_text.is_empty() ? "assert_signal_emitted_with_parameters" : p_text);
+	} else {
+		fail_test(vformat("%s (Parameters mismatch for '%s'. Expected %s, got %s)", p_text.is_empty() ? "assert_signal_emitted_with_parameters failed" : p_text, p_signal, p_expected_parameters, got));
 	}
-	if (logger.is_valid()) {
-		logger->add_fail(vformat("%s (Signal '%s' was not emitted)", p_text.is_empty() ? "assert_signal_emitted_with_parameters failed" : p_text, p_signal));
-	}
-	return false;
+	return passed;
 }
 
 int AutoworkTest::get_signal_emit_count(Object *p_object, const StringName &p_signal) {
@@ -1251,89 +949,50 @@ Array AutoworkTest::get_signal_parameters(Object *p_object, const StringName &p_
 }
 
 bool AutoworkTest::assert_property(Object *p_object, const String &p_property, const Variant &p_default, const Variant &p_set_to) {
-	if (!p_object) {
-		return false;
-	}
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_property");
 	Variant v = p_object->get(p_property);
 	if (!assert_eq(v, p_default, String("Assert default property ") + p_property)) {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_property failed: Initial value did not match default.");
-		}
+		fail_test("assert_property failed: Initial value did not match default.");
 		return false;
 	}
 	p_object->set(p_property, p_set_to);
 	Variant set_val = p_object->get(p_property);
 	if (!assert_eq_deep(set_val, p_set_to, "")) {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_property failed: Value was not set correctly.");
-		}
+		fail_test("assert_property failed: Value was not set correctly.");
 		return false;
 	}
-	if (logger.is_valid()) {
-		logger->add_pass("assert_property pass");
-	}
+	pass_test("assert_property pass");
 	return true;
 }
 
 bool AutoworkTest::assert_set_property(Object *p_object, const String &p_property, const Variant &p_new_value, const Variant &p_expected, const String &p_text) {
-	if (!p_object) {
-		if (logger.is_valid()) {
-			logger->add_fail(p_text.is_empty() ? "assert_set_property failed: object is null." : p_text);
-		}
-		return false;
-	}
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_set_property");
 	p_object->set(p_property, p_new_value);
 	Variant set_val = p_object->get(p_property);
-	bool passed = true;
-	if (set_val.get_type() != p_expected.get_type() || set_val != p_expected) {
-		passed = false;
-	}
+	bool passed = set_val != p_expected;
 	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_set_property" : p_text);
-		}
-		return true;
+		pass_test(p_text.is_empty() ? "assert_set_property" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(p_text.is_empty() ? vformat("assert_set_property failed: expected %s got %s", p_expected, set_val) : p_text);
-		}
-		return false;
+		fail_test(p_text.is_empty() ? vformat("assert_set_property failed: expected %s got %s", p_expected, set_val) : p_text);
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_readonly_property(Object *p_object, const String &p_property, const Variant &p_new_value, const Variant &p_expected, const String &p_text) {
-	if (!p_object) {
-		if (logger.is_valid()) {
-			logger->add_fail(p_text.is_empty() ? "assert_readonly_property failed: object is null." : p_text);
-		}
-		return false;
-	}
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_readonly_property");
 	p_object->set(p_property, p_new_value);
 	Variant set_val = p_object->get(p_property);
-	bool passed = true;
-	if (set_val.get_type() != p_expected.get_type() || set_val != p_expected) {
-		passed = false;
-	}
-	if (passed) {
-		if (logger.is_valid()) {
-			logger->add_pass(p_text.is_empty() ? "assert_readonly_property" : p_text);
-		}
-		return true;
+	bool passed = set_val == p_expected;
+	if (set_val == p_expected) {
+		pass_test(p_text.is_empty() ? "assert_readonly_property" : p_text);
 	} else {
-		if (logger.is_valid()) {
-			logger->add_fail(p_text.is_empty() ? vformat("assert_readonly_property failed: expected %s got %s (property was modified!)", p_expected, set_val) : p_text);
-		}
-		return false;
+		fail_test(p_text.is_empty() ? vformat("assert_readonly_property failed: expected %s got %s (property was modified!)", p_expected, set_val) : p_text);
 	}
+	return passed;
 }
 
 bool AutoworkTest::assert_property_with_backing_variable(Object *p_object, const String &p_property, const Variant &p_default_value, const Variant &p_new_value, const String &p_backed_by_name) {
-	if (!p_object) {
-		if (logger.is_valid()) {
-			logger->add_fail("assert_property_with_backing_variable failed: object is null.");
-		}
-		return false;
-	}
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_property_with_backing_variable");
 	String setter_name = "@" + p_property + "_setter";
 	String getter_name = "@" + p_property + "_getter";
 	String backing_name = p_backed_by_name.is_empty() ? "_" + p_property : p_backed_by_name;
@@ -1371,9 +1030,8 @@ bool AutoworkTest::assert_property_with_backing_variable(Object *p_object, const
 }
 
 bool AutoworkTest::assert_accessors(Object *p_object, const StringName &p_property, const Variant &p_default, const Variant &p_set_to) {
-	if (!p_object) {
-		return false;
-	}
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_accessors");
+
 	String get_func = "get_" + String(p_property);
 	String set_func = "set_" + String(p_property);
 	if (p_object->has_method(StringName("is_" + String(p_property)))) {
@@ -1397,153 +1055,171 @@ bool AutoworkTest::assert_accessors(Object *p_object, const StringName &p_proper
 	return assert_eq(v, p_set_to, "Getter should return newly set value");
 }
 
-bool AutoworkTest::assert_exports(Object *p_object, const StringName &p_property, int p_type) {
-	if (!p_object) {
-		return false;
-	}
+bool AutoworkTest::assert_exports(Object *p_object, const StringName &p_property, Variant::Type p_type) {
+	ERR_FAIL_TEST(p_object == nullptr, false, "object is null", "assert_exports");
+
 	List<PropertyInfo> plist;
 	p_object->get_property_list(&plist);
 	for (const PropertyInfo &pi : plist) {
 		if (pi.name == p_property && (pi.usage & PROPERTY_USAGE_EDITOR)) {
-			if (pi.type == p_type) {
-				if (logger.is_valid()) {
-					logger->add_pass(vformat("assert_exports '%s'", p_property));
-				}
-				return true;
+			bool passed = pi.type == p_type;
+			if (passed) {
+				pass_test(vformat("assert_exports '%s'", p_property));
 			} else {
-				if (logger.is_valid()) {
-					logger->add_fail(vformat("assert_exports failed: Property '%s' type mismatch", p_property));
-				}
-				return false;
+				fail_test(vformat("assert_exports failed: Property '%s' type mismatch", p_property));
 			}
+			return passed;
 		}
 	}
-	if (logger.is_valid()) {
-		logger->add_fail(vformat("assert_exports failed: Property '%s' not an editor export", p_property));
-	}
+	fail_test(vformat("assert_exports failed: Property '%s' not an editor export", p_property));
 	return false;
 }
 
 bool AutoworkTest::assert_connected(Object *p_source, Object *p_target, const StringName &p_signal, const StringName &p_method_name) {
-	if (!p_source || !p_target) {
-		return false;
-	}
+	ERR_FAIL_TEST(p_source == nullptr, false, "source is null", "assert_exports");
+	ERR_FAIL_TEST(p_target == nullptr, false, "target is null", "assert_exports");
+
 	List<Object::Connection> signal_connections;
 	p_source->get_signal_connection_list(p_signal, &signal_connections);
 	for (const Object::Connection &c : signal_connections) {
-		if (c.callable.get_object() == p_target && (p_method_name.is_empty() || c.callable.get_method() == p_method_name)) {
-			if (logger.is_valid()) {
-				logger->add_pass("assert_connected");
-			}
+		if (c.callable.get_object() == p_target && c.callable.get_method() == p_method_name) {
+			pass_test("assert_connected");
 			return true;
 		}
 	}
-	if (logger.is_valid()) {
-		logger->add_fail("assert_connected failed");
-	}
+	fail_test("assert_connected failed");
 	return false;
 }
 
 bool AutoworkTest::assert_not_connected(Object *p_source, Object *p_target, const StringName &p_signal, const StringName &p_method_name) {
-	if (!p_source || !p_target) {
-		return false;
-	}
+	ERR_FAIL_TEST(p_source == nullptr, false, "source is null", "assert_not_connected");
+	ERR_FAIL_TEST(p_target == nullptr, false, "target is null", "assert_not_connected");
+
 	List<Object::Connection> signal_connections;
 	p_source->get_signal_connection_list(p_signal, &signal_connections);
 	for (const Object::Connection &c : signal_connections) {
-		if (c.callable.get_object() == p_target && (p_method_name.is_empty() || c.callable.get_method() == p_method_name)) {
-			if (logger.is_valid()) {
-				logger->add_fail("assert_not_connected failed");
-			}
+		if (c.callable.get_object() == p_target && c.callable.get_method() == p_method_name) {
+			fail_test("assert_not_connected failed");
 			return false;
 		}
 	}
-	if (logger.is_valid()) {
-		logger->add_pass("assert_not_connected");
-	}
+	pass_test("assert_not_connected");
 	return true;
 }
 
 bool AutoworkTest::assert_no_new_orphans(const String &p_text) {
-	if (logger.is_valid()) {
-		logger->add_pass(p_text.is_empty() ? "assert_no_new_orphans (Tracked globally by Autowork logger run cycle)" : p_text);
-	}
-	return true;
+	ERR_PRINT("Not implemented.");
+	return false;
 }
 
-Variant AutoworkTest::wait_seconds(double p_seconds, const String &p_msg) {
-	if (logger.is_valid() && !p_msg.is_empty()) {
-		logger->add_pass(p_msg);
-	}
-	uint64_t start_time = OS::get_singleton()->get_ticks_msec();
-	uint64_t timeout_msec = p_seconds * 1000.0;
-	while ((OS::get_singleton()->get_ticks_msec() - start_time) < timeout_msec) {
-		OS::get_singleton()->delay_usec(10000); // 10ms
-		SceneTree *scene_tree = Object::cast_to<SceneTree>(OS::get_singleton()->get_main_loop());
-		if (scene_tree) {
-			scene_tree->emit_signal("process_frame");
-			scene_tree->emit_signal("physics_frame");
-		}
-	}
-	return Variant();
+Signal AutoworkTest::wait_seconds(double p_seconds, const String &p_msg) {
+	ERR_FAIL_COND_V_MSG(p_seconds <= 0.0, _emit_deferred("timeout"), "seconds <= 0.0");
+	SceneTree *tree = SceneTree::get_singleton();
+	ERR_FAIL_NULL_V_MSG(tree, _emit_deferred("timeout"), "SceneTree is invalid, this is a bug");
+
+	Ref<SceneTreeTimer> timer = tree->create_timer(p_seconds, true, true);
+	pending(vformat("(%d seconds) %s", p_seconds, p_msg));
+	return Signal(timer.ptr(), "timeout");
 }
 
-Variant AutoworkTest::wait_frames(int p_frames, const String &p_msg) {
-	if (logger.is_valid() && !p_msg.is_empty()) {
-		logger->add_pass(p_msg);
+Signal AutoworkTest::_wait_frames(int p_frames, const String &p_msg, bool p_physics_frames) {
+	ERR_FAIL_COND_V_MSG(p_frames <= 0, _emit_deferred("frameout"), "frames <= 0.0");
+	SceneTree *tree = SceneTree::get_singleton();
+	ERR_FAIL_NULL_V_MSG(tree, _emit_deferred("frameout"), "SceneTree is invalid, this is a bug");
+
+	// physics_process waits for one extra frame so we compensate, for now.
+	_frames_left = p_physics_frames ? p_frames - 1 : p_frames;
+
+	String signal_name = p_physics_frames ? "physics_frame" : "process_frame";
+
+	Callable count_frames = callable_mp(this, &AutoworkTest::_count_frames);
+	if (!tree->is_connected(signal_name, count_frames)) {
+		tree->connect(signal_name, count_frames);
 	}
-	SceneTree *tree = Object::cast_to<SceneTree>(OS::get_singleton()->get_main_loop());
-	if (tree) {
-		for (int i = 0; i < p_frames; i++) {
-			OS::get_singleton()->delay_usec(16000);
-			tree->emit_signal("process_frame");
-		}
+
+	Callable disconnect_signal = Callable(tree, "disconnect").bind(signal_name, count_frames);
+	if (!this->is_connected("frameout", disconnect_signal)) {
+		this->connect("frameout", disconnect_signal, CONNECT_ONE_SHOT);
 	}
-	return Variant();
+
+	if (p_physics_frames) {
+		pending(vformat("(%d physics frames) %s", p_frames, p_msg));
+	} else {
+		pending(vformat("(%d process frames) %s", p_frames, p_msg));
+	}
+
+	return Signal(this, "frameout");
 }
 
-Variant AutoworkTest::wait_physics_frames(int p_frames, const String &p_msg) {
-	if (logger.is_valid() && !p_msg.is_empty()) {
-		logger->add_pass(p_msg);
-	}
-	SceneTree *tree = Object::cast_to<SceneTree>(OS::get_singleton()->get_main_loop());
-	if (tree) {
-		for (int i = 0; i < p_frames; i++) {
-			OS::get_singleton()->delay_usec(16000);
-			tree->emit_signal("physics_frame");
-		}
-	}
-	return Variant();
+Signal AutoworkTest::wait_process_frames(int p_frames, const String &p_msg) {
+	return _wait_frames(p_frames, p_msg, false);
 }
 
-Variant AutoworkTest::wait_for_signal(Object *p_object, const StringName &p_signal, double p_max_wait, const String &p_msg) {
-	if (logger.is_valid() && !p_msg.is_empty()) {
-		logger->add_pass(p_msg);
-	}
-	if (!p_object || !signal_watcher.is_valid()) {
-		return Variant();
-	}
+Signal AutoworkTest::wait_physics_frames(int p_frames, const String &p_msg) {
+	return _wait_frames(p_frames, p_msg, true);
+}
 
-	uint64_t start_time = OS::get_singleton()->get_ticks_msec();
-	uint64_t timeout_msec = p_max_wait * 1000.0;
+Signal AutoworkTest::_wait_callable(const Callable &p_callable, double p_max_wait, const String &p_msg, bool p_wait_for_true) {
+	ERR_FAIL_COND_V_MSG(!p_callable.is_valid(), _emit_deferred("timeout"), "callable is null or invalid");
+	ERR_FAIL_COND_V_MSG(p_max_wait <= 0.0, _emit_deferred("timeout"), "max_wait <= 0.0");
+	SceneTree *tree = SceneTree::get_singleton();
+	ERR_FAIL_NULL_V_MSG(tree, _emit_deferred("timeout"), "SceneTree is invalid, this is a bug");
 
-	signal_watcher->watch_signal(p_object, p_signal);
-	int start_count = signal_watcher->get_emit_count(p_object, p_signal);
+	_time_left = p_max_wait;
 
-	while (signal_watcher->get_emit_count(p_object, p_signal) == start_count && (OS::get_singleton()->get_ticks_msec() - start_time) < timeout_msec) {
-		OS::get_singleton()->delay_usec(10000); // 10ms
-
-		SceneTree *scene_tree = Object::cast_to<SceneTree>(OS::get_singleton()->get_main_loop());
-		if (scene_tree) {
-			scene_tree->emit_signal("process_frame");
-		}
+	Callable check_callable = callable_mp(this, &AutoworkTest::_check_callable);
+	check_callable = check_callable.bind(p_callable, p_wait_for_true);
+	if (!tree->is_connected("physics_frame", check_callable)) {
+		tree->connect("physics_frame", check_callable);
 	}
 
-	if (signal_watcher->get_emit_count(p_object, p_signal) > start_count) {
-		return signal_watcher->get_signal_parameters(p_object, p_signal, -1);
+	Callable disconnect_signal = Callable(tree, "disconnect").bind("physics_frame", check_callable).unbind(1); // unbind timeout's return_value
+	if (!this->is_connected("timeout", disconnect_signal)) {
+		this->connect("timeout", disconnect_signal, CONNECT_ONE_SHOT);
 	}
 
-	return Variant();
+	if (p_wait_for_true) {
+		pending(vformat("(waiting until condition is true for a max of %f seconds) %s", p_max_wait, p_msg));
+	} else {
+		pending(vformat("(waiting while condition is true for a max of %f seconds) %s", p_max_wait, p_msg));
+	}
+
+	return Signal(this, "timeout");
+}
+
+Signal AutoworkTest::wait_until(const Callable &p_callable, double p_max_wait, const String &p_msg) {
+	return _wait_callable(p_callable, p_max_wait, p_msg, true);
+}
+
+Signal AutoworkTest::wait_while(const Callable &p_callable, double p_max_wait, const String &p_msg) {
+	return _wait_callable(p_callable, p_max_wait, p_msg, false);
+}
+
+Signal AutoworkTest::wait_for_signal(const Signal &p_signal, double p_max_wait, const String &p_msg) {
+	ERR_FAIL_COND_V_MSG(p_signal.is_null(), _emit_deferred("timeout"), "signal is null.");
+	ERR_FAIL_COND_V_MSG(p_max_wait <= 0.0, _emit_deferred("timeout"), "max_wait <= 0.0.");
+	SceneTree *tree = SceneTree::get_singleton();
+	ERR_FAIL_NULL_V_MSG(tree, _emit_deferred("timeout"), "SceneTree is invalid, this is a bug.");
+
+	_signal = p_signal;
+	_time_left = p_max_wait;
+
+	_signal.connect(callable_mp(this, &AutoworkTest::_signal_callback), CONNECT_ONE_SHOT);
+
+	Callable check_signal_timeout = callable_mp(this, &AutoworkTest::_check_signal_timeout);
+	if (!tree->is_connected("physics_frame", check_signal_timeout)) {
+		tree->connect("physics_frame", check_signal_timeout);
+	}
+
+	Callable disconnect_signal = Callable(tree, "disconnect").bind("physics_frame", check_signal_timeout).unbind(1); // unbind timeout's return_value
+	if (!this->is_connected("timeout", disconnect_signal)) {
+		this->connect("timeout", disconnect_signal, CONNECT_ONE_SHOT);
+	}
+
+	String obj_signal_name = vformat("%s.%s", p_signal.get_object()->get_class_name(), p_signal.get_name());
+	pending(vformat("(waiting for signal %s for a max of %f seconds) %s", obj_signal_name, p_max_wait, p_msg));
+
+	return Signal(this, "timeout");
 }
 
 void AutoworkTest::set_doubler(Ref<AutoworkDoubler> p_doubler) {
@@ -1565,31 +1241,8 @@ Variant AutoworkTest::double_resource(const String &p_path) {
 	return Variant();
 }
 
-Variant AutoworkTest::double_scene(const String &p_path) {
-	if (doubler.is_valid()) {
-		return doubler->double_scene(p_path);
-	}
-	return Variant();
-}
-
 Variant AutoworkTest::double_singleton(const String &p_name) {
-	// if (logger.is_valid()) {
-	// 	logger->add_warning("Legacy 'double_singleton' etc. is not supported natively in Autowork. Call ignored.");
-	// }
-	return Variant();
-}
-
-Variant AutoworkTest::double_inner(const String &p_path, const String &p_inner_name) {
-	// if (logger.is_valid()) {
-	// 	logger->add_warning("Legacy 'double_inner' and 'partial_double_inner' are unsupported via native C++ ast reflection parsing. Call ignored.");
-	// }
-	return Variant();
-}
-
-Variant AutoworkTest::partial_double_inner(const String &p_path, const String &p_inner_name) {
-	// if (logger.is_valid()) {
-	// 	logger->add_warning("Legacy 'double_inner' and 'partial_double_inner' are unsupported via native C++ ast reflection parsing. Call ignored.");
-	// }
+	ERR_PRINT("Not implemented.");
 	return Variant();
 }
 
@@ -1610,16 +1263,9 @@ int AutoworkTest::get_test_count() {
 	return logger.is_valid() ? logger->get_test_count() : 0;
 }
 
-void AutoworkTest::p(const String &p_text, int p_level) {
-	if (logger.is_valid()) {
-		logger->print_log(p_text);
-	}
-}
-
-void AutoworkTest::ignore_method_when_doubling(const Variant &p_thing, const StringName &p_method) {
-	// if (logger.is_valid()) {
-	// 	logger->add_warning("Legacy 'ignore_method_when_doubling' is not supported natively in Autowork. Call ignored.");
-	// }
+void AutoworkTest::print_log(const String &p_text) {
+	ERR_FAIL_COND_MSG(!logger.is_valid(), "logger is invalid");
+	logger->print_log(p_text);
 }
 
 Ref<AutoworkStubParams> AutoworkTest::stub(const Variant &p_object, const StringName &p_method) {
@@ -1633,131 +1279,24 @@ Ref<AutoworkStubParams> AutoworkTest::stub(const Variant &p_object, const String
 	return p;
 }
 
-void AutoworkTest::replace_node(Node *p_base, const NodePath &p_path, Node *p_with) {
-	if (!p_base) {
-		return;
-	}
-	Node *to_replace = p_base->get_node_or_null(p_path);
-	if (!to_replace) {
-		return;
-	}
-	Node *parent = to_replace->get_parent();
-	if (!parent) {
-		return;
-	}
-	int index = to_replace->get_index();
-	parent->remove_child(to_replace);
-	to_replace->queue_free();
-	parent->add_child(p_with);
-	parent->move_child(p_with, index);
-}
+void AutoworkTest::simulate(Node *p_node, int p_times, double p_delta, bool p_check_is_processing, SimulateMethod p_simulate_method) {
+	ERR_FAIL_NULL_MSG(p_node, "node is null");
+	ERR_FAIL_COND_MSG(p_times <= 0, "times <= 0");
 
-void AutoworkTest::simulate(Node *p_node, int p_times, double p_delta) {
-	if (!p_node) {
-		return;
-	}
+	bool should_process = p_simulate_method != SIMULATE_PHYSICS && (p_check_is_processing ? p_node->is_processing() : true);
+	bool should_physics = p_simulate_method != SIMULATE_PROCESS && (p_check_is_processing ? p_node->is_physics_processing() : true);
+
 	for (int i = 0; i < p_times; i++) {
-		if (p_node->has_method("_process")) {
+		if (should_process) {
 			p_node->call("_process", p_delta);
 		}
-		if (p_node->has_method("_physics_process")) {
+		if (should_physics) {
 			p_node->call("_physics_process", p_delta);
 		}
-	}
-}
-
-Variant AutoworkTest::wait_process_frames(int p_frames, const String &p_msg) {
-	return wait_frames(p_frames, p_msg);
-}
-
-Variant AutoworkTest::wait_until(const Callable &p_callable, double p_max_wait, const String &p_msg) {
-	return wait_frames(1, p_msg);
-}
-
-Variant AutoworkTest::wait_while(const Callable &p_callable, double p_max_wait, const String &p_msg) {
-	return wait_frames(1, p_msg);
-}
-
-bool AutoworkTest::skip_if_godot_version_lt(const String &p_expected) {
-	if (p_expected.is_empty()) {
-		return false;
-	}
-	Dictionary vinfo = Engine::get_singleton()->get_version_info();
-	int major = vinfo["major"];
-	int minor = vinfo["minor"];
-	int patch = vinfo["patch"];
-
-	PackedStringArray parts = p_expected.split(".");
-	int exp_major = parts.size() > 0 ? parts[0].to_int() : 0;
-	int exp_minor = parts.size() > 1 ? parts[1].to_int() : 0;
-	int exp_patch = parts.size() > 2 ? parts[2].to_int() : 0;
-
-	bool is_lt = false;
-	if (major < exp_major) {
-		is_lt = true;
-	} else if (major == exp_major && minor < exp_minor) {
-		is_lt = true;
-	} else if (major == exp_major && minor == exp_minor && patch < exp_patch) {
-		is_lt = true;
-	}
-
-	if (is_lt) {
-		pending(vformat("Skipped due to Godot version < %s", p_expected));
-	}
-	return is_lt;
-}
-
-void AutoworkTest::register_inner_classes(const Variant &p_base_script) {
-	// NOP: AutoworkCollector parses and extracts inner classes automatically without needing manual registration.
-}
-
-Dictionary AutoworkTest::compare_deep(const Variant &p_v1, const Variant &p_v2, const Variant &p_max_differences) {
-	bool are_equal = false;
-	String summary = "";
-
-	if (p_v1.get_type() == Variant::DICTIONARY && p_v2.get_type() == Variant::DICTIONARY) {
-		Dictionary d1 = p_v1;
-		Dictionary d2 = p_v2;
-		are_equal = d1.hash() == d2.hash();
-		if (are_equal) {
-			summary = "Dictionaries match deep equality.";
-		} else {
-			summary = vformat("Dictionaries differ deep equality. Expected %s, Got %s", String(p_v2), String(p_v1));
-		}
-	} else if (p_v1.get_type() == Variant::ARRAY && p_v2.get_type() == Variant::ARRAY) {
-		Array a1 = p_v1;
-		Array a2 = p_v2;
-		are_equal = a1.hash() == a2.hash();
-		if (are_equal) {
-			summary = "Arrays match deep equality.";
-		} else {
-			summary = vformat("Arrays differ deep equality. Expected %s, Got %s", String(p_v2), String(p_v1));
-		}
-	} else {
-		are_equal = p_v1 == p_v2;
-		if (are_equal) {
-			summary = "Values match deep equality.";
-		} else {
-			summary = vformat("Values differ deep equality. Expected %s, Got %s", String(p_v2), String(p_v1));
+		for (int j = 0; j < p_node->get_child_count(); j++) {
+			simulate(p_node->get_child(j), 1, p_delta, p_check_is_processing, p_simulate_method);
 		}
 	}
-
-	Dictionary ret;
-	ret["are_equal"] = are_equal;
-	ret["summary"] = summary;
-	ret["get_short_summary"] = summary;
-	return ret;
-}
-
-Dictionary AutoworkTest::compare_shallow(const Variant &p_v1, const Variant &p_v2, const Variant &p_max_differences) {
-	if (logger.is_valid()) {
-		logger->add_fail("compare_shallow has been removed. Use compare_deep.");
-	}
-	Dictionary ret;
-	ret["are_equal"] = false;
-	ret["summary"] = "compare_shallow has been removed.";
-	ret["get_short_summary"] = "compare_shallow has been removed.";
-	return ret;
 }
 
 Dictionary AutoworkTest::get_summary() {
@@ -1772,91 +1311,68 @@ Dictionary AutoworkTest::get_summary() {
 
 String AutoworkTest::get_summary_text() {
 	String ret = get_script_instance() ? get_script_instance()->get_script()->get_path() : "[Unknown Script]";
-	ret += "\n  " + itos(get_pass_count()) + " of " + itos(get_assert_count()) + " passed.";
+	ret += vformat("\n  %d of %d passed", get_pass_count(), get_assert_count());
 	if (get_pending_count() > 0) {
-		ret += "\n  " + itos(get_pending_count()) + " pending";
+		ret += vformat("\n  %d pending", get_pending_count());
 	}
 	if (get_fail_count() > 0) {
-		ret += "\n  " + itos(get_fail_count()) + " failed.";
+		ret += vformat("\n  %d failed", get_fail_count());
 	}
 	return ret;
 }
 
-bool AutoworkTest::skip_if_godot_version_ne(const String &p_expected) {
-	if (p_expected.is_empty()) {
-		return false;
-	}
-	Dictionary vinfo = Engine::get_singleton()->get_version_info();
-	int major = vinfo["major"];
-	int minor = vinfo["minor"];
-	int patch = vinfo["patch"];
+bool AutoworkTest::skip_if_engine_version_lt(const String &p_version, const bool p_check_godot) {
+	ERR_FAIL_COND_V_MSG(p_version.is_empty(), false, "version is empty");
 
-	PackedStringArray parts = p_expected.split(".");
+	Dictionary vinfo = Engine::get_singleton()->get_version_info();
+	int major = p_check_godot ? vinfo["major"] : vinfo["external_major"];
+	int minor = p_check_godot ? vinfo["minor"] : vinfo["external_minor"];
+	int patch = p_check_godot ? vinfo["patch"] : vinfo["external_patch"];
+
+	PackedStringArray parts = p_version.split(".");
+	int exp_major = parts.size() > 0 ? parts[0].to_int() : 0;
+	int exp_minor = parts.size() > 1 ? parts[1].to_int() : 0;
+	int exp_patch = parts.size() > 2 ? parts[2].to_int() : 0;
+
+	bool is_lt = false;
+	if (major < exp_major) {
+		is_lt = true;
+	} else if (major == exp_major && minor < exp_minor) {
+		is_lt = true;
+	} else if (major == exp_major && minor == exp_minor && patch < exp_patch) {
+		is_lt = true;
+	}
+
+	if (is_lt) {
+		pending(vformat("Skipped due to %s version < %s", p_check_godot ? "Godot" : "Blazium", p_version));
+	}
+	return is_lt;
+}
+
+bool AutoworkTest::skip_if_godot_version_lt(const String &p_version) {
+	return skip_if_engine_version_lt(p_version, true);
+}
+
+bool AutoworkTest::skip_if_engine_version_ne(const String &p_version, const bool p_check_godot) {
+	ERR_FAIL_COND_V_MSG(p_version.is_empty(), false, "version is empty");
+
+	Dictionary vinfo = Engine::get_singleton()->get_version_info();
+	int major = p_check_godot ? vinfo["major"] : vinfo["external_major"];
+	int minor = p_check_godot ? vinfo["minor"] : vinfo["external_minor"];
+	int patch = p_check_godot ? vinfo["patch"] : vinfo["external_patch"];
+
+	PackedStringArray parts = p_version.split(".");
 	int exp_major = parts.size() > 0 ? parts[0].to_int() : 0;
 	int exp_minor = parts.size() > 1 ? parts[1].to_int() : 0;
 	int exp_patch = parts.size() > 2 ? parts[2].to_int() : 0;
 
 	bool is_ne = (major != exp_major || minor != exp_minor || patch != exp_patch);
 	if (is_ne) {
-		pending(vformat("Skipped due to Godot version != %s", p_expected));
+		pending(vformat("Skipped due to %s version != %s", p_check_godot ? "Godot" : "Blazium", p_version));
 	}
 	return is_ne;
 }
 
-void AutoworkTest::file_touch(const String &p_path) {
-	Ref<FileAccess> f = FileAccess::open(p_path, FileAccess::WRITE);
-}
-
-void AutoworkTest::file_delete(const String &p_path) {
-	Ref<DirAccess> da = DirAccess::open(p_path.get_base_dir());
-	if (da.is_valid()) {
-		da->remove(p_path.get_file());
-	}
-}
-
-void AutoworkTest::directory_delete_files(const String &p_path) {
-	Ref<DirAccess> da = DirAccess::open(p_path);
-	if (da.is_null()) {
-		return;
-	}
-
-	da->list_dir_begin();
-	String file = da->get_next();
-	while (!file.is_empty()) {
-		if (file == "." || file == "..") {
-			file = da->get_next();
-			continue;
-		}
-		String full_path = p_path.path_join(file);
-		if (!da->current_is_dir()) {
-			da->remove(file);
-		}
-		file = da->get_next();
-	}
-}
-
-String AutoworkTest::get_file_as_text(const String &p_path) {
-	if (!FileAccess::exists(p_path)) {
-		return "";
-	}
-	Ref<FileAccess> f = FileAccess::open(p_path, FileAccess::READ);
-	if (f.is_valid()) {
-		return f->get_as_text();
-	}
-	return "";
-}
-
-bool AutoworkTest::is_file_empty(const String &p_path) {
-	if (!FileAccess::exists(p_path)) {
-		return true;
-	}
-	Ref<FileAccess> f = FileAccess::open(p_path, FileAccess::READ);
-	if (f.is_valid()) {
-		return f->get_length() == 0;
-	}
-	return true;
-}
-
-bool AutoworkTest::is_file_not_empty(const String &p_path) {
-	return !is_file_empty(p_path);
+bool AutoworkTest::skip_if_godot_version_ne(const String &p_version) {
+	return skip_if_engine_version_ne(p_version, true);
 }

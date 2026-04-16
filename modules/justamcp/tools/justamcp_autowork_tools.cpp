@@ -57,7 +57,7 @@ static Dictionary _execute_autowork(Autowork *p_autowork) {
 		tree->get_root()->add_child(p_autowork);
 	}
 
-	p_autowork->run_tests(false);
+	p_autowork->run_tests();
 
 	result["ok"] = true;
 
@@ -174,7 +174,7 @@ Dictionary JustAMCPAutoworkTools::execute_tool(const String &p_tool_name, const 
 		}
 		Autowork *aw = memnew(Autowork);
 		aw->add_directory("res://");
-		aw->set_select(p_args["test_name"]);
+		aw->set_test(p_args["test_name"]);
 		return _execute_autowork(aw);
 	}
 

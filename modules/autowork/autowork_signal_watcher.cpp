@@ -32,9 +32,7 @@
 // --- AutoworkSignalHook ---
 
 void AutoworkSignalHook::_bind_methods() {
-	MethodInfo mi;
-	mi.name = "_on_emitted";
-	ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "_on_emitted", &AutoworkSignalHook::_on_emitted, mi);
+	ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "_on_emitted", &AutoworkSignalHook::_on_emitted, MethodInfo("_on_emitted"));
 }
 
 AutoworkSignalHook::AutoworkSignalHook() {
@@ -77,13 +75,7 @@ AutoworkSignalWatcher::~AutoworkSignalWatcher() {
 }
 
 void AutoworkSignalWatcher::watch_signal(Object *p_object, const StringName &p_signal) {
-	if (!p_object) {
-		return;
-	}
-
-	if (p_object->is_connected(p_signal, Callable(this, "_on_emitted"))) { // Wait, it connects to hooks not itself
-		// skip
-	}
+	ERR_FAIL_NULL_MSG(p_object, "p_object is null.");
 
 	AutoworkSignalHook *hook = memnew(AutoworkSignalHook);
 	hook->setup(p_object, p_signal, this);

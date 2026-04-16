@@ -1,49 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="AutoworkConfig" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="AutoworkConfig" inherits="RefCounted" experimental="Some methods may not be implemented and may be changed in future versions." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
+		Handles configuration options for the Autowork test framework.
 	</brief_description>
 	<description>
-		Core class for the Autowork framework: AutoworkConfig.
-		Enables native testing, assertions, and mock implementations within Blazium Engine.
+		The AutoworkConfig class is responsible for managing configuration options used by the Autowork testing framework.
+
+		It provides functionality to load, modify, apply, and persist configuration settings.
+		These options can control aspects such as test discovery, filtering, logging behavior, and execution settings.
+
+		Configurations can be defined programmatically using dictionaries or loaded from external files, making it easier to share and reuse test setups across projects.
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
 		<method name="apply_options">
 			<return type="void" />
-			<param index="0" name="runner" type="Object" />
+			<param index="0" name="runner" type="Autowork" />
 			<description>
-				Utility method: apply options.
+				Applies the stored configuration options to the given [param runner].
 			</description>
 		</method>
 		<method name="get_options" qualifiers="const">
 			<return type="Dictionary" />
 			<description>
-				Utility method: get options.
-				[codeblock]
-				var default_opts = config.get_options()
-				[/codeblock]
+				Returns the currently stored configuration options.
 			</description>
 		</method>
 		<method name="load_options">
 			<return type="void" />
 			<param index="0" name="file_path" type="String" />
 			<description>
-				Utility method: load options.
+				Loads configuration options from a file.
 			</description>
 		</method>
 		<method name="set_options">
 			<return type="void" />
 			<param index="0" name="options" type="Dictionary" />
 			<description>
-				Utility method: set options.
+				Sets the configuration options manually.
 			</description>
 		</method>
 		<method name="write_options">
 			<return type="void" />
 			<param index="0" name="file_path" type="String" />
 			<description>
-				Utility method: write options.
+				Writes the current configuration options to a file.
 			</description>
 		</method>
 	</methods>

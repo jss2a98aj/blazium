@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="AutoworkSpy" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="AutoworkSpy" inherits="RefCounted" experimental="Some methods may not be implemented and may be changed in future versions." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
+		Records and inspects method calls during tests.
 	</brief_description>
 	<description>
-		Core class for the Autowork framework: AutoworkSpy.
-		Enables native testing, assertions, and mock implementations within Blazium Engine.
+		The AutoworkSpy is used to track and analyze method calls made on objects during testing.
+
+		It records each invocation, including the target object, method name, and arguments passed.
+		This allows tests to verify that specific methods were called, how many times they were called, and with what parameters.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -15,7 +18,7 @@
 			<param index="1" name="method_name" type="StringName" />
 			<param index="2" name="args" type="Array" />
 			<description>
-				Utility method: add call.
+				Stores the call information for later inspection, including the [param object], [param method_name], and arguments passed in [param args].
 			</description>
 		</method>
 		<method name="call_count">
@@ -24,13 +27,18 @@
 			<param index="1" name="method_name" type="StringName" />
 			<param index="2" name="args" type="Variant" default="null" />
 			<description>
-				Utility method: call count.
+				Returns the number of times a method was called.
+
+				If [param args] is provided, only calls matching the given arguments are counted.
+				Otherwise, all calls to the specified method are included.
 			</description>
 		</method>
 		<method name="clear">
 			<return type="void" />
 			<description>
-				Utility method: clear.
+				Clears all recorded method calls.
+
+				After calling this method, the spy returns to an empty state with no stored invocation history.
 			</description>
 		</method>
 		<method name="get_call_parameters">
@@ -39,7 +47,10 @@
 			<param index="1" name="method_name" type="StringName" />
 			<param index="2" name="index" type="int" default="-1" />
 			<description>
-				Utility method: get call parameters.
+				Returns the parameters used in recorded method calls.
+
+				If [param index] is provided, returns the arguments for that specific call instance.
+				If [param index] is -1, returns all recorded argument sets for the method.
 			</description>
 		</method>
 		<method name="was_called">
@@ -48,7 +59,10 @@
 			<param index="1" name="method_name" type="StringName" />
 			<param index="2" name="args" type="Variant" default="null" />
 			<description>
-				Utility method: was called.
+				Returns [code]true[/code] if the specified method was called.
+
+				If [param args] is provided, the check is refined to match calls with those exact arguments.
+				Otherwise, any call to the method is considered a match.
 			</description>
 		</method>
 	</methods>

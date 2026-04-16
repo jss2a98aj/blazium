@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="AutoworkHookScript" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="AutoworkHookScript" inherits="RefCounted" experimental="Some methods may not be implemented and may be changed in future versions." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
+		Base class for custom test execution hooks.
 	</brief_description>
 	<description>
-		Core class for the Autowork framework: AutoworkHookScript.
-		Enables native testing, assertions, and mock implementations within Blazium Engine.
+		The AutoworkHookScript class provides a mechanism to inject custom logic into the test execution process.
 	</description>
 	<tutorials>
 	</tutorials>
@@ -12,32 +12,32 @@
 		<method name="_run" qualifiers="virtual">
 			<return type="void" />
 			<description>
-				Utility method:  run.
+				Virtual method executed when the hook runs.
 			</description>
 		</method>
 		<method name="abort">
 			<return type="void" />
 			<description>
-				Utility method: abort.
+				Marks the hook execution as aborted.
 			</description>
 		</method>
 		<method name="get_exit_code" qualifiers="const">
 			<return type="int" />
 			<description>
-				Utility method: get exit code.
+				Returns the exit code set by the hook.
 			</description>
 		</method>
 		<method name="set_exit_code">
 			<return type="void" />
 			<param index="0" name="code" type="int" />
 			<description>
-				Utility method: set exit code.
+				Sets the exit code for the hook execution.
 			</description>
 		</method>
 		<method name="should_abort" qualifiers="const">
 			<return type="bool" />
 			<description>
-				Utility method: should abort.
+				Returns whether the hook has been marked for abortion.
 			</description>
 		</method>
 	</methods>
