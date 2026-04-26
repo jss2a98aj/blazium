@@ -61,6 +61,7 @@
 #include "tools/justamcp_tilemap_tools.h"
 #include "tools/prompts/justamcp_prompt.h"
 #include "tools/prompts/justamcp_prompt_blazium_context.h"
+#include "tools/prompts/justamcp_prompt_blazium_workflows.h"
 #include "tools/prompts/justamcp_prompt_editor_state.h"
 #include "tools/prompts/justamcp_prompt_project_info.h"
 #include "tools/resources/justamcp_resource.h"
@@ -154,6 +155,7 @@ void initialize_justamcp_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(JustAMCPTileMapTools);
 		GDREGISTER_CLASS(JustAMCPPrompt);
 		GDREGISTER_CLASS(JustAMCPPromptBlaziumContext);
+		GDREGISTER_CLASS(JustAMCPPromptBlaziumWorkflow);
 		GDREGISTER_CLASS(JustAMCPPromptProjectInfo);
 		GDREGISTER_CLASS(JustAMCPPromptEditorState);
 		GDREGISTER_CLASS(JustAMCPPromptExecutor);

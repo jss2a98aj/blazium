@@ -34,6 +34,7 @@ def get_doc_classes():
         "JustAMCPTileMapTools",
         "JustAMCPPrompt",
         "JustAMCPPromptBlaziumContext",
+        "JustAMCPPromptBlaziumWorkflow",
         "JustAMCPPromptEditorState",
         "JustAMCPPromptExecutor",
         "JustAMCPPromptProjectInfo",
