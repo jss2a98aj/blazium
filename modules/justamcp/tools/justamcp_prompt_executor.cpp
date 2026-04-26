@@ -31,7 +31,16 @@
 
 #include "justamcp_prompt_executor.h"
 #include "core/config/project_settings.h"
+#include "editor/editor_settings.h"
+#include "prompts/justamcp_prompt_autowork_failure_analyzer.h"
+#include "prompts/justamcp_prompt_autowork_test_generator.h"
 #include "prompts/justamcp_prompt_blazium_context.h"
+#include "prompts/justamcp_prompt_blazium_gdscript_linter.h"
+#include "prompts/justamcp_prompt_blazium_multiplayer_architect.h"
+#include "prompts/justamcp_prompt_blazium_optimization.h"
+#include "prompts/justamcp_prompt_blazium_scene_architect.h"
+#include "prompts/justamcp_prompt_blazium_shader_expert.h"
+#include "prompts/justamcp_prompt_blazium_ui_scaffolder.h"
 #include "prompts/justamcp_prompt_editor_state.h"
 #include "prompts/justamcp_prompt_project_info.h"
 
@@ -42,10 +51,39 @@ void JustAMCPPromptExecutor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("add_prompt", "prompt"), &JustAMCPPromptExecutor::add_prompt);
 }
 
+void JustAMCPPromptExecutor::register_settings() {
+	JustAMCPPromptExecutor exec;
+
+	Dictionary dict = exec.list_prompts();
+	if (dict.has("prompts")) {
+		Array prompts = dict["prompts"];
+		for (int i = 0; i < prompts.size(); i++) {
+			Dictionary p = prompts[i];
+			String name = p["name"];
+			String desc = p["description"];
+			String path = "blazium/justamcp/prompts/" + name;
+
+			GLOBAL_DEF_BASIC(PropertyInfo(Variant::STRING, path, PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY), desc);
+			if (EditorSettings::get_singleton()) {
+				EDITOR_DEF_BASIC(path, desc);
+				EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, path, PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY));
+			}
+		}
+	}
+}
+
 JustAMCPPromptExecutor::JustAMCPPromptExecutor() {
 	add_prompt(memnew(JustAMCPPromptBlaziumContext));
 	add_prompt(memnew(JustAMCPPromptProjectInfo));
 	add_prompt(memnew(JustAMCPPromptEditorState));
+	add_prompt(memnew(JustAMCPPromptAutoworkTestGenerator));
+	add_prompt(memnew(JustAMCPPromptAutoworkFailureAnalyzer));
+	add_prompt(memnew(JustAMCPPromptBlaziumOptimization));
+	add_prompt(memnew(JustAMCPPromptBlaziumSceneArchitect));
+	add_prompt(memnew(JustAMCPPromptBlaziumGDScriptLinter));
+	add_prompt(memnew(JustAMCPPromptBlaziumMultiplayerArchitect));
+	add_prompt(memnew(JustAMCPPromptBlaziumUIScaffolder));
+	add_prompt(memnew(JustAMCPPromptBlaziumShaderExpert));
 }
 
 JustAMCPPromptExecutor::~JustAMCPPromptExecutor() {}

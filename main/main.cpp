@@ -665,6 +665,15 @@ void Main::print_help(const char *p_binary) {
 #endif
 #endif
 
+// JUSTAMCP
+#ifdef MODULE_JUSTAMCP_ENABLED
+	print_help_title("JustAMCP Options");
+	print_help_option("--enable-mcp", "Force start the embedded JustAMCP server alongside the process.\n");
+	print_help_option("--mcp-port <port>", "Bind the JustAMCP server to a specific local port.\n");
+	print_help_option("--mcp-client-id <id>", "Force override the MCP OAuth Client ID dynamically.\n");
+	print_help_option("--mcp-client-secret <secret>", "Force override the MCP OAuth Client Secret dynamically.\n");
+#endif
+
 // AUTOWORK
 #ifdef MODULE_AUTOWORK_ENABLED
 	print_help_title("Autowork options");

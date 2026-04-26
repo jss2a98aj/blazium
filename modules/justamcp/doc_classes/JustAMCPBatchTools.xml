@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPBatchTools" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Exposes native Godot Batch utilities routing out to MCP schemas seamlessly.
+		Provides MCP tools for grouped editor operations.
 	</brief_description>
 	<description>
-		Inherits base bindings to automatically register Batch-related methods into the MCP registry globally. These specific tool endpoints allow connected LLMs to natively instrument Batch data directly within Godot's bounds.
+		Registers batch-operation tool schemas used by [JustAMCPToolExecutor]. These tools allow MCP clients to apply repeated node, resource, or project operations through one validated request instead of many individual calls.
 	</description>
 	<tutorials>
 		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>

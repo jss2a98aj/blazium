@@ -41,6 +41,7 @@
 #include "tools/justamcp_animation_tools.h"
 #include "tools/justamcp_audio_tools.h"
 #include "tools/justamcp_batch_tools.h"
+#include "tools/justamcp_documentation_tools.h"
 #include "tools/justamcp_export_tools.h"
 #include "tools/justamcp_input_tools.h"
 #include "tools/justamcp_node_tools.h"
@@ -122,6 +123,10 @@ void initialize_justamcp_module(ModuleInitializationLevel p_level) {
 			JustAMCPRuntime *runtime = memnew(JustAMCPRuntime);
 			Engine::get_singleton()->add_singleton(Engine::Singleton("JustAMCPRuntime", runtime));
 		}
+#ifdef TOOLS_ENABLED
+		GLOBAL_DEF_BASIC("blazium/justamcp/game_control_enabled", false);
+		GLOBAL_DEF_BASIC("blazium/justamcp/disable_game_mcp", false);
+#endif
 	}
 
 #ifdef TOOLS_ENABLED
@@ -134,6 +139,7 @@ void initialize_justamcp_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(JustAMCPAnalysisTools);
 		GDREGISTER_CLASS(JustAMCPAudioTools);
 		GDREGISTER_CLASS(JustAMCPBatchTools);
+		GDREGISTER_CLASS(JustAMCPDocumentationTools);
 		GDREGISTER_CLASS(JustAMCPExportTools);
 		GDREGISTER_CLASS(JustAMCPInputTools);
 		GDREGISTER_CLASS(JustAMCPNodeTools);

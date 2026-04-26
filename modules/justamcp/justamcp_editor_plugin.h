@@ -39,13 +39,20 @@
 #include "scene/gui/button.h"
 #include "scene/gui/label.h"
 #include "scene/gui/margin_container.h"
+#include "scene/gui/tab_container.h"
 #include "scene/gui/text_edit.h"
 
 class JustAMCPConfigUI : public MarginContainer {
 	GDCLASS(JustAMCPConfigUI, MarginContainer);
 
-	TextEdit *text_edit = nullptr;
+	TabContainer *tab_container = nullptr;
+	TextEdit *text_edit_antigravity = nullptr;
+	TextEdit *text_edit_cursor = nullptr;
 	Button *copy_button = nullptr;
+
+	Label *stats_tools_label = nullptr;
+	Label *stats_resources_label = nullptr;
+	Label *stats_prompts_label = nullptr;
 
 	void _update_config();
 	void _copy_pressed();
@@ -89,7 +96,7 @@ protected:
 public:
 	virtual String get_plugin_name() const override { return "JustAMCP"; }
 	bool has_main_screen() const override { return false; }
-	static String get_mcp_config_json();
+	static String get_mcp_config_json(bool p_is_cursor = false);
 
 	JustAMCPEditorPlugin();
 	~JustAMCPEditorPlugin();

@@ -51,6 +51,7 @@ private:
 
 	Dictionary _batch_set_property(const Dictionary &p_params);
 	void _batch_set_recursive(Node *p_node, Node *p_root, const String &p_type_name, const String &p_property, const Variant &p_value, Array &r_affected);
+	Dictionary _batch_add_nodes(const Dictionary &p_params);
 
 	Dictionary _find_node_references(const Dictionary &p_params);
 	void _search_files_for_pattern(const String &p_path, const String &p_pattern, Array &r_matches, int p_max_results);

@@ -19,6 +19,7 @@ def get_doc_classes():
         "JustAMCPAnalysisTools",
         "JustAMCPAudioTools",
         "JustAMCPBatchTools",
+        "JustAMCPDocumentationTools",
         "JustAMCPExportTools",
         "JustAMCPInputTools",
         "JustAMCPNodeTools",

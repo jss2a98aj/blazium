@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPPhysicsTools" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Exposes native Godot Physics utilities routing out to MCP schemas seamlessly.
+		Provides MCP tools for inspecting physics objects and settings.
 	</brief_description>
 	<description>
-		Inherits base bindings to automatically register Physics-related methods into the MCP registry globally. These specific tool endpoints allow connected LLMs to natively instrument Physics data directly within Godot's bounds.
+		Registers physics-oriented tool schemas used by [JustAMCPToolExecutor]. These tools expose collision objects, physics settings, and related scene data to MCP clients for debugging and automation.
 	</description>
 	<tutorials>
 		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>

@@ -544,6 +544,255 @@ Dictionary JustAMCPSceneTools::list_scene_nodes(const Dictionary &p_args) {
 	return ret;
 }
 
+Dictionary JustAMCPSceneTools::get_scene_file_content(const Dictionary &p_args) {
+	String project_path = p_args.get("projectPath", "");
+	String scene_path = _to_scene_res_path(project_path, p_args.get("scenePath", p_args.get("path", "")));
+	if (scene_path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "scenePath is required.";
+		return ret;
+	}
+	if (!FileAccess::exists(scene_path)) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Scene not found: " + scene_path;
+		return ret;
+	}
+	Ref<FileAccess> file = FileAccess::open(scene_path, FileAccess::READ);
+	if (file.is_null()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Failed to read scene: " + scene_path;
+		return ret;
+	}
+	String content = file->get_as_text();
+	file->close();
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["path"] = scene_path;
+	ret["content"] = content;
+	ret["size"] = content.length();
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::delete_scene_file(const Dictionary &p_args) {
+	String project_path = p_args.get("projectPath", "");
+	String scene_path = _to_scene_res_path(project_path, p_args.get("scenePath", p_args.get("path", "")));
+	if (scene_path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "scenePath is required.";
+		return ret;
+	}
+	if (!FileAccess::exists(scene_path)) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Scene not found: " + scene_path;
+		return ret;
+	}
+	Error err = DirAccess::remove_absolute(scene_path);
+	if (err != OK) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Failed to delete scene: " + itos(err);
+		return ret;
+	}
+	_refresh_filesystem();
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["path"] = scene_path;
+	ret["deleted"] = true;
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::get_scene_exports(const Dictionary &p_args) {
+	String project_path = p_args.get("projectPath", "");
+	String scene_path = _to_scene_res_path(project_path, p_args.get("scenePath", p_args.get("path", "")));
+	Array loaded = _load_scene(scene_path);
+	Dictionary err = loaded[1];
+	if (!err.is_empty()) {
+		return err;
+	}
+	Node *root = Object::cast_to<Node>(loaded[0]);
+	Array nodes;
+	_collect_nodes_recursive(root, ".", nodes);
+	Array exports;
+	for (int i = 0; i < nodes.size(); i++) {
+		Dictionary entry = nodes[i];
+		Node *node = Object::cast_to<Node>(entry["node"]);
+		if (!node) {
+			continue;
+		}
+		Dictionary props;
+		List<PropertyInfo> plist;
+		node->get_property_list(&plist);
+		for (const PropertyInfo &prop : plist) {
+			if ((prop.usage & PROPERTY_USAGE_SCRIPT_VARIABLE) || (prop.usage & PROPERTY_USAGE_EDITOR)) {
+				String prop_name = prop.name;
+				if (!prop_name.begins_with("_")) {
+					Dictionary info;
+					info["value"] = _serialize_value(node->get(prop_name));
+					info["type"] = Variant::get_type_name(prop.type);
+					info["hint"] = prop.hint;
+					info["hint_string"] = prop.hint_string;
+					props[prop_name] = info;
+				}
+			}
+		}
+		if (!props.is_empty()) {
+			Dictionary item;
+			item["node_path"] = entry["path"];
+			item["node_name"] = node->get_name();
+			item["node_type"] = node->get_class();
+			if (node->get_script()) {
+				Ref<Script> node_script = node->get_script();
+				item["script_path"] = node_script.is_valid() ? node_script->get_path() : String();
+			}
+			item["exports"] = props;
+			exports.push_back(item);
+		}
+	}
+	memdelete(root);
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["path"] = scene_path;
+	ret["nodes"] = exports;
+	ret["count"] = exports.size();
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::get_current_scene(const Dictionary &p_args) {
+	bool editor_ready = EditorNode::get_singleton() && EditorInterface::get_singleton();
+	Node *root = editor_ready ? EditorInterface::get_singleton()->get_edited_scene_root() : nullptr;
+	if (!root) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "No scene is currently open.";
+		return ret;
+	}
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["path"] = root->get_scene_file_path();
+	ret["root_name"] = root->get_name();
+	ret["root_type"] = root->get_class();
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::list_open_scenes(const Dictionary &p_args) {
+	Array scenes;
+	String current_path;
+	if (EditorNode::get_singleton() && EditorInterface::get_singleton()) {
+		PackedStringArray open_scenes = EditorInterface::get_singleton()->get_open_scenes();
+		for (int i = 0; i < open_scenes.size(); i++) {
+			scenes.push_back(open_scenes[i]);
+		}
+		Node *root = EditorInterface::get_singleton()->get_edited_scene_root();
+		if (root) {
+			current_path = root->get_scene_file_path();
+		}
+	}
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["scenes"] = scenes;
+	ret["current"] = current_path;
+	ret["count"] = scenes.size();
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::set_current_scene(const Dictionary &p_args) {
+	String path = _to_scene_res_path(p_args.get("projectPath", ""), p_args.get("path", p_args.get("scenePath", "")));
+	if (path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "path is required.";
+		return ret;
+	}
+	if (!FileAccess::exists(path)) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Scene not found: " + path;
+		return ret;
+	}
+	if (EditorInterface::get_singleton()) {
+		EditorInterface::get_singleton()->open_scene_from_path(path);
+	}
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["path"] = path;
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::reload_scene(const Dictionary &p_args) {
+	String path = _to_scene_res_path(p_args.get("projectPath", ""), p_args.get("path", p_args.get("scenePath", "")));
+	if (path == "res://") {
+		Node *root = EditorInterface::get_singleton() ? EditorInterface::get_singleton()->get_edited_scene_root() : nullptr;
+		if (root) {
+			path = root->get_scene_file_path();
+		}
+	}
+	if (path.is_empty() || path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "No scene to reload.";
+		return ret;
+	}
+	if (EditorInterface::get_singleton()) {
+		EditorInterface::get_singleton()->reload_scene_from_path(path);
+	}
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["path"] = path;
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::duplicate_scene_file(const Dictionary &p_args) {
+	String project_path = p_args.get("projectPath", "");
+	String source_path = _to_scene_res_path(project_path, p_args.get("source_path", p_args.get("sourcePath", "")));
+	String dest_path = _to_scene_res_path(project_path, p_args.get("dest_path", p_args.get("destPath", "")));
+	if (source_path == "res://" || dest_path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "source_path and dest_path are required.";
+		return ret;
+	}
+	if (!FileAccess::exists(source_path)) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Source scene not found: " + source_path;
+		return ret;
+	}
+	String dir_path = dest_path.get_base_dir();
+	if (!DirAccess::dir_exists_absolute(dir_path)) {
+		DirAccess::make_dir_recursive_absolute(dir_path);
+	}
+	Error err = DirAccess::copy_absolute(source_path, dest_path);
+	_refresh_filesystem();
+
+	Dictionary ret;
+	ret["ok"] = err == OK;
+	ret["source"] = source_path;
+	ret["destination"] = dest_path;
+	if (err != OK) {
+		ret["error"] = "Failed to duplicate scene: " + itos(err);
+	}
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::close_scene(const Dictionary &p_args) {
+	Dictionary ret;
+	ret["ok"] = false;
+	ret["unsupported"] = true;
+	ret["error"] = "Direct scene closing is not supported by the native EditorInterface API. Close the scene tab manually.";
+	ret["path"] = p_args.get("path", p_args.get("scenePath", ""));
+	return ret;
+}
+
 Dictionary JustAMCPSceneTools::add_node(const Dictionary &p_args) {
 	String project_path = p_args.get("projectPath", "");
 	String scene_path = _to_scene_res_path(project_path, p_args.get("scenePath", ""));
@@ -608,6 +857,76 @@ Dictionary JustAMCPSceneTools::add_node(const Dictionary &p_args) {
 	ret["ok"] = true;
 	ret["nodeName"] = node_name;
 	ret["nodeType"] = node_type;
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::instance_scene(const Dictionary &p_args) {
+	String project_path = p_args.get("projectPath", "");
+	String target_scene_path = _to_scene_res_path(project_path, p_args.get("scenePath", ""));
+	String instance_scene_path = _to_scene_res_path(project_path, p_args.get("instanceScenePath", ""));
+	String parent_node_path = p_args.get("parentNodePath", ".");
+
+	if (instance_scene_path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Missing instanceScenePath";
+		return ret;
+	}
+
+	Ref<PackedScene> packed = ResourceLoader::load(instance_scene_path);
+	if (packed.is_null()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Failed to load instance scene: " + instance_scene_path;
+		return ret;
+	}
+
+	Array result = _load_scene(target_scene_path);
+	Dictionary err = result[1];
+	if (!err.is_empty()) {
+		return err;
+	}
+
+	Node *root = Object::cast_to<Node>(result[0]);
+	Node *parent = _find_node(root, parent_node_path);
+	if (!parent) {
+		memdelete(root);
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Parent node not found: " + parent_node_path;
+		return ret;
+	}
+
+	Node *new_node = packed->instantiate();
+	if (!new_node) {
+		memdelete(root);
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Failed to instantiate packed scene.";
+		return ret;
+	}
+
+	if (p_args.has("nodeName")) {
+		String node_name = p_args.get("nodeName", "");
+		if (!node_name.is_empty()) {
+			new_node->set_name(node_name);
+		}
+	}
+
+	Dictionary properties = _parse_properties_arg(p_args.get("properties", Dictionary()));
+	_set_node_properties(new_node, properties);
+
+	parent->add_child(new_node);
+	_set_owner_recursive(new_node, root);
+
+	err = _save_scene(root, target_scene_path);
+	if (!err.is_empty()) {
+		return err;
+	}
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["nodeName"] = new_node->get_name();
 	return ret;
 }
 
@@ -988,6 +1307,47 @@ Dictionary JustAMCPSceneTools::save_scene(const Dictionary &p_args) {
 	return ret;
 }
 
+Dictionary JustAMCPSceneTools::create_inherited_scene(const Dictionary &p_args) {
+	String project_path = p_args.get("projectPath", "");
+	String base_scene_path = _to_scene_res_path(project_path, p_args.get("baseScenePath", ""));
+	String new_scene_path = _to_scene_res_path(project_path, p_args.get("newScenePath", ""));
+
+	if (base_scene_path == "res://" || new_scene_path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Missing baseScenePath or newScenePath parameter.";
+		return ret;
+	}
+
+	Ref<PackedScene> base_pack = ResourceLoader::load(base_scene_path);
+	if (base_pack.is_null()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Failed to load base scene packed resource.";
+		return ret;
+	}
+
+	Node *instance = base_pack->instantiate(PackedScene::GEN_EDIT_STATE_INSTANCE);
+	if (!instance) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Failed to instantiate base scene for inheritance.";
+		return ret;
+	}
+
+	instance->set_scene_file_path(base_scene_path);
+
+	Dictionary err = _save_scene(instance, new_scene_path);
+	if (!err.is_empty()) {
+		return err;
+	}
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["scenePath"] = p_args.get("newScenePath", "");
+	return ret;
+}
+
 Dictionary JustAMCPSceneTools::connect_signal(const Dictionary &p_args) {
 	String project_path = p_args.get("projectPath", "");
 	String scene_path = _to_scene_res_path(project_path, p_args.get("scenePath", ""));
@@ -1177,6 +1537,221 @@ Dictionary JustAMCPSceneTools::list_connections(const Dictionary &p_args) {
 	ret["ok"] = true;
 	ret["connections"] = conn_arr;
 	return ret;
+}
+
+Dictionary JustAMCPSceneTools::list_node_signals(const Dictionary &p_args) {
+	String project_path = p_args.get("projectPath", "");
+	String scene_path = _to_scene_res_path(project_path, p_args.get("scenePath", ""));
+	String node_path = p_args.get("nodePath", p_args.get("node_path", "."));
+
+	Array result = _load_scene(scene_path);
+	Dictionary err = result[1];
+	if (!err.is_empty()) {
+		return err;
+	}
+	Node *root = Object::cast_to<Node>(result[0]);
+	Node *node = _find_node(root, node_path);
+	if (!node) {
+		memdelete(root);
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Node not found: " + node_path;
+		return ret;
+	}
+
+	Array signals;
+	List<MethodInfo> signal_list;
+	node->get_signal_list(&signal_list);
+	for (const MethodInfo &signal : signal_list) {
+		Dictionary info;
+		info["name"] = signal.name;
+		Array args;
+		for (const PropertyInfo &arg : signal.arguments) {
+			Dictionary arg_info;
+			arg_info["name"] = arg.name;
+			arg_info["type"] = Variant::get_type_name(arg.type);
+			args.push_back(arg_info);
+		}
+		info["args"] = args;
+		signals.push_back(info);
+	}
+	memdelete(root);
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["node_path"] = node_path;
+	ret["signals"] = signals;
+	ret["count"] = signals.size();
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::has_signal_connection(const Dictionary &p_args) {
+	String project_path = p_args.get("projectPath", "");
+	String scene_path = _to_scene_res_path(project_path, p_args.get("scenePath", ""));
+	String source_node_path = p_args.get("sourceNodePath", p_args.get("source_path", ""));
+	String signal_name = p_args.get("signalName", p_args.get("signal_name", ""));
+	String target_node_path = p_args.get("targetNodePath", p_args.get("target_path", ""));
+	String method_name = p_args.get("methodName", p_args.get("method_name", ""));
+
+	Array result = _load_scene(scene_path);
+	Dictionary err = result[1];
+	if (!err.is_empty()) {
+		return err;
+	}
+	Node *root = Object::cast_to<Node>(result[0]);
+	Node *source = _find_node(root, source_node_path);
+	Node *target = _find_node(root, target_node_path);
+	if (!source || !target || signal_name.is_empty() || method_name.is_empty()) {
+		memdelete(root);
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "source, target, signal and method are required.";
+		return ret;
+	}
+
+	bool connected = source->is_connected(signal_name, Callable(target, StringName(method_name)));
+	memdelete(root);
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["source"] = source_node_path;
+	ret["signal"] = signal_name;
+	ret["target"] = target_node_path;
+	ret["method"] = method_name;
+	ret["connected"] = connected;
+	return ret;
+}
+
+Dictionary JustAMCPSceneTools::create_area_2d(const Dictionary &p_args) {
+	Dictionary mutable_args = p_args;
+	mutable_args["nodeType"] = "Area2D";
+	return add_node(mutable_args);
+}
+
+Dictionary JustAMCPSceneTools::create_line_2d(const Dictionary &p_args) {
+	Dictionary mutable_args = p_args;
+	mutable_args["nodeType"] = "Line2D";
+
+	Array points = mutable_args.get("points", Array());
+	Dictionary proxy_props;
+	if (mutable_args.has("properties")) {
+		proxy_props = mutable_args["properties"];
+	}
+	if (!points.is_empty()) {
+		PackedVector2Array varray;
+		for (int i = 0; i < points.size(); i++) {
+			Dictionary pt = points[i];
+			varray.push_back(Vector2((float)pt.get("x", 0.0), (float)pt.get("y", 0.0)));
+		}
+		proxy_props["points"] = varray;
+	}
+	mutable_args["properties"] = proxy_props;
+
+	return add_node(mutable_args);
+}
+
+Dictionary JustAMCPSceneTools::create_polygon_2d(const Dictionary &p_args) {
+	Dictionary mutable_args = p_args;
+	mutable_args["nodeType"] = "Polygon2D";
+
+	Array points = mutable_args.get("points", Array());
+	Dictionary proxy_props;
+	if (mutable_args.has("properties")) {
+		proxy_props = mutable_args["properties"];
+	}
+	if (!points.is_empty()) {
+		PackedVector2Array varray;
+		for (int i = 0; i < points.size(); i++) {
+			Dictionary pt = points[i];
+			varray.push_back(Vector2((float)pt.get("x", 0.0), (float)pt.get("y", 0.0)));
+		}
+		proxy_props["polygon"] = varray;
+	}
+	mutable_args["properties"] = proxy_props;
+
+	return add_node(mutable_args);
+}
+
+Dictionary JustAMCPSceneTools::create_csg_shape(const Dictionary &p_args) {
+	Dictionary mutable_args = p_args;
+	String shape_type = p_args.get("shapeType", "CSGBox3D");
+	mutable_args["nodeType"] = shape_type;
+
+	Dictionary proxy_props;
+	if (mutable_args.has("properties")) {
+		proxy_props = mutable_args["properties"];
+	}
+
+	if (shape_type == "CSGBox3D") {
+		proxy_props["size"] = Vector3(
+				p_args.get("width", 1.0),
+				p_args.get("height", 1.0),
+				p_args.get("depth", 1.0));
+	} else if (shape_type == "CSGSphere3D") {
+		proxy_props["radius"] = p_args.get("radius", 0.5);
+	} else if (shape_type == "CSGCylinder3D") {
+		proxy_props["radius"] = p_args.get("radius", 0.5);
+		proxy_props["height"] = p_args.get("height", 1.0);
+	}
+
+	mutable_args["properties"] = proxy_props;
+	return add_node(mutable_args);
+}
+
+Dictionary JustAMCPSceneTools::setup_camera_2d(const Dictionary &p_args) {
+	Dictionary mutable_args = p_args;
+	mutable_args["nodeType"] = "Camera2D";
+
+	Dictionary proxy_props;
+	if (mutable_args.has("properties")) {
+		proxy_props = mutable_args["properties"];
+	}
+
+	if (p_args.has("zoom")) {
+		float z = p_args.get("zoom", 1.0);
+		proxy_props["zoom"] = Vector2(z, z);
+	}
+	proxy_props["position_smoothing_enabled"] = p_args.get("smoothing", true);
+
+	mutable_args["properties"] = proxy_props;
+	return add_node(mutable_args);
+}
+
+Dictionary JustAMCPSceneTools::setup_parallax_2d(const Dictionary &p_args) {
+	Dictionary mutable_args = p_args;
+	mutable_args["nodeType"] = "ParallaxBackground";
+
+	Dictionary proxy_props;
+	if (mutable_args.has("properties")) {
+		proxy_props = mutable_args["properties"];
+	}
+	mutable_args["properties"] = proxy_props;
+
+	return add_node(mutable_args);
+}
+
+Dictionary JustAMCPSceneTools::create_multimesh(const Dictionary &p_args) {
+	Dictionary mutable_args = p_args;
+	mutable_args["nodeType"] = "MultiMeshInstance3D";
+
+	Dictionary proxy_props;
+	if (mutable_args.has("properties")) {
+		proxy_props = mutable_args["properties"];
+	}
+	mutable_args["properties"] = proxy_props;
+
+	return add_node(mutable_args);
+}
+
+Dictionary JustAMCPSceneTools::setup_skeleton(const Dictionary &p_args) {
+	Dictionary mutable_args = p_args;
+	mutable_args["nodeType"] = "Skeleton3D";
+	return add_node(mutable_args);
+}
+
+Dictionary JustAMCPSceneTools::setup_occlusion(const Dictionary &p_args) {
+	Dictionary mutable_args = p_args;
+	mutable_args["nodeType"] = "OccluderInstance3D";
+	return add_node(mutable_args);
 }
 
 #endif // TOOLS_ENABLED

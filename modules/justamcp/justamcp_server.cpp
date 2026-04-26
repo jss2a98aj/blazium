@@ -56,7 +56,38 @@ void JustAMCPServer::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("request_cancelled", PropertyInfo(Variant::NIL, "request_id", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_NIL_IS_VARIANT), PropertyInfo(Variant::STRING, "reason")));
 }
 
+JustAMCPServer *JustAMCPServer::singleton = nullptr;
+
+JustAMCPServer *JustAMCPServer::get_singleton() {
+	return singleton;
+}
+
+void JustAMCPServer::_print_handler_callback(void *p_user_data, const String &p_string, bool p_error, bool p_rich) {
+	JustAMCPServer *server = static_cast<JustAMCPServer *>(p_user_data);
+	if (!server) {
+		return;
+	}
+	MutexLock lock(server->engine_logs_mutex);
+
+	String prefix = p_error ? "[ERROR] " : "";
+	server->engine_logs.push_back(prefix + p_string);
+
+	if (server->engine_logs.size() > 500) {
+		server->engine_logs.remove_at(0);
+	}
+}
+
+Vector<String> JustAMCPServer::get_engine_logs() {
+	MutexLock lock(engine_logs_mutex);
+	return engine_logs;
+}
+
 JustAMCPServer::JustAMCPServer() {
+	singleton = this;
+	print_handler.printfunc = _print_handler_callback;
+	print_handler.userdata = this;
+	add_print_handler(&print_handler);
+
 #ifdef TOOLS_ENABLED
 	prompt_executor = memnew(JustAMCPPromptExecutor);
 	resource_executor = memnew(JustAMCPResourceExecutor);
@@ -65,6 +96,11 @@ JustAMCPServer::JustAMCPServer() {
 }
 
 JustAMCPServer::~JustAMCPServer() {
+	remove_print_handler(&print_handler);
+	if (singleton == this) {
+		singleton = nullptr;
+	}
+
 	_stop_server();
 #ifdef TOOLS_ENABLED
 	if (prompt_executor) {
@@ -152,6 +188,8 @@ void JustAMCPServer::_setup_settings() {
 
 #ifdef TOOLS_ENABLED
 	JustAMCPToolExecutor::register_tool_settings();
+	JustAMCPPromptExecutor::register_settings();
+	JustAMCPResourceExecutor::register_settings();
 #endif
 }
 
@@ -199,8 +237,54 @@ void JustAMCPServer::_start_server() {
 	}
 #endif
 
-	if (OS::get_singleton()->get_cmdline_args().find("--enable-mcp")) {
+	bool cmd_enable_mcp = false;
+	int cmd_port = -1;
+	String cmd_client_id = "";
+	String cmd_client_secret = "";
+
+	for (const List<String>::Element *E = args.front(); E; E = E->next()) {
+		if (E->get() == "--enable-mcp") {
+			cmd_enable_mcp = true;
+		}
+		if (E->get() == "--mcp-port" && E->next()) {
+			cmd_port = E->next()->get().to_int();
+		}
+		if (E->get() == "--mcp-client-id" && E->next()) {
+			cmd_client_id = E->next()->get();
+		}
+		if (E->get() == "--mcp-client-secret" && E->next()) {
+			cmd_client_secret = E->next()->get();
+		}
+	}
+
+	if (!cmd_client_id.is_empty() && cmd_client_secret.is_empty()) {
+		ERR_PRINT("JustAMCP: --mcp-client-id provided but --mcp-client-secret is missing. OAuth configuration failed.");
+		return;
+	}
+	if (!cmd_client_secret.is_empty() && cmd_client_id.is_empty()) {
+		ERR_PRINT("JustAMCP: --mcp-client-secret provided but --mcp-client-id is missing. OAuth configuration failed.");
+		return;
+	}
+
+	if (cmd_enable_mcp) {
 		enabled = true;
+	}
+	if (cmd_port > 0) {
+		port = cmd_port;
+	}
+	if (!cmd_client_id.is_empty() && !cmd_client_secret.is_empty()) {
+		if (ProjectSettings::get_singleton()) {
+			ProjectSettings::get_singleton()->set_setting("blazium/justamcp/oauth_enabled", true);
+			ProjectSettings::get_singleton()->set_setting("blazium/justamcp/client_id", cmd_client_id);
+			ProjectSettings::get_singleton()->set_setting("blazium/justamcp/client_secret", cmd_client_secret);
+		}
+#ifdef TOOLS_ENABLED
+		if (EditorSettings::get_singleton()) {
+			EditorSettings::get_singleton()->set_setting("blazium/justamcp/oauth_enabled", true);
+			EditorSettings::get_singleton()->set_setting("blazium/justamcp/client_id", cmd_client_id);
+			EditorSettings::get_singleton()->set_setting("blazium/justamcp/client_secret", cmd_client_secret);
+		}
+#endif
 	}
 
 	if (!enabled) {
@@ -215,8 +299,13 @@ void JustAMCPServer::_start_server() {
 		}
 
 		HTTPServer::get_singleton()->register_route("GET", "/sse", callable_mp(this, &JustAMCPServer::_handle_sse_connect));
+		HTTPServer::get_singleton()->register_route("POST", "/sse", callable_mp(this, &JustAMCPServer::_handle_sse_connect));
+		HTTPServer::get_singleton()->register_route("OPTIONS", "/sse", callable_mp(this, &JustAMCPServer::_handle_cors_preflight));
 		HTTPServer::get_singleton()->register_route("POST", "/message", callable_mp(this, &JustAMCPServer::_handle_message_post));
+		HTTPServer::get_singleton()->register_route("OPTIONS", "/message", callable_mp(this, &JustAMCPServer::_handle_cors_preflight));
+		HTTPServer::get_singleton()->register_route("GET", "/mcp", callable_mp(this, &JustAMCPServer::_handle_sse_connect));
 		HTTPServer::get_singleton()->register_route("POST", "/mcp", callable_mp(this, &JustAMCPServer::_handle_mcp_stateless_post));
+		HTTPServer::get_singleton()->register_route("OPTIONS", "/mcp", callable_mp(this, &JustAMCPServer::_handle_cors_preflight));
 
 		if (!HTTPServer::get_singleton()->is_connected("sse_connection_opened", callable_mp(this, &JustAMCPServer::_on_sse_connection_opened))) {
 			HTTPServer::get_singleton()->connect("sse_connection_opened", callable_mp(this, &JustAMCPServer::_on_sse_connection_opened));
@@ -239,8 +328,13 @@ void JustAMCPServer::_stop_server() {
 #if defined(MODULE_HTTPSERVER_ENABLED)
 	if (HTTPServer::get_singleton()) {
 		HTTPServer::get_singleton()->unregister_route("GET", "/sse");
+		HTTPServer::get_singleton()->unregister_route("POST", "/sse");
+		HTTPServer::get_singleton()->unregister_route("OPTIONS", "/sse");
 		HTTPServer::get_singleton()->unregister_route("POST", "/message");
+		HTTPServer::get_singleton()->unregister_route("OPTIONS", "/message");
+		HTTPServer::get_singleton()->unregister_route("GET", "/mcp");
 		HTTPServer::get_singleton()->unregister_route("POST", "/mcp");
+		HTTPServer::get_singleton()->unregister_route("OPTIONS", "/mcp");
 	}
 #endif
 	server_started = false;
@@ -250,10 +344,15 @@ void JustAMCPServer::_stop_server() {
 }
 
 #if defined(MODULE_HTTPSERVER_ENABLED)
+void JustAMCPServer::_handle_cors_preflight(Ref<HTTPRequestContext> p_context, Ref<HTTPResponse> p_response) {
+	p_response->set_status(204);
+	p_response->set_body("");
+}
+
 void JustAMCPServer::_handle_sse_connect(Ref<HTTPRequestContext> p_context, Ref<HTTPResponse> p_response) {
 	bool debug_logging = GLOBAL_GET("blazium/justamcp/enable_debug_logging");
 	if (debug_logging) {
-		print_line("JustAMCP: Incoming GET /sse connection attempt...");
+		print_line("JustAMCP: Incoming " + p_context->get_method() + " /sse connection attempt...");
 	}
 	// Optional OAuth validation
 #ifdef TOOLS_ENABLED
@@ -286,14 +385,31 @@ void JustAMCPServer::_handle_sse_connect(Ref<HTTPRequestContext> p_context, Ref<
 	if (oauth_enabled) {
 		if (!required_client_id.is_empty() || !required_client_secret.is_empty()) {
 			Dictionary headers = p_context->get_headers();
+			String authorization = headers.get("authorization", headers.get("Authorization", ""));
+			String client_id_header = headers.get("x-client-id", headers.get("X-Client-Id", ""));
+			String client_secret_header = headers.get("x-client-secret", headers.get("X-Client-Secret", ""));
+			String bearer_prefix = "Bearer ";
+			String basic_prefix = "Basic ";
+			String expected_pair = required_client_id + ":" + required_client_secret;
+			bool authorized = false;
 
-			// Note: Usually the AI sends 'Authorization: Bearer <token>' or similar custom headers.
-			// We gracefully respond Unauthorized if we actively required them and didn't find them fitting our basic validation standard.
-			// This is a minimal placeholder for basic token checks:
-			if (!headers.has("authorization")) {
+			if (!required_client_secret.is_empty()) {
+				authorized = authorization == bearer_prefix + required_client_secret ||
+						authorization == bearer_prefix + expected_pair ||
+						authorization == basic_prefix + expected_pair ||
+						client_secret_header == required_client_secret;
+			}
+			if (authorized && !required_client_id.is_empty()) {
+				authorized = client_id_header == required_client_id || authorization.ends_with(expected_pair);
+			}
+			if (!authorized && required_client_secret.is_empty() && !required_client_id.is_empty()) {
+				authorized = authorization == bearer_prefix + required_client_id || client_id_header == required_client_id;
+			}
+
+			if (!authorized) {
 				ERR_PRINT("JustAMCP: Unauthorized connection attempt.");
 				p_response->set_status(401);
-				p_response->set_body("Unauthorized - Missing Authorization header");
+				p_response->set_body("Unauthorized - Invalid OAuth credentials");
 				return;
 			}
 		}
@@ -508,6 +624,7 @@ Dictionary JustAMCPServer::_handle_json_rpc(const String &p_body, Ref<HTTPRespon
 		Dictionary serverInfo;
 		serverInfo["name"] = "blazium-mcp-server";
 		serverInfo["version"] = "1.0.0";
+		serverInfo["instructions"] = "Use blazium_* tools and blazium:// resources. Prefer editor tools for scene/resource edits, runtime_* tools only when a game bridge is active, and guide resources such as blazium://guide/tool-index for workflow orientation.";
 		result["serverInfo"] = serverInfo;
 
 		Dictionary rpc_result;

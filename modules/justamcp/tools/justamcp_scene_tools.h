@@ -49,8 +49,19 @@ public:
 	void set_editor_plugin(JustAMCPEditorPlugin *p_plugin) { editor_plugin = p_plugin; }
 
 	Dictionary create_scene(const Dictionary &p_args);
+	Dictionary create_inherited_scene(const Dictionary &p_args);
 	Dictionary list_scene_nodes(const Dictionary &p_args);
+	Dictionary get_scene_file_content(const Dictionary &p_args);
+	Dictionary delete_scene_file(const Dictionary &p_args);
+	Dictionary get_scene_exports(const Dictionary &p_args);
+	Dictionary get_current_scene(const Dictionary &p_args);
+	Dictionary list_open_scenes(const Dictionary &p_args);
+	Dictionary set_current_scene(const Dictionary &p_args);
+	Dictionary reload_scene(const Dictionary &p_args);
+	Dictionary duplicate_scene_file(const Dictionary &p_args);
+	Dictionary close_scene(const Dictionary &p_args);
 	Dictionary add_node(const Dictionary &p_args);
+	Dictionary instance_scene(const Dictionary &p_args);
 	Dictionary delete_node(const Dictionary &p_args);
 	Dictionary duplicate_node(const Dictionary &p_args);
 	Dictionary reparent_node(const Dictionary &p_args);
@@ -61,6 +72,19 @@ public:
 	Dictionary connect_signal(const Dictionary &p_args);
 	Dictionary disconnect_signal(const Dictionary &p_args);
 	Dictionary list_connections(const Dictionary &p_args);
+	Dictionary list_node_signals(const Dictionary &p_args);
+	Dictionary has_signal_connection(const Dictionary &p_args);
+
+	Dictionary create_area_2d(const Dictionary &p_args);
+	Dictionary create_line_2d(const Dictionary &p_args);
+	Dictionary create_polygon_2d(const Dictionary &p_args);
+	Dictionary create_csg_shape(const Dictionary &p_args);
+
+	Dictionary setup_camera_2d(const Dictionary &p_args);
+	Dictionary setup_parallax_2d(const Dictionary &p_args);
+	Dictionary create_multimesh(const Dictionary &p_args);
+	Dictionary setup_skeleton(const Dictionary &p_args);
+	Dictionary setup_occlusion(const Dictionary &p_args);
 
 private:
 	void _refresh_and_reload(const String &p_scene_path);

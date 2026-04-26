@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPThemeTools" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Exposes native Godot Theme utilities routing out to MCP schemas seamlessly.
+		Provides MCP tools for reading and editing UI theme data.
 	</brief_description>
 	<description>
-		Inherits base bindings to automatically register Theme-related methods into the MCP registry globally. These specific tool endpoints allow connected LLMs to natively instrument Theme data directly within Godot's bounds.
+		Registers theme-oriented tool schemas used by [JustAMCPToolExecutor]. These tools expose [Theme] resources, control styling, theme constants, colors, fonts, and related UI appearance data.
 	</description>
 	<tutorials>
 		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>

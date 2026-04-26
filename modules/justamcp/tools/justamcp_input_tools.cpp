@@ -85,8 +85,20 @@ Dictionary JustAMCPInputTools::execute_tool(const String &p_tool_name, const Dic
 	if (p_tool_name == "simulate_action") {
 		return _simulate_action(p_args);
 	}
+	if (p_tool_name == "simulate_touch") {
+		return _simulate_touch(p_args);
+	}
+	if (p_tool_name == "simulate_gamepad") {
+		return _simulate_gamepad(p_args);
+	}
 	if (p_tool_name == "simulate_sequence") {
 		return _simulate_sequence(p_args);
+	}
+	if (p_tool_name == "input_record") {
+		return _input_record(p_args);
+	}
+	if (p_tool_name == "input_replay") {
+		return _input_replay(p_args);
 	}
 
 	Dictionary err;
@@ -239,6 +251,64 @@ Dictionary JustAMCPInputTools::_simulate_action(const Dictionary &p_params) {
 	return MCP_SUCCESS(res);
 }
 
+Dictionary JustAMCPInputTools::_simulate_touch(const Dictionary &p_params) {
+	int index = p_params.has("index") ? int(p_params["index"]) : 0;
+	Dictionary position = p_params.get("position", Dictionary());
+	float x = p_params.has("x") ? float(p_params["x"]) : float(position.get("x", 0.0));
+	float y = p_params.has("y") ? float(p_params["y"]) : float(position.get("y", 0.0));
+	String action = p_params.get("action", "");
+	bool pressed = p_params.has("pressed") ? bool(p_params["pressed"]) : (action != "release");
+	bool double_tap = p_params.has("double_tap") ? bool(p_params["double_tap"]) : false;
+
+	Dictionary event;
+	event["type"] = action == "move" ? "screen_drag" : "screen_touch";
+	event["index"] = index;
+	event["pressed"] = pressed;
+	event["double_tap"] = double_tap;
+	Dictionary pos;
+	pos["x"] = x;
+	pos["y"] = y;
+	event["position"] = pos;
+
+	Array events;
+	events.push_back(event);
+	_write_commands(events);
+
+	Dictionary res;
+	res["sent"] = true;
+	res["event"] = event;
+	return MCP_SUCCESS(res);
+}
+
+Dictionary JustAMCPInputTools::_simulate_gamepad(const Dictionary &p_params) {
+	int device = p_params.has("device") ? int(p_params["device"]) : 0;
+
+	Dictionary event;
+	if (p_params.has("button_index") || p_params.has("button")) {
+		event["type"] = "joypad_button";
+		event["device"] = device;
+		event["button_index"] = p_params.has("button_index") ? int(p_params["button_index"]) : int(p_params["button"]);
+		event["pressed"] = p_params.has("pressed") ? bool(p_params["pressed"]) : true;
+		event["pressure"] = p_params.has("pressure") ? float(p_params["pressure"]) : 1.0;
+	} else if (p_params.has("axis")) {
+		event["type"] = "joypad_motion";
+		event["device"] = device;
+		event["axis"] = int(p_params["axis"]);
+		event["axis_value"] = p_params.has("axis_value") ? float(p_params["axis_value"]) : 0.0;
+	} else {
+		return MCP_INVALID_PARAMS("Missing joypad parameters (button_index or axis).");
+	}
+
+	Array events;
+	events.push_back(event);
+	_write_commands(events);
+
+	Dictionary res;
+	res["sent"] = true;
+	res["event"] = event;
+	return MCP_SUCCESS(res);
+}
+
 Dictionary JustAMCPInputTools::_simulate_sequence(const Dictionary &p_params) {
 	if (!p_params.has("events") || p_params["events"].get_type() != Variant::ARRAY) {
 		return MCP_INVALID_PARAMS("Missing required parameter: events (Array)");
@@ -281,4 +351,41 @@ Dictionary JustAMCPInputTools::_simulate_sequence(const Dictionary &p_params) {
 	res["event_count"] = events.size();
 	res["frame_delay"] = frame_delay;
 	return MCP_SUCCESS(res);
+}
+
+Dictionary JustAMCPInputTools::_input_record(const Dictionary &p_args) {
+	Dictionary result;
+	bool state = p_args.get("state", true); // true = record, false = stop
+
+	Dictionary event;
+	event["type"] = "meta";
+	event["action"] = state ? "record_start" : "record_stop";
+
+	Array events;
+	events.push_back(event);
+	_write_commands(events);
+
+	result["sent"] = true;
+	result["recording"] = state;
+	result["message"] = state ? "Started buffering OS Input events." : "Stopped tracking inputs.";
+	return MCP_SUCCESS(result);
+}
+
+Dictionary JustAMCPInputTools::_input_replay(const Dictionary &p_args) {
+	Dictionary result;
+	String sequence_buffer = p_args.get("sequence_buffer_id", "");
+
+	Dictionary event;
+	event["type"] = "meta";
+	event["action"] = "replay_buffer";
+	event["sequence_buffer_id"] = sequence_buffer;
+
+	Array events;
+	events.push_back(event);
+	_write_commands(events);
+
+	result["sent"] = true;
+	result["replaying"] = true;
+	result["sequence_buffer_id"] = sequence_buffer;
+	return MCP_SUCCESS(result);
 }

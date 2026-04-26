@@ -42,7 +42,7 @@ String JustAMCPResourceProjectFile::get_uri() const {
 }
 
 String JustAMCPResourceProjectFile::get_name() const {
-	return "Godot Project File";
+	return "Blazium Project File";
 }
 
 bool JustAMCPResourceProjectFile::is_template() const {
@@ -53,7 +53,7 @@ Dictionary JustAMCPResourceProjectFile::get_schema() const {
 	Dictionary resource;
 	resource["uriTemplate"] = get_uri();
 	resource["name"] = get_name();
-	resource["description"] = "Read any file inside the active res:// Godot Project path.";
+	resource["description"] = "Read any file inside the active res:// Blazium project path.";
 	resource["mimeType"] = "text/plain";
 	return resource;
 }

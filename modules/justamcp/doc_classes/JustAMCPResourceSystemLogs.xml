@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPResourceSystemLogs" inherits="JustAMCPResource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Handles decoupling deep Godot runtime logs dynamically scaling them outwardly across resource structures successfully globally!
+		Provides MCP resource access to captured Blazium logs.
 	</brief_description>
 	<description>
-		Inherits [JustAMCPResource] securely wrapping static endpoints dynamically capturing `godot://system/logs` queries cleanly handling external reads bypassing standard log tracks gracefully.
+		A [JustAMCPResource] implementation for [code]blazium://system/logs[/code]. It returns captured engine output and errors so MCP clients can inspect recent runtime diagnostics.
 	</description>
 	<tutorials>
 		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>

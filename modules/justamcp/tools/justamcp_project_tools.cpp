@@ -28,517 +28,555 @@
 /**************************************************************************/
 
 #include "justamcp_project_tools.h"
-#include "core/config/engine.h"
+#include "../justamcp_editor_plugin.h"
+
 #include "core/config/project_settings.h"
+#include "core/input/input_event.h"
+#include "core/input/input_map.h"
 #include "core/io/dir_access.h"
 #include "core/io/file_access.h"
-#include "core/io/resource_uid.h"
-#include "core/math/expression.h"
 #include "modules/regex/regex.h"
-
-// Helper macros for returning errors analogous to base_command.gd
-static inline Dictionary _MCP_SUCCESS(const Variant &data) {
-	Dictionary r;
-	r["ok"] = true;
-	r["result"] = data;
-	return r;
-}
-static inline Dictionary _MCP_ERROR_INTERNAL(int code, const String &msg) {
-	Dictionary e, r;
-	e["code"] = code;
-	e["message"] = msg;
-	r["ok"] = false;
-	r["error"] = e;
-	return r;
-}
-[[maybe_unused]] static inline Dictionary _MCP_ERROR_DATA(int code, const String &msg, const Variant &data) {
-	Dictionary e, r;
-	e["code"] = code;
-	e["message"] = msg;
-	e["data"] = data;
-	r["ok"] = false;
-	r["error"] = e;
-	return r;
-}
-#undef MCP_SUCCESS
-#undef MCP_ERROR
-#undef MCP_ERROR_DATA
-#undef MCP_INVALID_PARAMS
-#undef MCP_NOT_FOUND
-#undef MCP_INTERNAL
-#define MCP_SUCCESS(data) _MCP_SUCCESS(data)
-#define MCP_ERROR(code, msg) _MCP_ERROR_INTERNAL(code, msg)
-#define MCP_ERROR_DATA(code, msg, data) _MCP_ERROR_DATA(code, msg, data)
-#define MCP_INVALID_PARAMS(msg) _MCP_ERROR_INTERNAL(-32602, msg)
-#define MCP_NOT_FOUND(msg) _MCP_ERROR_DATA(-32001, String(msg) + " not found", Dictionary())
-#define MCP_INTERNAL(msg) _MCP_ERROR_INTERNAL(-32603, String("Internal error: ") + msg)
 
 void JustAMCPProjectTools::_bind_methods() {}
 
-JustAMCPProjectTools::JustAMCPProjectTools() {}
-
-JustAMCPProjectTools::~JustAMCPProjectTools() {}
-
 Dictionary JustAMCPProjectTools::execute_tool(const String &p_tool_name, const Dictionary &p_args) {
-	if (p_tool_name == "get_project_info") {
-		return _get_project_info(p_args);
-	} else if (p_tool_name == "get_filesystem_tree") {
-		return _get_filesystem_tree(p_args);
-	} else if (p_tool_name == "search_files") {
-		return _search_files(p_args);
-	} else if (p_tool_name == "search_in_files") {
-		return _search_in_files(p_args);
-	} else if (p_tool_name == "get_project_settings") {
-		return _get_project_settings(p_args);
-	} else if (p_tool_name == "set_project_setting") {
-		return _set_project_setting(p_args);
-	} else if (p_tool_name == "uid_to_project_path") {
-		return _uid_to_project_path(p_args);
-	} else if (p_tool_name == "project_path_to_uid") {
-		return _project_path_to_uid(p_args);
-	} else if (p_tool_name == "add_autoload") {
-		return _add_autoload(p_args);
-	} else if (p_tool_name == "remove_autoload") {
-		return _remove_autoload(p_args);
+	if (p_tool_name == "map_project") {
+		return map_project(p_args);
+	}
+	if (p_tool_name == "map_scenes") {
+		return map_scenes(p_args);
+	}
+	if (p_tool_name == "list_settings") {
+		return list_settings(p_args);
+	}
+	if (p_tool_name == "update_settings") {
+		return update_settings(p_args);
+	}
+	if (p_tool_name == "manage_autoloads") {
+		return manage_autoloads(p_args);
+	}
+	if (p_tool_name == "get_collision_layers") {
+		return get_collision_layers(p_args);
+	}
+	if (p_tool_name == "project_get_input_actions") {
+		return get_input_actions(p_args);
+	}
+	if (p_tool_name == "project_set_input_action") {
+		return set_input_action(p_args);
+	}
+	if (p_tool_name == "project_remove_input_action") {
+		return remove_input_action(p_args);
 	}
 
-	Dictionary err;
-	err["code"] = -32601;
-	err["message"] = "Method not found: " + p_tool_name;
-	Dictionary res;
-	res["error"] = err;
-	return res;
+	Dictionary ret;
+	ret["ok"] = false;
+	ret["error"] = "Unknown project tool: " + p_tool_name;
+	return ret;
 }
 
-Dictionary JustAMCPProjectTools::_get_project_info(const Dictionary &p_params) {
-	Dictionary info;
+Dictionary JustAMCPProjectTools::map_project(const Dictionary &p_args) {
+	String root_path = p_args.get("root", "res://");
+	bool include_addons = p_args.get("include_addons", false);
+	int lod = p_args.get("lod", 1); // Level of Detail: 0=Paths only, 1=Structure, 2=Full parsing
 
-	info["project_name"] = ProjectSettings::get_singleton()->get_setting("application/config/name", "");
-	info["godot_version"] = Engine::get_singleton()->get_version_info();
-	info["project_path"] = ProjectSettings::get_singleton()->globalize_path("res://");
-	info["main_scene"] = ProjectSettings::get_singleton()->get_setting("application/run/main_scene", "");
+	if (!root_path.begins_with("res://")) {
+		root_path = "res://" + root_path;
+	}
 
-	info["viewport_width"] = ProjectSettings::get_singleton()->get_setting("display/window/size/viewport_width", 0);
-	info["viewport_height"] = ProjectSettings::get_singleton()->get_setting("display/window/size/viewport_height", 0);
-	info["window_width"] = ProjectSettings::get_singleton()->get_setting("display/window/size/window_width_override", 0);
-	info["window_height"] = ProjectSettings::get_singleton()->get_setting("display/window/size/window_height_override", 0);
+	Array script_paths;
+	_collect_scripts(root_path, script_paths, include_addons);
 
-	info["renderer"] = ProjectSettings::get_singleton()->get_setting("rendering/renderer/rendering_method", "");
+	Array nodes;
+	Dictionary class_map;
 
-	Dictionary autoloads;
-	List<PropertyInfo> props;
-	ProjectSettings::get_singleton()->get_property_list(&props);
-	for (const PropertyInfo &E : props) {
-		String name = E.name;
-		if (name.begins_with("autoload/")) {
-			autoloads[name.substr(9)] = ProjectSettings::get_singleton()->get_setting(name);
+	for (int i = 0; i < script_paths.size(); i++) {
+		String path = script_paths[i];
+		Dictionary info = _parse_script(path, lod);
+		nodes.push_back(info);
+		if (info.has("class_name") && !String(info["class_name"]).is_empty()) {
+			class_map[info["class_name"]] = path;
 		}
 	}
-	info["autoloads"] = autoloads;
 
-	return MCP_SUCCESS(info);
-}
-
-Dictionary JustAMCPProjectTools::_get_filesystem_tree(const Dictionary &p_params) {
-	String path = p_params.has("path") ? String(p_params["path"]) : "res://";
-	String filter = p_params.has("filter") ? String(p_params["filter"]) : "";
-	int max_depth = p_params.has("max_depth") ? int(p_params["max_depth"]) : 10;
-
-	Dictionary tree = _scan_directory(path, filter, max_depth, 0);
-	Dictionary res;
-	res["tree"] = tree;
-	return MCP_SUCCESS(res);
-}
-
-Dictionary JustAMCPProjectTools::_scan_directory(const String &p_path, const String &p_filter, int p_max_depth, int p_depth) {
 	Dictionary result;
-	result["name"] = p_path.get_file();
-	result["path"] = p_path;
-	result["type"] = "directory";
-
-	if (p_depth >= p_max_depth) {
-		return result;
-	}
-
-	Ref<DirAccess> dir = DirAccess::open(p_path);
-	if (dir.is_null()) {
-		return result;
-	}
-
-	Array children;
-	dir->list_dir_begin();
-	String file_name = dir->get_next();
-
-	while (!file_name.is_empty()) {
-		if (file_name.begins_with(".")) {
-			file_name = dir->get_next();
-			continue;
-		}
-
-		String full_path = p_path.path_join(file_name);
-
-		if (dir->current_is_dir()) {
-			children.push_back(_scan_directory(full_path, p_filter, p_max_depth, p_depth + 1));
-		} else {
-			if (p_filter.is_empty() || file_name.match(p_filter)) {
-				Dictionary child;
-				child["name"] = file_name;
-				child["path"] = full_path;
-				child["type"] = "file";
-				children.push_back(child);
-			}
-		}
-		file_name = dir->get_next();
-	}
-	dir->list_dir_end();
-
-	if (!children.is_empty()) {
-		result["children"] = children;
-	}
-
+	result["ok"] = true;
+	result["nodes"] = nodes;
+	result["total_scripts"] = nodes.size();
 	return result;
 }
 
-Dictionary JustAMCPProjectTools::_search_files(const Dictionary &p_params) {
-	if (!p_params.has("query") || String(p_params["query"]).is_empty()) {
-		return MCP_INVALID_PARAMS("Missing required parameter: query");
-	}
-	String query = p_params["query"];
-	String path = p_params.has("path") ? String(p_params["path"]) : "res://";
-	String file_type = p_params.has("file_type") ? String(p_params["file_type"]) : "";
-	int max_results = p_params.has("max_results") ? int(p_params["max_results"]) : 50;
-
-	Array matches;
-	_search_recursive(path, query, file_type, matches, max_results);
-
-	Dictionary res;
-	res["matches"] = matches;
-	res["count"] = matches.size();
-	return MCP_SUCCESS(res);
-}
-
-void JustAMCPProjectTools::_search_recursive(const String &p_path, const String &p_query, const String &p_file_type, Array &r_matches, int p_max_results) {
-	if (r_matches.size() >= p_max_results) {
-		return;
-	}
-
+void JustAMCPProjectTools::_collect_scripts(const String &p_path, Array &r_results, bool p_include_addons) {
 	Ref<DirAccess> dir = DirAccess::open(p_path);
 	if (dir.is_null()) {
 		return;
 	}
 
 	dir->list_dir_begin();
-	String file_name = dir->get_next();
-
-	String query_lower = p_query.to_lower();
-
-	while (!file_name.is_empty() && r_matches.size() < p_max_results) {
-		if (file_name.begins_with(".")) {
-			file_name = dir->get_next();
+	String name = dir->get_next();
+	while (!name.is_empty()) {
+		if (name.begins_with(".")) {
+			name = dir->get_next();
 			continue;
 		}
-
-		String full_path = p_path.path_join(file_name);
-
+		String full_path = p_path.path_join(name);
 		if (dir->current_is_dir()) {
-			_search_recursive(full_path, p_query, p_file_type, r_matches, p_max_results);
-		} else {
-			if (!p_file_type.is_empty() && file_name.get_extension() != p_file_type) {
-				file_name = dir->get_next();
+			if (name == "addons" && !p_include_addons) {
+				name = dir->get_next();
 				continue;
 			}
-
-			if (file_name.to_lower().contains(query_lower)) {
-				r_matches.push_back(full_path);
-			} else if (file_name.match(p_query)) {
-				r_matches.push_back(full_path);
-			}
+			_collect_scripts(full_path, r_results, p_include_addons);
+		} else if (name.ends_with(".gd")) {
+			r_results.push_back(full_path);
 		}
-		file_name = dir->get_next();
+		name = dir->get_next();
 	}
 	dir->list_dir_end();
 }
 
-Dictionary JustAMCPProjectTools::_get_project_settings(const Dictionary &p_params) {
-	String section = p_params.has("section") ? String(p_params["section"]) : "";
-	String key = p_params.has("key") ? String(p_params["key"]) : "";
+Dictionary JustAMCPProjectTools::_parse_script(const String &p_path, int p_lod) {
+	Dictionary info;
+	info["path"] = p_path;
+	if (p_lod == 0) {
+		return info;
+	}
 
-	if (!key.is_empty()) {
-		if (ProjectSettings::get_singleton()->has_setting(key)) {
-			Variant value = ProjectSettings::get_singleton()->get_setting(key);
-			Dictionary res;
-			res["key"] = key;
-			res["value"] = String(value);
-			res["type"] = Variant::get_type_name(value.get_type());
-			return MCP_SUCCESS(res);
-		} else {
-			return MCP_NOT_FOUND("Setting '" + key + "'");
+	Error err;
+	Ref<FileAccess> f = FileAccess::open(p_path, FileAccess::READ, &err);
+	if (f.is_null()) {
+		return info;
+	}
+
+	String content = f->get_as_text();
+	f->close();
+
+	if (p_lod >= 1) {
+		Ref<RegEx> re_class;
+		re_class.instantiate();
+		re_class->compile("^class_name\\s+(\\w+)");
+		Ref<RegEx> re_extends;
+		re_extends.instantiate();
+		re_extends->compile("^extends\\s+(\\w+)");
+
+		Ref<RegExMatch> m_class = re_class->search(content);
+		if (m_class.is_valid()) {
+			info["class_name"] = m_class->get_string(1);
+		}
+
+		Ref<RegExMatch> m_ext = re_extends->search(content);
+		if (m_ext.is_valid()) {
+			info["extends"] = m_ext->get_string(1);
 		}
 	}
 
-	Dictionary settings;
+	if (p_lod >= 2) {
+		// Full parsing (methods, variables)
+		Array methods;
+		Ref<RegEx> re_func;
+		re_func.instantiate();
+		re_func->compile("^func\\s+(\\w+)");
+		TypedArray<RegExMatch> matches = re_func->search_all(content);
+		for (int i = 0; i < matches.size(); i++) {
+			Ref<RegExMatch> m = matches[i];
+			methods.push_back(m->get_string(1));
+		}
+		info["methods"] = methods;
+	}
+
+	return info;
+}
+
+Dictionary JustAMCPProjectTools::map_scenes(const Dictionary &p_args) {
+	String root_path = p_args.get("root", "res://");
+	bool include_addons = p_args.get("include_addons", false);
+
+	if (!root_path.begins_with("res://")) {
+		root_path = "res://" + root_path;
+	}
+
+	Array scene_paths;
+	_collect_scenes(root_path, scene_paths, include_addons);
+
+	Array scenes;
+	for (int i = 0; i < scene_paths.size(); i++) {
+		scenes.push_back(_parse_scene(scene_paths[i]));
+	}
+
+	Dictionary result;
+	result["ok"] = true;
+	result["scenes"] = scenes;
+	result["total_scenes"] = scenes.size();
+	return result;
+}
+
+void JustAMCPProjectTools::_collect_scenes(const String &p_path, Array &r_results, bool p_include_addons) {
+	Ref<DirAccess> dir = DirAccess::open(p_path);
+	if (dir.is_null()) {
+		return;
+	}
+
+	dir->list_dir_begin();
+	String name = dir->get_next();
+	while (!name.is_empty()) {
+		if (name.begins_with(".")) {
+			name = dir->get_next();
+			continue;
+		}
+		String full_path = p_path.path_join(name);
+		if (dir->current_is_dir()) {
+			if (name == "addons" && !p_include_addons) {
+				name = dir->get_next();
+				continue;
+			}
+			_collect_scenes(full_path, r_results, p_include_addons);
+		} else if (name.ends_with(".tscn") || name.ends_with(".scn")) {
+			r_results.push_back(full_path);
+		}
+		name = dir->get_next();
+	}
+	dir->list_dir_end();
+}
+
+Dictionary JustAMCPProjectTools::_parse_scene(const String &p_path) {
+	Dictionary info;
+	info["path"] = p_path;
+	info["filename"] = p_path.get_file();
+
+	// Basic TSCN parsing could be added here similar to godot-mcp
+	return info;
+}
+
+Dictionary JustAMCPProjectTools::list_settings(const Dictionary &p_args) {
+	String category = p_args.get("category", "");
+
+	Array settings;
 	List<PropertyInfo> props;
 	ProjectSettings::get_singleton()->get_property_list(&props);
-	for (const PropertyInfo &E : props) {
-		String name = E.name;
-		if (section.is_empty() || name.begins_with(section)) {
-			settings[name] = String(ProjectSettings::get_singleton()->get_setting(name));
-		}
-	}
-	Dictionary res;
-	res["settings"] = settings;
-	res["count"] = settings.size();
-	return MCP_SUCCESS(res);
-}
 
-Dictionary JustAMCPProjectTools::_set_project_setting(const Dictionary &p_params) {
-	if (!p_params.has("key") || String(p_params["key"]).is_empty()) {
-		return MCP_INVALID_PARAMS("Missing required parameter: key");
-	}
-	String key = p_params["key"];
-	if (!p_params.has("value")) {
-		return MCP_INVALID_PARAMS("Missing required parameter: value");
-	}
-
-	Variant value = p_params["value"];
-
-	if (value.get_type() == Variant::STRING) {
-		String s = value;
-		if (s.begins_with("Vector2(")) {
-			Expression expr;
-			if (expr.parse(s) == OK) {
-				Variant parsed = expr.execute(Array(), nullptr, false, true);
-				if (parsed.get_type() == Variant::VECTOR2) {
-					value = parsed;
-				}
-			}
-		} else if (s == "true") {
-			value = true;
-		} else if (s == "false") {
-			value = false;
-		} else if (s.is_valid_int()) {
-			value = s.to_int();
-		} else if (s.is_valid_float()) {
-			value = s.to_float();
-		}
-	}
-
-	ProjectSettings::get_singleton()->set_setting(key, value);
-	Error err = ProjectSettings::get_singleton()->save();
-	if (err != OK) {
-		return MCP_INTERNAL("Failed to save project settings.");
-	}
-
-	Dictionary res;
-	res["key"] = key;
-	res["value"] = String(ProjectSettings::get_singleton()->get_setting(key));
-	res["saved"] = true;
-	return MCP_SUCCESS(res);
-}
-
-Dictionary JustAMCPProjectTools::_uid_to_project_path(const Dictionary &p_params) {
-	if (!p_params.has("uid") || String(p_params["uid"]).is_empty()) {
-		return MCP_INVALID_PARAMS("Missing required parameter: uid");
-	}
-	String uid_str = p_params["uid"];
-
-	ResourceUID::ID uid = ResourceUID::get_singleton()->text_to_id(uid_str);
-	if (uid == ResourceUID::INVALID_ID) {
-		return MCP_INVALID_PARAMS("Invalid UID format.");
-	}
-
-	if (!ResourceUID::get_singleton()->has_id(uid)) {
-		return MCP_NOT_FOUND("UID");
-	}
-
-	String path = ResourceUID::get_singleton()->get_id_path(uid);
-	Dictionary res;
-	res["uid"] = uid_str;
-	res["path"] = path;
-	return MCP_SUCCESS(res);
-}
-
-Dictionary JustAMCPProjectTools::_project_path_to_uid(const Dictionary &p_params) {
-	if (!p_params.has("path") || String(p_params["path"]).is_empty()) {
-		return MCP_INVALID_PARAMS("Missing required parameter: path");
-	}
-	String path = p_params["path"];
-
-	if (!ResourceLoader::exists(path)) {
-		return MCP_NOT_FOUND("Resource path");
-	}
-
-	ResourceUID::ID uid = ResourceLoader::get_resource_uid(path);
-	if (uid == ResourceUID::INVALID_ID) {
-		return MCP_ERROR(-32001, "No UID assigned.");
-	}
-
-	String uid_str = ResourceUID::get_singleton()->id_to_text(uid);
-	Dictionary res;
-	res["path"] = path;
-	res["uid"] = uid_str;
-	return MCP_SUCCESS(res);
-}
-
-Dictionary JustAMCPProjectTools::_search_in_files(const Dictionary &p_params) {
-	if (!p_params.has("query") || String(p_params["query"]).is_empty()) {
-		return MCP_INVALID_PARAMS("Missing required parameter: query");
-	}
-	String query = p_params["query"];
-
-	String path = p_params.has("path") ? String(p_params["path"]) : "res://";
-	int max_results = p_params.has("max_results") ? int(p_params["max_results"]) : 50;
-	bool use_regex = p_params.has("regex") ? bool(p_params["regex"]) : false;
-	String file_type = p_params.has("file_type") ? String(p_params["file_type"]) : "";
-
-	Ref<RegEx> regex;
-	if (use_regex) {
-		regex.instantiate();
-		Error err = regex->compile(query);
-		if (err != OK) {
-			return MCP_INVALID_PARAMS("Invalid regex pattern");
-		}
-	}
-
-	Array matches;
-	_search_in_files_recursive(path, query, regex, file_type, matches, max_results);
-
-	Dictionary res;
-	res["matches"] = matches;
-	res["count"] = matches.size();
-	res["query"] = query;
-	return MCP_SUCCESS(res);
-}
-
-void JustAMCPProjectTools::_search_in_files_recursive(const String &p_path, const String &p_query, const Ref<RefCounted> &p_regex, const String &p_file_type, Array &r_matches, int p_max_results) {
-	if (r_matches.size() >= p_max_results) {
-		return;
-	}
-
-	Ref<DirAccess> dir = DirAccess::open(p_path);
-	if (dir.is_null()) {
-		return;
-	}
-
-	dir->list_dir_begin();
-	String file_name = dir->get_next();
-
-	Vector<String> text_extensions = { "gd", "tscn", "tres", "cfg", "godot", "gdshader", "md", "txt", "json" };
-
-	while (!file_name.is_empty() && r_matches.size() < p_max_results) {
-		if (file_name.begins_with(".")) {
-			file_name = dir->get_next();
+	for (const PropertyInfo &pi : props) {
+		if (!category.is_empty() && !pi.name.begins_with(category + "/")) {
 			continue;
 		}
 
-		String full_path = p_path.path_join(file_name);
+		Dictionary s;
+		s["path"] = pi.name;
+		s["type"] = _type_to_string(pi.type);
+		s["value"] = _serialize_value(ProjectSettings::get_singleton()->get_setting(pi.name));
+		settings.push_back(s);
+	}
 
-		if (dir->current_is_dir()) {
-			if (file_name != "addons" && file_name != ".godot") {
-				_search_in_files_recursive(full_path, p_query, p_regex, p_file_type, r_matches, p_max_results);
+	Dictionary result;
+	result["ok"] = true;
+	result["settings"] = settings;
+	return result;
+}
+
+Dictionary JustAMCPProjectTools::update_settings(const Dictionary &p_args) {
+	Dictionary settings = p_args.get("settings", Dictionary());
+	Array keys = settings.keys();
+
+	for (int i = 0; i < keys.size(); i++) {
+		String key = keys[i];
+		ProjectSettings::get_singleton()->set_setting(key, settings[key]);
+	}
+
+	ProjectSettings::get_singleton()->save();
+
+	Dictionary result;
+	result["ok"] = true;
+	result["updated_count"] = keys.size();
+	return result;
+}
+
+Dictionary JustAMCPProjectTools::manage_autoloads(const Dictionary &p_args) {
+	String op = p_args.get("operation", "list");
+	ProjectSettings *settings = ProjectSettings::get_singleton();
+
+	if (op == "list") {
+		Array list;
+		List<PropertyInfo> props;
+		settings->get_property_list(&props);
+		for (const PropertyInfo &pi : props) {
+			if (pi.name.begins_with("autoload/")) {
+				String value = settings->get_setting(pi.name);
+				Dictionary al;
+				al["name"] = pi.name.substr(9);
+				al["path"] = value.begins_with("*") ? value.substr(1) : value;
+				al["singleton"] = value.begins_with("*");
+				al["order"] = settings->get_order(pi.name);
+				list.push_back(al);
 			}
-		} else {
-			String ext = file_name.get_extension();
-			if (!p_file_type.is_empty()) {
-				if (ext != p_file_type) {
-					file_name = dir->get_next();
-					continue;
-				}
-			} else if (text_extensions.find(ext) == -1) {
-				file_name = dir->get_next();
-				continue;
-			}
+		}
+		Dictionary res;
+		res["ok"] = true;
+		res["autoloads"] = list;
+		return res;
+	}
 
-			Ref<FileAccess> file = FileAccess::open(full_path, FileAccess::READ);
-			if (file.is_valid()) {
-				String content = file->get_as_text();
-				file->close();
-				Vector<String> lines = content.split("\n");
-				RegEx *regex = Object::cast_to<RegEx>(p_regex.ptr());
+	if (op == "add") {
+		String name = p_args.get("name", "");
+		String path = p_args.get("path", "");
+		bool singleton = p_args.get("singleton", true);
+		if (name.is_empty() || name.contains("/") || name.contains("\\")) {
+			Dictionary res;
+			res["ok"] = false;
+			res["error"] = "Autoload 'name' is required and must not contain path separators.";
+			return res;
+		}
+		if (!path.begins_with("res://") || !FileAccess::exists(path)) {
+			Dictionary res;
+			res["ok"] = false;
+			res["error"] = "Autoload 'path' must be an existing res:// file.";
+			return res;
+		}
+		String setting_name = "autoload/" + name;
+		if (settings->has_setting(setting_name)) {
+			Dictionary res;
+			res["ok"] = false;
+			res["error"] = "Autoload already exists: " + name;
+			return res;
+		}
+		settings->set_setting(setting_name, singleton ? "*" + path : path);
+		if (p_args.has("order")) {
+			settings->set_order(setting_name, p_args["order"]);
+		}
+		Error err = settings->save();
+		Dictionary res;
+		res["ok"] = err == OK;
+		res["operation"] = op;
+		res["name"] = name;
+		res["path"] = path;
+		res["singleton"] = singleton;
+		if (err != OK) {
+			res["error"] = "Failed to save project settings.";
+		}
+		return res;
+	}
 
-				for (int i = 0; i < lines.size(); i++) {
-					if (r_matches.size() >= p_max_results) {
-						break;
-					}
-					String line = lines[i];
-					bool matched = false;
-					if (regex) {
-						matched = regex->search(line).is_valid();
-					} else {
-						matched = line.contains(p_query);
-					}
-					if (matched) {
-						Dictionary match_dict;
-						match_dict["file"] = full_path;
-						match_dict["line"] = i + 1;
-						match_dict["text"] = line.strip_edges();
-						r_matches.push_back(match_dict);
-					}
+	if (op == "remove") {
+		String name = p_args.get("name", "");
+		String setting_name = name.begins_with("autoload/") ? name : "autoload/" + name;
+		if (name.is_empty() || !settings->has_setting(setting_name)) {
+			Dictionary res;
+			res["ok"] = false;
+			res["error"] = "Autoload not found: " + name;
+			return res;
+		}
+		String removed_path = settings->get_setting(setting_name);
+		settings->clear(setting_name);
+		Error err = settings->save();
+		Dictionary res;
+		res["ok"] = err == OK;
+		res["operation"] = op;
+		res["name"] = name;
+		res["path"] = removed_path.begins_with("*") ? removed_path.substr(1) : removed_path;
+		if (err != OK) {
+			res["error"] = "Failed to save project settings.";
+		}
+		return res;
+	}
+
+	if (op == "update") {
+		String name = p_args.get("name", "");
+		String setting_name = name.begins_with("autoload/") ? name : "autoload/" + name;
+		if (name.is_empty() || !settings->has_setting(setting_name)) {
+			Dictionary res;
+			res["ok"] = false;
+			res["error"] = "Autoload not found: " + name;
+			return res;
+		}
+
+		String current_value = settings->get_setting(setting_name);
+		String path = p_args.get("path", current_value.begins_with("*") ? current_value.substr(1) : current_value);
+		bool singleton = p_args.get("singleton", current_value.begins_with("*"));
+		if (!path.begins_with("res://") || !FileAccess::exists(path)) {
+			Dictionary res;
+			res["ok"] = false;
+			res["error"] = "Autoload 'path' must be an existing res:// file.";
+			return res;
+		}
+
+		String new_name = p_args.get("new_name", name);
+		String new_setting_name = new_name.begins_with("autoload/") ? new_name : "autoload/" + new_name;
+		if (new_name.is_empty() || new_name.contains("/") || new_name.contains("\\")) {
+			Dictionary res;
+			res["ok"] = false;
+			res["error"] = "Autoload 'new_name' must not contain path separators.";
+			return res;
+		}
+		if (new_setting_name != setting_name && settings->has_setting(new_setting_name)) {
+			Dictionary res;
+			res["ok"] = false;
+			res["error"] = "Autoload already exists: " + new_name;
+			return res;
+		}
+
+		int order = p_args.get("order", settings->get_order(setting_name));
+		if (new_setting_name != setting_name) {
+			settings->clear(setting_name);
+		}
+		settings->set_setting(new_setting_name, singleton ? "*" + path : path);
+		settings->set_order(new_setting_name, order);
+		Error err = settings->save();
+		Dictionary res;
+		res["ok"] = err == OK;
+		res["operation"] = op;
+		res["name"] = new_name;
+		res["path"] = path;
+		res["singleton"] = singleton;
+		res["order"] = order;
+		if (err != OK) {
+			res["error"] = "Failed to save project settings.";
+		}
+		return res;
+	}
+
+	Dictionary res;
+	res["ok"] = false;
+	res["error"] = "Unknown autoload operation: " + op;
+	return res;
+}
+
+Dictionary JustAMCPProjectTools::get_collision_layers(const Dictionary &p_args) {
+	Dictionary res;
+	res["ok"] = true;
+	Array layers2d;
+	Array layers3d;
+	for (int i = 1; i <= 32; i++) {
+		String name2d = ProjectSettings::get_singleton()->get_setting("layer_names/2d_physics/layer_" + itos(i));
+		if (!name2d.is_empty()) {
+			Dictionary d;
+			d["index"] = i;
+			d["name"] = name2d;
+			layers2d.push_back(d);
+		}
+
+		String name3d = ProjectSettings::get_singleton()->get_setting("layer_names/3d_physics/layer_" + itos(i));
+		if (!name3d.is_empty()) {
+			Dictionary d;
+			d["index"] = i;
+			d["name"] = name3d;
+			layers3d.push_back(d);
+		}
+	}
+	res["layers_2d"] = layers2d;
+	res["layers_3d"] = layers3d;
+	return res;
+}
+
+Dictionary JustAMCPProjectTools::get_input_actions(const Dictionary &p_args) {
+	Dictionary actions;
+	if (!InputMap::get_singleton()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "InputMap singleton is unavailable.";
+		return ret;
+	}
+
+	bool include_builtin = p_args.get("include_builtin", false);
+	List<StringName> action_names = InputMap::get_singleton()->get_actions();
+	for (const StringName &action_name : action_names) {
+		String action = action_name;
+		if (!include_builtin && action.begins_with("ui_")) {
+			continue;
+		}
+		Array events;
+		const List<Ref<InputEvent>> *action_events = InputMap::get_singleton()->action_get_events(action_name);
+		if (action_events) {
+			for (const Ref<InputEvent> &event : *action_events) {
+				if (event.is_valid()) {
+					events.push_back(event->as_text());
 				}
 			}
 		}
-		file_name = dir->get_next();
+		Dictionary info;
+		info["deadzone"] = InputMap::get_singleton()->action_get_deadzone(action_name);
+		info["events"] = events;
+		info["event_count"] = events.size();
+		actions[action] = info;
 	}
-	dir->list_dir_end();
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["actions"] = actions;
+	ret["count"] = actions.size();
+	return ret;
 }
 
-Dictionary JustAMCPProjectTools::_add_autoload(const Dictionary &p_params) {
-	if (!p_params.has("name") || String(p_params["name"]).is_empty()) {
-		return MCP_INVALID_PARAMS("Missing required param: name");
+Dictionary JustAMCPProjectTools::set_input_action(const Dictionary &p_args) {
+	String action = p_args.get("action", "");
+	if (action.is_empty()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "action is required.";
+		return ret;
 	}
-	if (!p_params.has("path") || String(p_params["path"]).is_empty()) {
-		return MCP_INVALID_PARAMS("Missing required param: path");
-	}
-
-	String autoload_name = p_params["name"];
-	String autoload_path = p_params["path"];
-
-	if (!FileAccess::exists(autoload_path)) {
-		return MCP_NOT_FOUND("File '" + autoload_path + "'");
-	}
-
-	String setting_key = "autoload/" + autoload_name;
-	if (ProjectSettings::get_singleton()->has_setting(setting_key)) {
-		Dictionary error_data;
-		error_data["current_value"] = String(ProjectSettings::get_singleton()->get_setting(setting_key));
-		error_data["suggestion"] = "Use remove_autoload first to replace it";
-		return MCP_ERROR_DATA(-32000, "Autoload already exists", error_data);
+	if (!InputMap::get_singleton()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "InputMap singleton is unavailable.";
+		return ret;
 	}
 
-	ProjectSettings::get_singleton()->set_setting(setting_key, "*" + autoload_path);
-	Error err = ProjectSettings::get_singleton()->save();
-	if (err != OK) {
-		return MCP_INTERNAL("Failed to save project settings");
+	float deadzone = p_args.get("deadzone", InputMap::DEFAULT_DEADZONE);
+	if (!InputMap::get_singleton()->has_action(action)) {
+		InputMap::get_singleton()->add_action(action, deadzone);
+	} else {
+		InputMap::get_singleton()->action_set_deadzone(action, deadzone);
+		if (p_args.get("replace_events", false)) {
+			InputMap::get_singleton()->action_erase_events(action);
+		}
 	}
 
-	Dictionary res;
-	res["name"] = autoload_name;
-	res["path"] = autoload_path;
-	res["added"] = true;
-	return MCP_SUCCESS(res);
+	// Persist the caller-provided event descriptors so editor/project settings retain the intended binding data.
+	Dictionary setting;
+	setting["deadzone"] = deadzone;
+	setting["events"] = p_args.get("events", Array());
+	ProjectSettings::get_singleton()->set_setting("input/" + action, setting);
+	ProjectSettings::get_singleton()->save();
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["action"] = action;
+	ret["deadzone"] = deadzone;
+	ret["event_descriptors"] = setting["events"];
+	return ret;
 }
 
-Dictionary JustAMCPProjectTools::_remove_autoload(const Dictionary &p_params) {
-	if (!p_params.has("name") || String(p_params["name"]).is_empty()) {
-		return MCP_INVALID_PARAMS("Missing required param: name");
+Dictionary JustAMCPProjectTools::remove_input_action(const Dictionary &p_args) {
+	String action = p_args.get("action", "");
+	if (action.is_empty()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "action is required.";
+		return ret;
 	}
-	String autoload_name = p_params["name"];
-	String setting_key = "autoload/" + autoload_name;
-
-	if (!ProjectSettings::get_singleton()->has_setting(setting_key)) {
-		return MCP_NOT_FOUND("Autoload '" + autoload_name + "'");
+	if (!InputMap::get_singleton()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "InputMap singleton is unavailable.";
+		return ret;
 	}
-
-	String old_value = String(ProjectSettings::get_singleton()->get_setting(setting_key));
-	ProjectSettings::get_singleton()->clear(setting_key);
-	Error err = ProjectSettings::get_singleton()->save();
-	if (err != OK) {
-		return MCP_INTERNAL("Failed to save project settings");
+	bool existed = InputMap::get_singleton()->has_action(action);
+	if (existed) {
+		InputMap::get_singleton()->erase_action(action);
 	}
+	ProjectSettings::get_singleton()->clear("input/" + action);
+	ProjectSettings::get_singleton()->save();
 
-	Dictionary res;
-	res["name"] = autoload_name;
-	res["old_path"] = old_value;
-	res["removed"] = true;
-	return MCP_SUCCESS(res);
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["action"] = action;
+	ret["removed"] = existed;
+	return ret;
 }
+
+String JustAMCPProjectTools::_type_to_string(int p_type_id) {
+	return Variant::get_type_name(Variant::Type(p_type_id));
+}
+
+Variant JustAMCPProjectTools::_serialize_value(const Variant &p_value) {
+	return p_value; // Simplified for now
+}
+
+JustAMCPProjectTools::JustAMCPProjectTools() {}
+JustAMCPProjectTools::~JustAMCPProjectTools() {}

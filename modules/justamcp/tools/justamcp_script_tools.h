@@ -49,10 +49,21 @@ private:
 	Dictionary _read_script(const Dictionary &p_params);
 	Dictionary _create_script(const Dictionary &p_params);
 	Dictionary _edit_script(const Dictionary &p_params);
-	void _reload_script(const String &p_path);
-	Dictionary _attach_script(const Dictionary &p_params);
-	Dictionary _get_open_scripts(const Dictionary &p_params);
+	Dictionary _delete_script(const Dictionary &p_params);
 	Dictionary _validate_script(const Dictionary &p_params);
+	Dictionary _attach_script(const Dictionary &p_params);
+	Dictionary _detach_script(const Dictionary &p_params);
+	Dictionary _get_open_scripts(const Dictionary &p_params);
+	Dictionary _open_script_in_editor(const Dictionary &p_params);
+	Dictionary _get_script_errors(const Dictionary &p_params);
+	Dictionary _search_in_scripts(const Dictionary &p_params);
+	Dictionary _find_script_symbols(const Dictionary &p_params);
+	Dictionary _patch_script(const Dictionary &p_params);
+	Dictionary _get_script_metadata(const Dictionary &p_params);
+	Dictionary _get_script_references(const Dictionary &p_params);
+
+	void _reload_script(const String &p_path);
+	void _find_references_recursive(const String &p_path, const String &p_script_path, Array &r_references);
 
 protected:
 	static void _bind_methods();
