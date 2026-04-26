@@ -40,6 +40,8 @@
 #include "modules/httpserver/http_server.h"
 #endif
 
+#include "core/string/print_string.h"
+
 class JustAMCPServer : public Node {
 	GDCLASS(JustAMCPServer, Node);
 
@@ -62,8 +64,15 @@ private:
 	void _stop_server();
 	void _on_settings_changed();
 
+	static JustAMCPServer *singleton;
+	Vector<String> engine_logs;
+	Mutex engine_logs_mutex;
+	PrintHandlerList print_handler;
+	static void _print_handler_callback(void *p_user_data, const String &p_string, bool p_error, bool p_rich);
+
 #if defined(MODULE_HTTPSERVER_ENABLED)
 	void _handle_sse_connect(Ref<HTTPRequestContext> p_context, Ref<HTTPResponse> p_response);
+	void _handle_cors_preflight(Ref<HTTPRequestContext> p_context, Ref<HTTPResponse> p_response);
 	void _handle_message_post(Ref<HTTPRequestContext> p_context, Ref<HTTPResponse> p_response);
 	void _handle_mcp_stateless_post(Ref<HTTPRequestContext> p_context, Ref<HTTPResponse> p_response);
 	Dictionary _handle_json_rpc(const String &p_body, Ref<HTTPResponse> p_response);
@@ -86,6 +95,9 @@ public:
 	void send_log_message(const String &p_level, const String &p_logger, const Variant &p_data);
 	void send_progress_notification(const String &p_token, double p_progress, double p_total, const String &p_message);
 	void broadcast_task_status(const String &p_task_id);
+
+	static JustAMCPServer *get_singleton();
+	Vector<String> get_engine_logs();
 
 	bool is_server_started() const { return server_started; }
 

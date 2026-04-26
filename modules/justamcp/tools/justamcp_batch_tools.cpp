@@ -131,6 +131,9 @@ Dictionary JustAMCPBatchTools::execute_tool(const String &p_tool_name, const Dic
 	if (p_tool_name == "batch_set_property") {
 		return _batch_set_property(p_args);
 	}
+	if (p_tool_name == "batch_add_nodes") {
+		return _batch_add_nodes(p_args);
+	}
 	if (p_tool_name == "find_node_references") {
 		return _find_node_references(p_args);
 	}
@@ -300,6 +303,65 @@ void JustAMCPBatchTools::_batch_set_recursive(Node *p_node, Node *p_root, const 
 	for (int i = 0; i < p_node->get_child_count(); i++) {
 		_batch_set_recursive(p_node->get_child(i), p_root, p_type_name, p_property, p_value, r_affected);
 	}
+}
+
+Dictionary JustAMCPBatchTools::_batch_add_nodes(const Dictionary &p_params) {
+	Node *root = _get_edited_root();
+	if (!root) {
+		return MCP_ERROR(-32000, "No scene is currently open");
+	}
+
+	Array node_defs = p_params.get("nodes", Array());
+	if (node_defs.is_empty()) {
+		return MCP_INVALID_PARAMS("Missing param: nodes");
+	}
+
+	Array created;
+	for (int i = 0; i < node_defs.size(); i++) {
+		if (node_defs[i].get_type() != Variant::DICTIONARY) {
+			continue;
+		}
+		Dictionary def = node_defs[i];
+		String type_name = def.get("type", def.get("node_type", "Node"));
+		String parent_path = def.get("parent_path", def.get("parentPath", "."));
+		Node *parent = parent_path == "." ? root : _find_node_by_path(parent_path);
+		if (!parent) {
+			continue;
+		}
+		Object *obj = ClassDB::instantiate(StringName(type_name));
+		Node *node = Object::cast_to<Node>(obj);
+		if (!node) {
+			if (obj) {
+				memdelete(obj);
+			}
+			continue;
+		}
+		node->set_name(def.get("name", type_name));
+		parent->add_child(node);
+		node->set_owner(root);
+		Dictionary properties = def.get("properties", Dictionary());
+		Array keys = properties.keys();
+		for (int j = 0; j < keys.size(); j++) {
+			node->set(keys[j], properties[keys[j]]);
+		}
+
+		Dictionary info;
+		info["name"] = node->get_name();
+		info["type"] = node->get_class();
+		info["path"] = root->get_path_to(node);
+		created.push_back(info);
+	}
+
+#ifdef TOOLS_ENABLED
+	if (!created.is_empty() && EditorInterface::get_singleton()) {
+		EditorInterface::get_singleton()->mark_scene_as_unsaved();
+	}
+#endif
+
+	Dictionary res;
+	res["created"] = created;
+	res["count"] = created.size();
+	return MCP_SUCCESS(res);
 }
 
 Dictionary JustAMCPBatchTools::_find_node_references(const Dictionary &p_params) {

@@ -42,6 +42,7 @@
 #include "scene/2d/physics/ray_cast_2d.h"
 #include "scene/2d/physics/rigid_body_2d.h"
 #include "scene/2d/physics/static_body_2d.h"
+#include "scene/2d/sprite_2d.h"
 #include "scene/3d/physics/area_3d.h"
 #include "scene/3d/physics/character_body_3d.h"
 #include "scene/3d/physics/collision_shape_3d.h"
@@ -49,7 +50,9 @@
 #include "scene/3d/physics/ray_cast_3d.h"
 #include "scene/3d/physics/rigid_body_3d.h"
 #include "scene/3d/physics/static_body_3d.h"
+#include "scene/3d/visual_instance_3d.h"
 #include "scene/gui/control.h"
+#include "scene/gui/texture_rect.h"
 
 #include "scene/resources/2d/capsule_shape_2d.h"
 #include "scene/resources/2d/circle_shape_2d.h"
@@ -158,6 +161,9 @@ Dictionary JustAMCPPhysicsTools::execute_tool(const String &p_tool_name, const D
 	}
 	if (p_tool_name == "set_physics_layers") {
 		return _set_physics_layers(p_args);
+	}
+	if (p_tool_name == "autofit") {
+		return _autofit(p_args);
 	}
 	if (p_tool_name == "get_physics_layers") {
 		return _get_physics_layers(p_args);
@@ -307,6 +313,123 @@ Dictionary JustAMCPPhysicsTools::_setup_collision(const Dictionary &p_params) {
 	res["shape_type"] = shape_class_name;
 	res["dimension"] = dim.to_upper();
 	return MCP_SUCCESS(res);
+}
+
+Dictionary JustAMCPPhysicsTools::_autofit(const Dictionary &p_params) {
+	String node_path = p_params.get("path", "");
+	Node *node = _find_node_by_path(node_path);
+	if (!node) {
+		return MCP_NOT_FOUND(node_path);
+	}
+
+	bool is_3d = node->is_class("CollisionShape3D");
+	bool is_2d = node->is_class("CollisionShape2D");
+	if (!is_3d && !is_2d) {
+		return MCP_INVALID_PARAMS("Node must be CollisionShape2D or 3D");
+	}
+
+	String source_path = p_params.get("source_path", "");
+	Node *source = nullptr;
+	if (source_path.is_empty()) {
+		// Try to find a sibling MeshInstance3D or Sprite2D
+		Node *parent = node->get_parent();
+		if (parent) {
+			for (int i = 0; i < parent->get_child_count(); i++) {
+				Node *c = parent->get_child(i);
+				if (c == node) {
+					continue;
+				}
+				if (is_3d && c->is_class("VisualInstance3D")) {
+					source = c;
+					break;
+				}
+				if (is_2d && (c->is_class("Sprite2D") || c->is_class("TextureRect"))) {
+					source = c;
+					break;
+				}
+			}
+		}
+	} else {
+		source = _find_node_by_path(source_path);
+	}
+
+	if (!source) {
+		return MCP_INVALID_PARAMS("No measurement source found.");
+	}
+
+	String shape_type = p_params.get("shape_type", is_3d ? "box" : "rectangle");
+
+	EditorUndoRedoManager *ur = nullptr;
+#ifdef TOOLS_ENABLED
+	ur = EditorUndoRedoManager::get_singleton();
+#endif
+
+	if (is_3d) {
+		CollisionShape3D *cs = Object::cast_to<CollisionShape3D>(node);
+		VisualInstance3D *vi = Object::cast_to<VisualInstance3D>(source);
+		if (cs && vi) {
+			AABB aabb = vi->get_aabb();
+			Vector3 sz = aabb.size * vi->get_scale();
+			Ref<Shape3D> shape;
+			if (shape_type == "box") {
+				Ref<BoxShape3D> b;
+				b.instantiate();
+				b->set_size(sz);
+				shape = b;
+			} else if (shape_type == "sphere") {
+				Ref<SphereShape3D> s;
+				s.instantiate();
+				s->set_radius(sz.length() * 0.5);
+				shape = s;
+			}
+			if (shape.is_valid()) {
+				if (ur) {
+					ur->create_action("Autofit Shape 3D");
+					ur->add_do_property(cs, "shape", shape);
+					ur->add_undo_property(cs, "shape", cs->get_shape());
+					ur->add_do_reference(shape.ptr());
+					ur->commit_action();
+				} else {
+					cs->set_shape(shape);
+				}
+			}
+		}
+	} else {
+		CollisionShape2D *cs = Object::cast_to<CollisionShape2D>(node);
+		if (cs) {
+			Vector2 sz;
+			if (Sprite2D *s = Object::cast_to<Sprite2D>(source)) {
+				sz = s->get_rect().size * s->get_scale();
+			} else if (Control *c = Object::cast_to<Control>(source)) {
+				sz = c->get_size();
+			}
+			Ref<Shape2D> shape;
+			if (shape_type == "rectangle") {
+				Ref<RectangleShape2D> r;
+				r.instantiate();
+				r->set_size(sz);
+				shape = r;
+			} else if (shape_type == "circle") {
+				Ref<CircleShape2D> c;
+				c.instantiate();
+				c->set_radius(sz.length() * 0.5);
+				shape = c;
+			}
+			if (shape.is_valid()) {
+				if (ur) {
+					ur->create_action("Autofit Shape 2D");
+					ur->add_do_property(cs, "shape", shape);
+					ur->add_undo_property(cs, "shape", cs->get_shape());
+					ur->add_do_reference(shape.ptr());
+					ur->commit_action();
+				} else {
+					cs->set_shape(shape);
+				}
+			}
+		}
+	}
+
+	return MCP_SUCCESS(node_path);
 }
 
 Dictionary JustAMCPPhysicsTools::_set_physics_layers(const Dictionary &p_params) {

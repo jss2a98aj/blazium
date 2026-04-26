@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPResourceProjectFile" inherits="JustAMCPResource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Specific abstraction extracting native wildcard properties parsing explicit paths deeply internally safely!
+		Provides MCP resource access to project files under res://.
 	</brief_description>
 	<description>
-		Inherits [JustAMCPResource] specifying dynamic mappings explicitly capturing `res://{path}` paths securely dumping read boundaries outwardly iteratively internally across native loop frameworks explicitly.
+		A [JustAMCPResource] implementation for [code]res://{path}[/code] URIs. It resolves project-relative file requests and returns file contents using MCP resource response dictionaries.
 	</description>
 	<tutorials>
 		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>

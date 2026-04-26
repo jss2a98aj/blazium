@@ -47,7 +47,11 @@ private:
 	Dictionary _simulate_mouse_click(const Dictionary &p_params);
 	Dictionary _simulate_mouse_move(const Dictionary &p_params);
 	Dictionary _simulate_action(const Dictionary &p_params);
+	Dictionary _simulate_touch(const Dictionary &p_params);
+	Dictionary _simulate_gamepad(const Dictionary &p_args);
 	Dictionary _simulate_sequence(const Dictionary &p_params);
+	Dictionary _input_record(const Dictionary &p_args);
+	Dictionary _input_replay(const Dictionary &p_args);
 
 protected:
 	static void _bind_methods();

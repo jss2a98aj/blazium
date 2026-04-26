@@ -47,6 +47,7 @@ protected:
 	static void _bind_methods();
 
 public:
+	static void register_settings();
 	void set_editor_plugin(JustAMCPEditorPlugin *p_plugin) { editor_plugin = p_plugin; }
 
 	void add_prompt(const Ref<JustAMCPPrompt> &p_prompt);

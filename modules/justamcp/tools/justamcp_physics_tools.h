@@ -45,6 +45,7 @@ private:
 	String _detect_dimension(Node *p_node);
 
 	Dictionary _setup_collision(const Dictionary &p_params);
+	Dictionary _autofit(const Dictionary &p_params);
 	Dictionary _set_physics_layers(const Dictionary &p_params);
 	Dictionary _get_physics_layers(const Dictionary &p_params);
 	Dictionary _add_raycast(const Dictionary &p_params);

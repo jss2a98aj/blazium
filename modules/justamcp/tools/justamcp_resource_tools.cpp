@@ -42,6 +42,7 @@
 #include "editor/editor_file_system.h"
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/2d/sprite_2d.h"
 #include "scene/2d/tile_map.h"
 #include "scene/3d/mesh_instance_3d.h"
@@ -195,17 +196,383 @@ Error JustAMCPResourceTools::_save_scene_root(Node *p_root, const String &p_scen
 	return ResourceSaver::save(packed, p_scene_path);
 }
 
-Dictionary JustAMCPResourceTools::create_resource(const Dictionary &p_args) {
-	String res_path = _ensure_res_path(p_args.get("resourcePath", ""));
-	String resource_type = p_args.get("resourceType", "Resource");
-	if (res_path == "res://") {
+Dictionary JustAMCPResourceTools::get_resource_info(const Dictionary &p_args) {
+	String type = p_args.get("type", "");
+	if (type.is_empty()) {
 		Dictionary ret;
 		ret["ok"] = false;
-		ret["error"] = "resourcePath is required";
+		ret["error"] = "type is required";
 		return ret;
 	}
 
-	Object *_resource_obj = ClassDB::instantiate(StringName(resource_type));
+	if (!ClassDB::class_exists(StringName(type))) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Unknown class: " + type;
+		return ret;
+	}
+
+	List<PropertyInfo> props;
+	ClassDB::get_property_list(StringName(type), &props);
+
+	Array properties;
+	for (const PropertyInfo &E : props) {
+		if (!(E.usage & PROPERTY_USAGE_EDITOR)) {
+			continue;
+		}
+		Dictionary d;
+		d["name"] = E.name;
+		d["type"] = Variant::get_type_name(E.type);
+		properties.push_back(d);
+	}
+
+	Dictionary data;
+	data["type"] = type;
+	data["properties"] = properties;
+	data["can_instantiate"] = ClassDB::can_instantiate(StringName(type));
+	data["parent"] = ClassDB::get_parent_class(StringName(type));
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["data"] = data;
+	return ret;
+}
+
+Dictionary JustAMCPResourceTools::read_resource_file(const Dictionary &p_args) {
+	String res_path = _ensure_res_path(p_args.get("path", p_args.get("resource_path", "")));
+	if (res_path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "path is required.";
+		return ret;
+	}
+	if (!FileAccess::exists(res_path)) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Resource file not found: " + res_path;
+		return ret;
+	}
+
+	Ref<FileAccess> file = FileAccess::open(res_path, FileAccess::READ);
+	if (file.is_valid()) {
+		String content = file->get_as_text();
+		file->close();
+		Dictionary ret;
+		ret["ok"] = true;
+		ret["path"] = res_path;
+		ret["content"] = content;
+		ret["size"] = content.length();
+		return ret;
+	}
+
+	Ref<Resource> resource = ResourceLoader::load(res_path);
+	if (resource.is_valid()) {
+		Dictionary data;
+		data["class"] = resource->get_class();
+		data["path"] = resource->get_path();
+		data["resource_name"] = resource->get_name();
+		Dictionary ret;
+		ret["ok"] = true;
+		ret["path"] = res_path;
+		ret["resource"] = data;
+		return ret;
+	}
+
+	Dictionary ret;
+	ret["ok"] = false;
+	ret["error"] = "Failed to read resource: " + res_path;
+	return ret;
+}
+
+Dictionary JustAMCPResourceTools::edit_resource_file(const Dictionary &p_args) {
+	String res_path = _ensure_res_path(p_args.get("path", p_args.get("resource_path", "")));
+	if (res_path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "path is required.";
+		return ret;
+	}
+	if (!FileAccess::exists(res_path)) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Resource file not found: " + res_path;
+		return ret;
+	}
+
+	if (p_args.has("content")) {
+		Ref<FileAccess> file = FileAccess::open(res_path, FileAccess::WRITE);
+		if (file.is_null()) {
+			Dictionary ret;
+			ret["ok"] = false;
+			ret["error"] = "Failed to open resource for writing.";
+			return ret;
+		}
+		String content = p_args["content"];
+		file->store_string(content);
+		file->close();
+		_refresh_filesystem();
+		Dictionary ret;
+		ret["ok"] = true;
+		ret["path"] = res_path;
+		ret["bytes_written"] = content.utf8().length();
+		return ret;
+	}
+
+	Ref<Resource> resource = ResourceLoader::load(res_path);
+	if (resource.is_null()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Failed to load resource for property editing.";
+		return ret;
+	}
+	if (p_args.has("properties")) {
+		_set_resource_properties(resource, p_args["properties"]);
+	}
+	Error err = ResourceSaver::save(resource, res_path);
+	_refresh_filesystem();
+
+	Dictionary ret;
+	ret["ok"] = err == OK;
+	ret["path"] = res_path;
+	if (err != OK) {
+		ret["error"] = "Failed to save resource: " + itos(err);
+	}
+	return ret;
+}
+
+Dictionary JustAMCPResourceTools::get_resource_preview(const Dictionary &p_args) {
+	String res_path = _ensure_res_path(p_args.get("path", p_args.get("resource_path", "")));
+	Dictionary ret;
+	ret["path"] = res_path;
+	if (res_path == "res://") {
+		ret["ok"] = false;
+		ret["error"] = "path is required.";
+		return ret;
+	}
+	Ref<Resource> resource = ResourceLoader::load(res_path);
+	if (resource.is_null()) {
+		ret["ok"] = false;
+		ret["error"] = "Failed to load resource: " + res_path;
+		return ret;
+	}
+	ret["ok"] = true;
+	ret["class"] = resource->get_class();
+	ret["resource_name"] = resource->get_name();
+	ret["resource_path"] = resource->get_path();
+	ret["description"] = vformat("%s resource at %s", resource->get_class(), res_path);
+	return ret;
+}
+
+void JustAMCPResourceTools::_list_resources_recursive(const String &p_path, const String &p_type_filter, Array &r_results) {
+	Ref<DirAccess> dir = DirAccess::open(p_path);
+	if (dir.is_null()) {
+		return;
+	}
+
+	dir->list_dir_begin();
+	String file_name = dir->get_next();
+	while (!file_name.is_empty()) {
+		if (file_name.begins_with(".")) {
+			file_name = dir->get_next();
+			continue;
+		}
+		String full_path = p_path.path_join(file_name);
+		if (dir->current_is_dir()) {
+			_list_resources_recursive(full_path, p_type_filter, r_results);
+		} else {
+			String ext = file_name.get_extension().to_lower();
+			if (ext == "tres" || ext == "res" || ext == "tscn" || ext == "material" || ext == "mesh") {
+				Dictionary item;
+				item["path"] = full_path;
+				item["extension"] = ext;
+				if (!p_type_filter.is_empty()) {
+					Ref<Resource> resource = ResourceLoader::load(full_path);
+					if (resource.is_null() || !resource->is_class(p_type_filter)) {
+						file_name = dir->get_next();
+						continue;
+					}
+					item["type"] = resource->get_class();
+				}
+				r_results.push_back(item);
+			}
+		}
+		file_name = dir->get_next();
+	}
+	dir->list_dir_end();
+}
+
+Dictionary JustAMCPResourceTools::list_resource_files(const Dictionary &p_args) {
+	String path = _ensure_res_path(p_args.get("path", "res://"));
+	String type_filter = p_args.get("type_filter", "");
+	Array resources;
+	_list_resources_recursive(path, type_filter, resources);
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["resources"] = resources;
+	ret["count"] = resources.size();
+	ret["path"] = path;
+	if (!type_filter.is_empty()) {
+		ret["type_filter"] = type_filter;
+	}
+	return ret;
+}
+
+Dictionary JustAMCPResourceTools::save_resource_as(const Dictionary &p_args) {
+	String source_path = _ensure_res_path(p_args.get("resource_path", p_args.get("source_path", p_args.get("path", ""))));
+	String dest_path = _ensure_res_path(p_args.get("dest_path", p_args.get("save_path", "")));
+	if (source_path == "res://" || dest_path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "resource_path/source_path and dest_path/save_path are required.";
+		return ret;
+	}
+
+	Ref<Resource> resource = ResourceLoader::load(source_path);
+	if (resource.is_null()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Resource not found: " + source_path;
+		return ret;
+	}
+	String dir_path = dest_path.get_base_dir();
+	if (!DirAccess::dir_exists_absolute(dir_path)) {
+		DirAccess::make_dir_recursive_absolute(dir_path);
+	}
+	Error err = ResourceSaver::save(resource, dest_path);
+	_refresh_filesystem();
+
+	Dictionary ret;
+	ret["ok"] = err == OK;
+	ret["source_path"] = source_path;
+	ret["path"] = dest_path;
+	if (err != OK) {
+		ret["error"] = "Failed to save resource: " + itos(err);
+	}
+	return ret;
+}
+
+Dictionary JustAMCPResourceTools::get_resource_dependencies(const Dictionary &p_args) {
+	String path = _ensure_res_path(p_args.get("path", ""));
+	if (path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "path is required.";
+		return ret;
+	}
+
+	List<String> deps;
+	ResourceLoader::get_dependencies(path, &deps);
+	Array dependencies;
+	for (const String &dep : deps) {
+		dependencies.push_back(dep);
+	}
+
+	Dictionary ret;
+	ret["ok"] = true;
+	ret["path"] = path;
+	ret["dependencies"] = dependencies;
+	ret["count"] = dependencies.size();
+	return ret;
+}
+
+Dictionary JustAMCPResourceTools::import_asset_copy(const Dictionary &p_args) {
+	String source_path = p_args.get("source_path", "");
+	String dest_path = _ensure_res_path(p_args.get("dest_path", ""));
+	if (source_path.is_empty() || dest_path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "source_path and dest_path are required.";
+		return ret;
+	}
+	String dir_path = dest_path.get_base_dir();
+	if (!DirAccess::dir_exists_absolute(dir_path)) {
+		DirAccess::make_dir_recursive_absolute(dir_path);
+	}
+	Error err = DirAccess::copy_absolute(source_path, dest_path);
+	_refresh_filesystem();
+
+	Dictionary ret;
+	ret["ok"] = err == OK;
+	ret["source"] = source_path;
+	ret["destination"] = dest_path;
+	if (err != OK) {
+		ret["error"] = "Failed to copy asset: " + itos(err);
+	}
+	return ret;
+}
+
+Dictionary JustAMCPResourceTools::manage_resource_autoloads(const Dictionary &p_args) {
+	String action = p_args.get("action", p_args.get("operation", "list"));
+	ProjectSettings *settings = ProjectSettings::get_singleton();
+	if (action == "list") {
+		Dictionary autoloads;
+		List<PropertyInfo> props;
+		settings->get_property_list(&props);
+		for (const PropertyInfo &prop : props) {
+			if (prop.name.begins_with("autoload/")) {
+				autoloads[prop.name.substr(9)] = settings->get_setting(prop.name);
+			}
+		}
+		Dictionary ret;
+		ret["ok"] = true;
+		ret["autoloads"] = autoloads;
+		return ret;
+	}
+	String name = p_args.get("name", "");
+	String path = p_args.get("path", "");
+	if (name.is_empty()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "name is required.";
+		return ret;
+	}
+	String setting_name = "autoload/" + name;
+	if (action == "add") {
+		if (path.is_empty()) {
+			Dictionary ret;
+			ret["ok"] = false;
+			ret["error"] = "path is required for add.";
+			return ret;
+		}
+		settings->set_setting(setting_name, path.begins_with("*") ? path : "*" + path);
+	} else if (action == "remove") {
+		settings->clear(setting_name);
+	} else {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Unknown autoload action: " + action;
+		return ret;
+	}
+	Error err = settings->save();
+	Dictionary ret;
+	ret["ok"] = err == OK;
+	ret["action"] = action;
+	ret["name"] = name;
+	if (!path.is_empty()) {
+		ret["path"] = path;
+	}
+	if (err != OK) {
+		ret["error"] = "Failed to save project settings.";
+	}
+	return ret;
+}
+
+Dictionary JustAMCPResourceTools::create_resource(const Dictionary &p_args) {
+	String res_type = p_args.get("type", p_args.get("resourceType", "Resource"));
+	String res_path = _ensure_res_path(p_args.get("resource_path", p_args.get("resourcePath", "")));
+	String node_path = p_args.get("path", "");
+	String property = p_args.get("property", "");
+	bool overwrite = p_args.get("overwrite", false);
+
+	if (res_path == "res://" && node_path.is_empty()) {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "Either resource_path or path+property is required.";
+		return ret;
+	}
+
+	Object *_resource_obj = ClassDB::instantiate(StringName(res_type));
 	Ref<Resource> resource = Object::cast_to<Resource>(_resource_obj);
 	if (resource.is_null()) {
 		if (_resource_obj) {
@@ -213,37 +580,60 @@ Dictionary JustAMCPResourceTools::create_resource(const Dictionary &p_args) {
 		}
 		Dictionary ret;
 		ret["ok"] = false;
-		ret["error"] = "Failed to instantiate resource type";
-		ret["resourceType"] = resource_type;
+		ret["error"] = "Failed to instantiate " + res_type;
 		return ret;
-	}
-
-	String script_path = p_args.get("script", "");
-	if (!script_path.is_empty()) {
-		Ref<Script> script_obj = ResourceLoader::load(_ensure_res_path(script_path));
-		if (script_obj.is_valid()) {
-			resource->set_script(script_obj);
-		}
 	}
 
 	if (p_args.has("properties")) {
 		_set_resource_properties(resource, p_args["properties"]);
 	}
 
-	Error save_result = ResourceSaver::save(resource, res_path);
-	if (save_result != OK) {
-		Dictionary ret;
-		ret["ok"] = false;
-		ret["error"] = "Failed to save resource";
-		ret["code"] = save_result;
-		return ret;
+	if (!res_path.is_empty() && res_path != "res://") {
+		if (!overwrite && FileAccess::exists(res_path)) {
+			Dictionary ret;
+			ret["ok"] = false;
+			ret["error"] = "Resource already exists. Pass overwrite=true to replace it.";
+			ret["resource_path"] = res_path;
+			return ret;
+		}
+		Error save_result = ResourceSaver::save(resource, res_path);
+		if (save_result != OK) {
+			Dictionary ret;
+			ret["ok"] = false;
+			ret["error"] = "Save failed";
+			return ret;
+		}
+		_refresh_filesystem();
 	}
 
-	_refresh_filesystem();
+	if (!node_path.is_empty() && !property.is_empty()) {
+		Node *scene_root = nullptr;
+		if (editor_plugin && editor_plugin->get_editor_interface()) {
+			scene_root = editor_plugin->get_editor_interface()->get_edited_scene_root();
+		}
+		if (scene_root) {
+			Node *target = scene_root->get_node_or_null(NodePath(node_path));
+			if (target) {
+				EditorUndoRedoManager *ur = editor_plugin->get_editor_interface()->get_editor_undo_redo();
+				if (ur) {
+					ur->create_action("Create Resource: " + res_type);
+					ur->add_do_property(target, property, resource);
+					ur->add_undo_property(target, property, target->get(property));
+					ur->add_do_reference(resource.ptr());
+					ur->commit_action();
+				} else {
+					target->set(property, resource);
+				}
+			}
+		}
+	}
+
 	Dictionary ret;
 	ret["ok"] = true;
-	ret["resourcePath"] = res_path;
-	ret["resourceType"] = resource_type;
+	ret["type"] = res_type;
+	if (!res_path.is_empty()) {
+		ret["resource_path"] = res_path;
+	}
 	return ret;
 }
 
@@ -723,6 +1113,32 @@ Dictionary JustAMCPResourceTools::apply_theme_shader(const Dictionary &p_args) {
 	ret["ok"] = true;
 	ret["theme"] = theme;
 	ret["effect"] = effect;
+	return ret;
+}
+
+Dictionary JustAMCPResourceTools::resource_import_asset(const Dictionary &p_args) {
+	String res_path = _ensure_res_path(p_args.get("path", ""));
+	if (res_path == "res://") {
+		Dictionary ret;
+		ret["ok"] = false;
+		ret["error"] = "path is required for import_asset.";
+		return ret;
+	}
+
+	if (editor_plugin && editor_plugin->get_editor_interface() && EditorFileSystem::get_singleton()) {
+		Vector<String> files;
+		files.push_back(res_path);
+		EditorFileSystem::get_singleton()->reimport_files(files);
+		Dictionary ret;
+		ret["ok"] = true;
+		ret["path"] = res_path;
+		ret["message"] = "Reimport triggered asynchronously.";
+		return ret;
+	}
+
+	Dictionary ret;
+	ret["ok"] = false;
+	ret["error"] = "Editor file system or interface unavailable.";
 	return ret;
 }
 

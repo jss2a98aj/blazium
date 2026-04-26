@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPTaskManager" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Manages asynchronous background execution tasks securely mapping lifecycle boundaries natively mapping back via the MCP.
+		Tracks long-running MCP tasks and their results.
 	</brief_description>
 	<description>
-		Dynamically routes, isolates, and terminates background tasks asynchronously globally. It handles basic routing safely avoiding blocking UI components strictly natively mapping hooks.
+		[JustAMCPTaskManager] stores task metadata for MCP operations that complete asynchronously. It creates task handles, reports status, stores completed result content, and records cancellation or failure state.
 		[codeblock]
 		var manager = JustAMCPTaskManager.new()
-		manager.create_task("task_001", 100000)
+		var created = manager.create_task("task_001", 60000)
+		print(created["task"]["status"])
 
-		var gt = manager.get_task("task_001")
-		print(gt["status"]) # working
-
-		manager.complete_task("task_001", {"content": [{"type": "text", "text": "Task Completed"}]})
-
-		var cx = manager.create_task("task_cancel", 900)
-		manager.cancel_task("task_cancel")
+		manager.complete_task("task_001", {
+		    "content": [{"type": "text", "text": "Task completed"}],
+		})
+		print(manager.get_task_result("task_001"))
 		[/codeblock]
 	</description>
 	<tutorials>
@@ -25,7 +23,7 @@
 			<return type="Dictionary" />
 			<param index="0" name="task_id" type="String" />
 			<description>
-				Safely issues a cancellation token targeting an active task id implicitly mapping cancellation flows explicitly dynamically updating state!
+				Marks an active task as cancelled unless it has already completed or failed, then returns the updated task dictionary.
 			</description>
 		</method>
 		<method name="complete_task">
@@ -33,7 +31,7 @@
 			<param index="0" name="task_id" type="String" />
 			<param index="1" name="result" type="Dictionary" />
 			<description>
-				Mutates an active job bounds globally assigning completed result contents mapping implicitly effectively.
+				Marks an existing task as completed and stores the [code]content[/code] array from [param result] for [method get_task_result].
 			</description>
 		</method>
 		<method name="create_task">
@@ -41,7 +39,7 @@
 			<param index="0" name="task_id" type="String" />
 			<param index="1" name="ttl" type="int" default="60000" />
 			<description>
-				Instantiates an active job definition explicitly safely generating standard initialization state maps effectively mapped natively.
+				Creates a task entry with status [code]working[/code], a time-to-live in milliseconds, and default polling metadata. Returns an error if the task id already exists.
 			</description>
 		</method>
 		<method name="fail_task">
@@ -49,28 +47,28 @@
 			<param index="0" name="task_id" type="String" />
 			<param index="1" name="error" type="String" />
 			<description>
-				Forcefully flags existing jobs explicitly generating failure trace strings cleanly across pipelines.
+				Marks an existing task as failed and stores [param error] as the task status message.
 			</description>
 		</method>
 		<method name="get_task">
 			<return type="Dictionary" />
 			<param index="0" name="task_id" type="String" />
 			<description>
-				Identifies and resolves active tracking meta mappings fetching live status dynamically globally.
+				Returns the current metadata for [param task_id], or an error dictionary if the task is unknown.
 			</description>
 		</method>
 		<method name="get_task_result">
 			<return type="Dictionary" />
 			<param index="0" name="task_id" type="String" />
 			<description>
-				Extracts the explicitly passed result block cleanly throwing errors when tasks are actively actively working safely.
+				Returns the stored result content for a completed task. Unknown, working, cancelled, or failed tasks return an error dictionary.
 			</description>
 		</method>
 		<method name="list_tasks">
 			<return type="Dictionary" />
 			<param index="0" name="cursor" type="String" default="&quot;&quot;" />
 			<description>
-				Returns all mapped jobs handling tracking structures globally directly handling arrays natively.
+				Returns all tracked task dictionaries. [param cursor] is accepted for protocol compatibility.
 			</description>
 		</method>
 	</methods>

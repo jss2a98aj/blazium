@@ -31,6 +31,8 @@
 
 #include "justamcp_editor_plugin.h"
 #include "justamcp_server.h"
+#include "tools/justamcp_prompt_executor.h"
+#include "tools/justamcp_resource_executor.h"
 #include "tools/justamcp_tool_executor.h"
 
 #include "core/config/project_settings.h"
@@ -38,6 +40,7 @@
 #include "editor/editor_settings.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/dialogs.h"
+#include "scene/gui/grid_container.h"
 #include "scene/gui/text_edit.h"
 #include "servers/display_server.h"
 
@@ -47,11 +50,37 @@ void JustAMCPConfigUI::_bind_methods() {
 }
 
 void JustAMCPConfigUI::_update_config() {
-	text_edit->set_text(JustAMCPEditorPlugin::get_mcp_config_json());
+	text_edit_antigravity->set_text(JustAMCPEditorPlugin::get_mcp_config_json(false));
+	text_edit_cursor->set_text(JustAMCPEditorPlugin::get_mcp_config_json(true));
+
+	JustAMCPToolExecutor exec;
+	int total_tools = exec.get_tool_schemas(false, true).size();
+	int active_tools = exec.get_tool_schemas(false, false).size();
+
+	JustAMCPResourceExecutor res_exec;
+	int total_res = res_exec.list_resources().get("resources", Array()).operator Array().size();
+
+	JustAMCPPromptExecutor prmpt_exec;
+	int total_prompts = prmpt_exec.list_prompts().get("prompts", Array()).operator Array().size();
+
+	if (stats_tools_label) {
+		stats_tools_label->set_text("Tools (Active): " + itos(active_tools) + " / " + itos(total_tools));
+	}
+	if (stats_resources_label) {
+		stats_resources_label->set_text("Resources: " + itos(total_res));
+	}
+	if (stats_prompts_label) {
+		stats_prompts_label->set_text("Prompts: " + itos(total_prompts));
+	}
 }
 
 void JustAMCPConfigUI::_copy_pressed() {
-	DisplayServer::get_singleton()->clipboard_set(text_edit->get_text());
+	int current_tab = tab_container->get_current_tab();
+	if (current_tab == 0) {
+		DisplayServer::get_singleton()->clipboard_set(text_edit_antigravity->get_text());
+	} else {
+		DisplayServer::get_singleton()->clipboard_set(text_edit_cursor->get_text());
+	}
 }
 
 void JustAMCPConfigUI::_on_settings_changed() {
@@ -82,13 +111,41 @@ JustAMCPConfigUI::JustAMCPConfigUI() {
 	add_child(vbox);
 
 	Label *info_label = memnew(Label);
-	info_label->set_text("Default MCP Config (Add to Cursor/Claude mcp_config.json):");
+	info_label->set_text("Default MCP Config (Add to your IDE mcp_config.json):");
 	vbox->add_child(info_label);
 
-	text_edit = memnew(TextEdit);
-	text_edit->set_custom_minimum_size(Size2(0, 200));
-	text_edit->set_editable(false);
-	vbox->add_child(text_edit);
+	GridContainer *stats_grid = memnew(GridContainer);
+	stats_grid->set_columns(3);
+	stats_grid->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	vbox->add_child(stats_grid);
+
+	stats_tools_label = memnew(Label);
+	stats_tools_label->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	stats_grid->add_child(stats_tools_label);
+
+	stats_resources_label = memnew(Label);
+	stats_resources_label->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	stats_grid->add_child(stats_resources_label);
+
+	stats_prompts_label = memnew(Label);
+	stats_prompts_label->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	stats_grid->add_child(stats_prompts_label);
+
+	tab_container = memnew(TabContainer);
+	tab_container->set_v_size_flags(Control::SIZE_EXPAND_FILL);
+	vbox->add_child(tab_container);
+
+	text_edit_antigravity = memnew(TextEdit);
+	text_edit_antigravity->set_name("AntiGravity");
+	text_edit_antigravity->set_custom_minimum_size(Size2(0, 200));
+	text_edit_antigravity->set_editable(false);
+	tab_container->add_child(text_edit_antigravity);
+
+	text_edit_cursor = memnew(TextEdit);
+	text_edit_cursor->set_name("Cursor");
+	text_edit_cursor->set_custom_minimum_size(Size2(0, 200));
+	text_edit_cursor->set_editable(false);
+	tab_container->add_child(text_edit_cursor);
 
 	copy_button = memnew(Button);
 	copy_button->set_text("Copy Config to Clipboard");
@@ -110,6 +167,73 @@ bool JustAMCPConfigInspectorPlugin::parse_property(Object *p_object, const Varia
 		add_custom_control(ui);
 		return true; // Stop default property editor rendering mapping
 	}
+
+	String found_path = "";
+	String prop_value = "";
+
+	JustAMCPPromptExecutor p_exec;
+	Array prompts = p_exec.list_prompts().get("prompts", Array());
+	for (int i = 0; i < prompts.size(); i++) {
+		Dictionary p = prompts[i];
+		String n = p["name"];
+		String d = p["description"];
+		if (p_path == n || p_path.ends_with("prompts/" + n)) {
+			found_path = "blazium/justamcp/prompts/" + n;
+			prop_value = d;
+			break;
+		}
+	}
+
+	if (found_path.is_empty()) {
+		JustAMCPResourceExecutor r_exec;
+		Array res = r_exec.list_resources().get("resources", Array());
+		for (int i = 0; i < res.size(); i++) {
+			Dictionary r = res[i];
+			String n = r["name"];
+			String d = r["description"];
+			if (p_path == n || p_path.ends_with("resources/" + n)) {
+				found_path = "blazium/justamcp/resources/" + n;
+				prop_value = d;
+				break;
+			}
+		}
+
+		if (found_path.is_empty()) {
+			Array tmpl = r_exec.list_resource_templates().get("resourceTemplates", Array());
+			for (int i = 0; i < tmpl.size(); i++) {
+				Dictionary r = tmpl[i];
+				String n = r["name"];
+				String d = r["description"];
+				if (p_path == n || p_path.ends_with("resources/" + n)) {
+					found_path = "blazium/justamcp/resources/" + n;
+					prop_value = d;
+					break;
+				}
+			}
+		}
+	}
+
+	if (!found_path.is_empty()) {
+		VBoxContainer *vbox = memnew(VBoxContainer);
+		vbox->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+
+		Label *lbl = memnew(Label);
+		lbl->set_text(found_path.get_file());
+		vbox->add_child(lbl);
+
+		TextEdit *text_edit = memnew(TextEdit);
+		text_edit->set_editable(false);
+		text_edit->set_text(prop_value);
+		text_edit->set_custom_minimum_size(Size2(0, 60));
+		text_edit->set_v_size_flags(Control::SIZE_EXPAND_FILL);
+		text_edit->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+		text_edit->add_theme_color_override("font_readonly_color", Color(0.8, 0.8, 0.8));
+		vbox->add_child(text_edit);
+
+		add_custom_control(vbox);
+		return true;
+	}
+
 	return false;
 }
 
@@ -201,15 +325,26 @@ void JustAMCPEditorPlugin::_show_configuration_dialog() {
 	dialog->add_child(vbox);
 
 	Label *info_label = memnew(Label);
-	info_label->set_text("Add the following JSON to your Cursor/Claude mcp_config.json:");
+	info_label->set_text("Add the following JSON to your IDE mcp_config.json:");
 	vbox->add_child(info_label);
 
-	TextEdit *text_edit = memnew(TextEdit);
-	text_edit->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	text_edit->set_editable(false);
+	TabContainer *tab_container = memnew(TabContainer);
+	tab_container->set_v_size_flags(Control::SIZE_EXPAND_FILL);
+	vbox->add_child(tab_container);
 
-	text_edit->set_text(JustAMCPEditorPlugin::get_mcp_config_json());
-	vbox->add_child(text_edit);
+	TextEdit *text_edit_ag = memnew(TextEdit);
+	text_edit_ag->set_name("AntiGravity");
+	text_edit_ag->set_v_size_flags(Control::SIZE_EXPAND_FILL);
+	text_edit_ag->set_editable(false);
+	text_edit_ag->set_text(JustAMCPEditorPlugin::get_mcp_config_json(false));
+	tab_container->add_child(text_edit_ag);
+
+	TextEdit *text_edit_cursor = memnew(TextEdit);
+	text_edit_cursor->set_name("Cursor");
+	text_edit_cursor->set_v_size_flags(Control::SIZE_EXPAND_FILL);
+	text_edit_cursor->set_editable(false);
+	text_edit_cursor->set_text(JustAMCPEditorPlugin::get_mcp_config_json(true));
+	tab_container->add_child(text_edit_cursor);
 
 	EditorNode::get_singleton()->get_gui_base()->add_child(dialog);
 	dialog->popup_centered();
@@ -235,7 +370,7 @@ void JustAMCPEditorPlugin::_on_tool_requested(const Variant &p_request_id, const
 	}
 }
 
-String JustAMCPEditorPlugin::get_mcp_config_json() {
+String JustAMCPEditorPlugin::get_mcp_config_json(bool p_is_cursor) {
 	int port = 6506;
 	bool oauth_enabled = false;
 	String client_id = "";
@@ -279,7 +414,11 @@ String JustAMCPEditorPlugin::get_mcp_config_json() {
 	String json_config = "{\n";
 	json_config += "  \"mcpServers\": {\n";
 	json_config += "    \"blazium-mcp\": {\n";
-	json_config += "      \"serverUrl\": \"http://127.0.0.1:" + itos(port) + "/mcp\"";
+	if (p_is_cursor) {
+		json_config += "      \"url\": \"http://127.0.0.1:" + itos(port) + "/sse\"";
+	} else {
+		json_config += "      \"serverUrl\": \"http://127.0.0.1:" + itos(port) + "/mcp\"";
+	}
 
 	if (oauth_enabled && (!client_id.is_empty() || !client_secret.is_empty())) {
 		json_config += ",\n      \"oauth\": {\n";

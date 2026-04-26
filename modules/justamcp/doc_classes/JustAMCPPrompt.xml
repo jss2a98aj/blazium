@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPPrompt" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Abstract virtual class mapping native extensible generic MCP Prompt definitions.
+		Base class for prompts exposed through the MCP prompt API.
 	</brief_description>
 	<description>
-		This core base abstraction establishes the standardized interface needed to dynamically inject prompts directly into the Model Context Protocol bindings natively on the server.
-		By inheriting from [JustAMCPPrompt], classes seamlessly integrate over iterative registries using [method JustAMCPPromptExecutor.add_prompt].
+		[JustAMCPPrompt] defines the prompt interface used by [JustAMCPPromptExecutor]. Subclasses provide a prompt schema, render prompt messages from arguments, and optionally provide completions for prompt argument values.
+		[codeblock]
+		var prompt = JustAMCPPromptBlaziumContext.new()
+		print(prompt.get_name())
+		print(prompt.get_prompt())
+		[/codeblock]
 	</description>
 	<tutorials>
 		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>
@@ -15,26 +19,26 @@
 			<return type="Dictionary" />
 			<param index="0" name="argument" type="Dictionary" />
 			<description>
-				Processes any auto-complete queries requested iteratively directly by the MCP pipeline natively mapping argument fragments matching schema keys dynamically across execution loops.
+				Returns completion suggestions for one prompt argument. The [param argument] dictionary follows the MCP completion request shape and usually contains the argument name and current value.
 			</description>
 		</method>
 		<method name="get_messages">
 			<return type="Dictionary" />
 			<param index="0" name="args" type="Dictionary" />
 			<description>
-				Executes the actual logic rendering out dynamically formatted textual block bindings or templates specifically constructed based on passed argument constraints dynamically mapped via contexts safely.
+				Renders this prompt with [param args] and returns an MCP-compatible prompt result dictionary containing message content or an error.
 			</description>
 		</method>
 		<method name="get_name" qualifiers="const">
 			<return type="String" />
 			<description>
-				Returns the strict system name defining this exact prompt externally safely explicitly routing lookups.
+				Returns the stable prompt name used by [method JustAMCPPromptExecutor.get_prompt] and MCP prompt references.
 			</description>
 		</method>
 		<method name="get_prompt" qualifiers="const">
 			<return type="Dictionary" />
 			<description>
-				Returns the raw dictionary structural definitions parsing constraints securely spanning name, description, and list boundaries externally routing mappings across the graph securely!
+				Returns this prompt's MCP schema dictionary, including its name, description, and accepted arguments.
 			</description>
 		</method>
 	</methods>

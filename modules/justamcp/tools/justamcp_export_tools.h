@@ -31,6 +31,7 @@
 
 #include "core/object/class_db.h"
 #include "core/object/object.h"
+#include "core/templates/list.h"
 #include "editor/plugins/editor_plugin.h"
 #include "scene/main/node.h"
 
@@ -43,6 +44,12 @@ private:
 	Dictionary _list_export_presets(const Dictionary &p_params);
 	Dictionary _export_project(const Dictionary &p_params);
 	Dictionary _get_export_info(const Dictionary &p_params);
+	Dictionary _list_android_devices(const Dictionary &p_params);
+	Dictionary _get_android_preset_info(const Dictionary &p_params);
+	Dictionary _deploy_to_android(const Dictionary &p_params);
+	String _resolve_adb_path() const;
+	Dictionary _run_blocking(const String &p_command, const List<String> &p_args) const;
+	Dictionary _find_android_preset(const String &p_preset_name, int p_preset_index) const;
 
 protected:
 	static void _bind_methods();

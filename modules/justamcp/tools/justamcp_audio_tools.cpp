@@ -134,7 +134,7 @@ Dictionary JustAMCPAudioTools::execute_tool(const String &p_tool_name, const Dic
 	if (p_tool_name == "add_audio_player") {
 		return _add_audio_player(p_args);
 	}
-	if (p_tool_name == "get_audio_info") {
+	if (p_tool_name == "audio_get_players_info") {
 		return _get_audio_info(p_args);
 	}
 

@@ -441,6 +441,10 @@
 		<member name="audio/video/video_delay_compensation_ms" type="int" setter="" getter="" default="0">
 			Setting to hardcode audio delay when playing video. Best to leave this unchanged unless you know what you are doing.
 		</member>
+		<member name="blazium/justamcp/disable_game_mcp" type="bool" setter="" getter="" default="false">
+		</member>
+		<member name="blazium/justamcp/game_control_enabled" type="bool" setter="" getter="" default="false">
+		</member>
 		<member name="collada/use_ambient" type="bool" setter="" getter="" default="false">
 			If [code]true[/code], ambient lights will be imported from COLLADA models as [DirectionalLight3D]. If [code]false[/code], ambient lights will be ignored.
 		</member>

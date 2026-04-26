@@ -132,14 +132,41 @@ Dictionary JustAMCPScriptTools::execute_tool(const String &p_tool_name, const Di
 	if (p_tool_name == "edit_script") {
 		return _edit_script(p_args);
 	}
+	if (p_tool_name == "delete_script") {
+		return _delete_script(p_args);
+	}
 	if (p_tool_name == "attach_script") {
 		return _attach_script(p_args);
+	}
+	if (p_tool_name == "detach_script") {
+		return _detach_script(p_args);
 	}
 	if (p_tool_name == "get_open_scripts") {
 		return _get_open_scripts(p_args);
 	}
+	if (p_tool_name == "open_script_in_editor") {
+		return _open_script_in_editor(p_args);
+	}
+	if (p_tool_name == "get_script_errors") {
+		return _get_script_errors(p_args);
+	}
+	if (p_tool_name == "search_in_scripts") {
+		return _search_in_scripts(p_args);
+	}
+	if (p_tool_name == "find_script_symbols") {
+		return _find_script_symbols(p_args);
+	}
+	if (p_tool_name == "patch_script") {
+		return _patch_script(p_args);
+	}
 	if (p_tool_name == "validate_script") {
 		return _validate_script(p_args);
+	}
+	if (p_tool_name == "get_script_metadata") {
+		return _get_script_metadata(p_args);
+	}
+	if (p_tool_name == "get_script_references") {
+		return _get_script_references(p_args);
 	}
 
 	Dictionary err;
@@ -363,6 +390,29 @@ Dictionary JustAMCPScriptTools::_edit_script(const Dictionary &p_params) {
 	return MCP_SUCCESS(res);
 }
 
+Dictionary JustAMCPScriptTools::_delete_script(const Dictionary &p_params) {
+	if (!p_params.has("path")) {
+		return MCP_INVALID_PARAMS("Missing param: path");
+	}
+	String path = p_params["path"];
+	if (!FileAccess::exists(path)) {
+		return MCP_NOT_FOUND("Script '" + path + "'");
+	}
+	Error err = DirAccess::remove_absolute(path);
+	if (err != OK) {
+		return MCP_INTERNAL("Failed to delete script: " + itos(err));
+	}
+#ifdef TOOLS_ENABLED
+	if (EditorFileSystem::get_singleton()) {
+		EditorFileSystem::get_singleton()->scan();
+	}
+#endif
+	Dictionary res;
+	res["path"] = path;
+	res["deleted"] = true;
+	return MCP_SUCCESS(res);
+}
+
 void JustAMCPScriptTools::_reload_script(const String &p_path) {
 #ifdef TOOLS_ENABLED
 	if (EditorFileSystem::get_singleton()) {
@@ -420,6 +470,26 @@ Dictionary JustAMCPScriptTools::_attach_script(const Dictionary &p_params) {
 	return MCP_SUCCESS(res);
 }
 
+Dictionary JustAMCPScriptTools::_detach_script(const Dictionary &p_params) {
+	if (!p_params.has("node_path")) {
+		return MCP_INVALID_PARAMS("Missing param: node_path");
+	}
+	String node_path = p_params["node_path"];
+	Node *root = _get_edited_root();
+	if (!root) {
+		return MCP_ERROR(-32000, "No scene is currently open");
+	}
+	Node *node = _find_node_by_path(node_path);
+	if (!node) {
+		return MCP_NOT_FOUND("Node '" + node_path + "'");
+	}
+	node->set_script(Variant());
+	Dictionary res;
+	res["node_path"] = root->get_path_to(node);
+	res["detached"] = true;
+	return MCP_SUCCESS(res);
+}
+
 Dictionary JustAMCPScriptTools::_get_open_scripts(const Dictionary &p_params) {
 	Array open_scripts;
 #ifdef TOOLS_ENABLED
@@ -439,6 +509,197 @@ Dictionary JustAMCPScriptTools::_get_open_scripts(const Dictionary &p_params) {
 	Dictionary res;
 	res["scripts"] = open_scripts;
 	res["count"] = open_scripts.size();
+	return MCP_SUCCESS(res);
+}
+
+Dictionary JustAMCPScriptTools::_open_script_in_editor(const Dictionary &p_params) {
+	if (!p_params.has("path")) {
+		return MCP_INVALID_PARAMS("Missing param: path");
+	}
+	String path = p_params["path"];
+	int line = p_params.has("line") ? int(p_params["line"]) : -1;
+	if (!FileAccess::exists(path)) {
+		return MCP_NOT_FOUND("Script '" + path + "'");
+	}
+#ifdef TOOLS_ENABLED
+	Ref<Script> loaded_script = ResourceLoader::load(path);
+	if (loaded_script.is_valid() && EditorInterface::get_singleton()) {
+		EditorInterface::get_singleton()->edit_script(loaded_script, line);
+		Dictionary res;
+		res["path"] = path;
+		res["line"] = line;
+		res["opened"] = true;
+		return MCP_SUCCESS(res);
+	}
+#endif
+	return MCP_INTERNAL("Script editor is unavailable or script failed to load.");
+}
+
+Dictionary JustAMCPScriptTools::_get_script_errors(const Dictionary &p_params) {
+	Dictionary validation = _validate_script(p_params);
+	Dictionary res;
+	res["errors"] = Array();
+	res["message"] = "Use validate_script for compile status and editor/LSP diagnostics for detailed errors.";
+	if (validation.has("result")) {
+		Dictionary result = validation["result"];
+		if (result.has("valid") && !bool(result["valid"])) {
+			Array errors;
+			Dictionary error;
+			error["path"] = result.get("path", p_params.get("path", ""));
+			error["message"] = result.get("message", "Compilation failed.");
+			error["error_code"] = result.get("error_code", 0);
+			errors.push_back(error);
+			res["errors"] = errors;
+		}
+	}
+	return MCP_SUCCESS(res);
+}
+
+Dictionary JustAMCPScriptTools::_search_in_scripts(const Dictionary &p_params) {
+	if (!p_params.has("pattern")) {
+		return MCP_INVALID_PARAMS("Missing param: pattern");
+	}
+	String pattern = p_params["pattern"];
+	String path = p_params.has("path") ? String(p_params["path"]) : "res://";
+	Array scripts;
+	_find_scripts(path, true, scripts);
+	Array matches;
+	for (int i = 0; i < scripts.size(); i++) {
+		Dictionary info = scripts[i];
+		String script_path = info["path"];
+		Ref<FileAccess> file = FileAccess::open(script_path, FileAccess::READ);
+		if (file.is_null()) {
+			continue;
+		}
+		String content = file->get_as_text();
+		file->close();
+		Vector<String> lines = content.split("\n");
+		for (int j = 0; j < lines.size(); j++) {
+			if (lines[j].contains(pattern)) {
+				Dictionary match;
+				match["file"] = script_path;
+				match["line"] = j + 1;
+				match["text"] = lines[j].strip_edges();
+				matches.push_back(match);
+			}
+		}
+	}
+
+	Dictionary res;
+	res["pattern"] = pattern;
+	res["matches"] = matches;
+	res["count"] = matches.size();
+	return MCP_SUCCESS(res);
+}
+
+Dictionary JustAMCPScriptTools::_find_script_symbols(const Dictionary &p_params) {
+	String path = p_params.has("path") ? String(p_params["path"]) : "";
+	Array scripts;
+	if (path.is_empty()) {
+		_find_scripts("res://", true, scripts);
+	} else {
+		Dictionary info;
+		info["path"] = path;
+		scripts.push_back(info);
+	}
+
+	Array symbols;
+	Ref<RegEx> regex;
+	regex.instantiate();
+	regex->compile("^\\s*(class_name|extends|signal|func|var|const|enum)\\s+([A-Za-z_][A-Za-z0-9_]*)?");
+	for (int i = 0; i < scripts.size(); i++) {
+		Dictionary script_info = scripts[i];
+		String script_path = script_info.get("path", "");
+		if (!FileAccess::exists(script_path)) {
+			continue;
+		}
+		Ref<FileAccess> file = FileAccess::open(script_path, FileAccess::READ);
+		if (file.is_null()) {
+			continue;
+		}
+		Vector<String> lines = file->get_as_text().split("\n");
+		file->close();
+		for (int line_idx = 0; line_idx < lines.size(); line_idx++) {
+			Ref<RegExMatch> match = regex->search(lines[line_idx]);
+			if (match.is_valid()) {
+				Dictionary symbol;
+				symbol["file"] = script_path;
+				symbol["line"] = line_idx + 1;
+				symbol["kind"] = match->get_string(1);
+				symbol["name"] = match->get_string(2);
+				symbol["text"] = lines[line_idx].strip_edges();
+				symbols.push_back(symbol);
+			}
+		}
+	}
+
+	Dictionary res;
+	res["symbols"] = symbols;
+	res["count"] = symbols.size();
+	return MCP_SUCCESS(res);
+}
+
+Dictionary JustAMCPScriptTools::_patch_script(const Dictionary &p_params) {
+	if (!p_params.has("path")) {
+		return MCP_INVALID_PARAMS("Missing param: path");
+	}
+	String path = p_params["path"];
+	if (!FileAccess::exists(path)) {
+		return MCP_NOT_FOUND("Script '" + path + "'");
+	}
+
+	Ref<FileAccess> file = FileAccess::open(path, FileAccess::READ);
+	if (file.is_null()) {
+		return MCP_INTERNAL("Cannot read script");
+	}
+	String content = file->get_as_text();
+	file->close();
+
+	String anchor = p_params.get("anchor", p_params.get("search", ""));
+	String replacement = p_params.get("replacement", p_params.get("replace", ""));
+	String insert_before = p_params.get("insert_before", "");
+	String insert_after = p_params.get("insert_after", "");
+	bool changed = false;
+
+	if (!anchor.is_empty()) {
+		if (content.contains(anchor)) {
+			content = content.replace(anchor, replacement);
+			changed = true;
+		} else {
+			return MCP_NOT_FOUND("Anchor");
+		}
+	} else if (!insert_before.is_empty()) {
+		int pos = content.find(insert_before);
+		if (pos < 0) {
+			return MCP_NOT_FOUND("insert_before anchor");
+		}
+		content = content.substr(0, pos) + replacement + content.substr(pos);
+		changed = true;
+	} else if (!insert_after.is_empty()) {
+		int pos = content.find(insert_after);
+		if (pos < 0) {
+			return MCP_NOT_FOUND("insert_after anchor");
+		}
+		pos += insert_after.length();
+		content = content.substr(0, pos) + replacement + content.substr(pos);
+		changed = true;
+	} else {
+		return MCP_INVALID_PARAMS("Provide anchor/search, insert_before, or insert_after.");
+	}
+
+	if (changed) {
+		file = FileAccess::open(path, FileAccess::WRITE);
+		if (file.is_null()) {
+			return MCP_INTERNAL("Cannot write script");
+		}
+		file->store_string(content);
+		file->close();
+		_reload_script(path);
+	}
+
+	Dictionary res;
+	res["path"] = path;
+	res["patched"] = changed;
 	return MCP_SUCCESS(res);
 }
 
@@ -493,4 +754,121 @@ Dictionary JustAMCPScriptTools::_validate_script(const Dictionary &p_params) {
 	res["error_string"] = String::num_int64(err); // simplified
 	res["message"] = "Compilation failed.";
 	return MCP_SUCCESS(res);
+}
+
+Dictionary JustAMCPScriptTools::_get_script_metadata(const Dictionary &p_params) {
+	if (!p_params.has("path")) {
+		return MCP_INVALID_PARAMS("Missing param: path");
+	}
+	String path = p_params["path"];
+
+	if (!ResourceLoader::exists(path)) {
+		return MCP_NOT_FOUND("Script '" + path + "'");
+	}
+
+	Ref<Script> script_res = ResourceLoader::load(path);
+	if (script_res.is_null()) {
+		return MCP_INTERNAL("Failed to load script: " + path);
+	}
+
+	Dictionary meta;
+	meta["path"] = path;
+	meta["class_name"] = script_res->get_instance_base_type(); // fallback
+	meta["is_tool"] = script_res->is_tool();
+
+	// Methods
+	Array methods;
+	List<MethodInfo> m_list;
+	script_res->get_script_method_list(&m_list);
+	for (const MethodInfo &mi : m_list) {
+		Dictionary m;
+		m["name"] = mi.name;
+		Array params;
+		for (const PropertyInfo &pi : mi.arguments) {
+			params.push_back(pi.name + ":" + Variant::get_type_name(pi.type));
+		}
+		m["parameters"] = params;
+		m["return"] = Variant::get_type_name(mi.return_val.type);
+		methods.push_back(m);
+	}
+	meta["methods"] = methods;
+
+	// Properties
+	Array properties;
+	List<PropertyInfo> p_list;
+	script_res->get_script_property_list(&p_list);
+	for (const PropertyInfo &pi : p_list) {
+		Dictionary prod;
+		prod["name"] = pi.name;
+		prod["type"] = Variant::get_type_name(pi.type);
+		prod["usage"] = pi.usage;
+		properties.push_back(prod);
+	}
+	meta["properties"] = properties;
+
+	// Signals
+	Array signals;
+	List<MethodInfo> s_list;
+	script_res->get_script_signal_list(&s_list);
+	for (const MethodInfo &si : s_list) {
+		Dictionary sig;
+		sig["name"] = si.name;
+		Array params;
+		for (const PropertyInfo &pi : si.arguments) {
+			params.push_back(pi.name + ":" + Variant::get_type_name(pi.type));
+		}
+		sig["parameters"] = params;
+		signals.push_back(sig);
+	}
+	meta["signals"] = signals;
+
+	return MCP_SUCCESS(meta);
+}
+
+Dictionary JustAMCPScriptTools::_get_script_references(const Dictionary &p_params) {
+	if (!p_params.has("path")) {
+		return MCP_INVALID_PARAMS("Missing param: path");
+	}
+	String path = p_params["path"];
+
+	Array references;
+	_find_references_recursive("res://", path, references);
+
+	Dictionary res;
+	res["script_path"] = path;
+	res["references"] = references;
+	res["count"] = references.size();
+	return MCP_SUCCESS(res);
+}
+
+void JustAMCPScriptTools::_find_references_recursive(const String &p_path, const String &p_target_script, Array &r_references) {
+	Ref<DirAccess> dir = DirAccess::open(p_path);
+	if (dir.is_null()) {
+		return;
+	}
+
+	dir->list_dir_begin();
+	String file_name = dir->get_next();
+	while (!file_name.is_empty()) {
+		if (file_name.begins_with(".")) {
+			file_name = dir->get_next();
+			continue;
+		}
+
+		String full_path = p_path.path_join(file_name);
+		if (dir->current_is_dir()) {
+			_find_references_recursive(full_path, p_target_script, r_references);
+		} else if (file_name.ends_with(".tscn") || file_name.ends_with(".tres")) {
+			Ref<FileAccess> file = FileAccess::open(full_path, FileAccess::READ);
+			if (file.is_valid()) {
+				String content = file->get_as_text();
+				if (content.contains(p_target_script)) {
+					r_references.push_back(full_path);
+				}
+				file->close();
+			}
+		}
+		file_name = dir->get_next();
+	}
+	dir->list_dir_end();
 }

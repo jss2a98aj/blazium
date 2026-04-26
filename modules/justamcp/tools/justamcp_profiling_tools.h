@@ -42,6 +42,8 @@ private:
 
 	Dictionary _get_performance_monitors(const Dictionary &p_params);
 	Dictionary _get_editor_performance(const Dictionary &p_params);
+	Dictionary _detect_bottlenecks(const Dictionary &p_params);
+	Dictionary _monitor_thresholds(const Dictionary &p_params);
 
 protected:
 	static void _bind_methods();

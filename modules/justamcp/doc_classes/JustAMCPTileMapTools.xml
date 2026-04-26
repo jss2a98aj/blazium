@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPTileMapTools" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Exposes native Godot TileMap utilities routing out to MCP schemas seamlessly.
+		Provides MCP tools for TileMap and tileset workflows.
 	</brief_description>
 	<description>
-		Inherits base bindings to automatically register TileMap-related methods into the MCP registry globally. These specific tool endpoints allow connected LLMs to natively instrument TileMap data directly within Godot's bounds.
+		Registers tilemap-oriented tool schemas used by [JustAMCPToolExecutor]. These tools expose tile maps, tilesets, cells, layers, and related 2D level data to MCP clients.
 	</description>
 	<tutorials>
 		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>

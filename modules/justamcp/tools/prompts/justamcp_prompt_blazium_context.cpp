@@ -45,7 +45,13 @@ Dictionary JustAMCPPromptBlaziumContext::get_prompt() const {
 	result["name"] = "blazium_context";
 	result["title"] = "Blazium Context Info";
 	result["description"] = "Retrieves information about Blazium Engine JustAMCP operations.";
-	result["arguments"] = Array();
+	Array arguments;
+	Dictionary mode;
+	mode["name"] = "mode";
+	mode["description"] = "Optional context tone: strict, casual, or debug.";
+	mode["required"] = false;
+	arguments.push_back(mode);
+	result["arguments"] = arguments;
 	return result;
 }
 

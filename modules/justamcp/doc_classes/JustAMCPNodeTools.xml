@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <class name="JustAMCPNodeTools" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Exposes native Godot Node utilities routing out to MCP schemas seamlessly.
+		Provides MCP tools for querying and changing nodes.
 	</brief_description>
 	<description>
-		Inherits base bindings to automatically register Node-related methods into the MCP registry globally. These specific tool endpoints allow connected LLMs to natively instrument Node data directly within Godot's bounds.
+		Registers node-oriented tool schemas used by [JustAMCPToolExecutor]. These tools let MCP clients find nodes, read or write properties, call methods, and interact with the edited scene through validated requests.
 	</description>
 	<tutorials>
 		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>

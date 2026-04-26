@@ -55,9 +55,19 @@ public:
 	Dictionary create_shader(const Dictionary &p_args);
 	Dictionary create_tileset(const Dictionary &p_args);
 	Dictionary set_tilemap_cells(const Dictionary &p_args);
+	Dictionary get_resource_info(const Dictionary &p_args);
+	Dictionary read_resource_file(const Dictionary &p_args);
+	Dictionary edit_resource_file(const Dictionary &p_args);
+	Dictionary get_resource_preview(const Dictionary &p_args);
+	Dictionary list_resource_files(const Dictionary &p_args);
+	Dictionary save_resource_as(const Dictionary &p_args);
+	Dictionary get_resource_dependencies(const Dictionary &p_args);
+	Dictionary import_asset_copy(const Dictionary &p_args);
+	Dictionary manage_resource_autoloads(const Dictionary &p_args);
 	Dictionary set_theme_color(const Dictionary &p_args);
 	Dictionary set_theme_font_size(const Dictionary &p_args);
 	Dictionary apply_theme_shader(const Dictionary &p_args);
+	Dictionary resource_import_asset(const Dictionary &p_args);
 
 private:
 	String _ensure_res_path(const String &p_path);
@@ -68,6 +78,7 @@ private:
 	Ref<Theme> _load_theme(const String &p_theme_path);
 	Error _save_scene_root(Node *p_root, const String &p_scene_path);
 	String _get_theme_shader_code(const String &p_theme, const String &p_effect);
+	void _list_resources_recursive(const String &p_path, const String &p_type_filter, Array &r_results);
 
 public:
 	JustAMCPResourceTools();

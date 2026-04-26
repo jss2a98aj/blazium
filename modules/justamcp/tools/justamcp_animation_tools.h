@@ -29,12 +29,13 @@
 
 #pragma once
 
-#ifdef TOOLS_ENABLED
-
 #include "core/object/object.h"
 #include "scene/main/node.h"
 
 class JustAMCPEditorPlugin;
+class AnimationNode;
+class AnimationNodeBlendTree;
+class AnimationNodeStateMachine;
 
 class JustAMCPAnimationTools : public Object {
 	GDCLASS(JustAMCPAnimationTools, Object);
@@ -47,14 +48,25 @@ protected:
 
 public:
 	void set_editor_plugin(JustAMCPEditorPlugin *p_plugin) { editor_plugin = p_plugin; }
+	Dictionary execute_tool(const String &p_tool_name, const Dictionary &p_args);
 
 	Dictionary create_animation(const Dictionary &p_args);
+	Dictionary set_animation_keyframe(const Dictionary &p_args);
+	Dictionary get_animation_info(const Dictionary &p_args);
+	Dictionary list_animations(const Dictionary &p_args);
+	Dictionary remove_animation(const Dictionary &p_args);
 	Dictionary add_animation_track(const Dictionary &p_args);
 	Dictionary create_animation_tree(const Dictionary &p_args);
+	Dictionary get_animation_tree_structure(const Dictionary &p_args);
 	Dictionary add_animation_state(const Dictionary &p_args);
+	Dictionary remove_animation_state(const Dictionary &p_args);
 	Dictionary connect_animation_states(const Dictionary &p_args);
+	Dictionary remove_animation_transition(const Dictionary &p_args);
+	Dictionary set_animation_tree_parameter(const Dictionary &p_args);
+	Dictionary set_blend_tree_node(const Dictionary &p_args);
 	Dictionary create_navigation_region(const Dictionary &p_args);
 	Dictionary create_navigation_agent(const Dictionary &p_args);
+	Dictionary create_tween(const Dictionary &p_args);
 
 private:
 	String _ensure_res_path(const String &p_path);
@@ -72,10 +84,11 @@ private:
 
 	Ref<Resource> _get_default_animation_library(Node *p_player);
 	Ref<Resource> _get_state_machine(Node *p_anim_tree, const String &p_state_machine_path = "");
+	Dictionary _serialize_animation_node(const Ref<AnimationNode> &p_node);
+	Dictionary _serialize_state_machine(const Ref<AnimationNodeStateMachine> &p_state_machine);
+	Dictionary _serialize_blend_tree(const Ref<AnimationNodeBlendTree> &p_blend_tree);
 
 public:
 	JustAMCPAnimationTools();
 	~JustAMCPAnimationTools();
 };
-
-#endif // TOOLS_ENABLED

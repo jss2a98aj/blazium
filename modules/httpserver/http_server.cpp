@@ -356,6 +356,9 @@ bool HTTPServer::_match_route(const String &p_pattern, const String &p_path, Dic
 }
 
 void HTTPServer::_dispatch_request(int p_client_id, ClientConnection &p_client, Ref<HTTPRequestContext> p_context) {
+	// Debug print for all incoming raw requests
+	print_line("HTTPServer Trace: " + p_context->get_method() + " " + p_context->get_raw_path());
+
 	// Find matching route
 	Route *matched_route = nullptr;
 	Dictionary path_params;

@@ -29,8 +29,6 @@
 
 #pragma once
 
-#ifdef TOOLS_ENABLED
-
 #include "core/object/object.h"
 #include "scene/main/node.h"
 
@@ -39,8 +37,30 @@ class JustAMCPAnalysisTools;
 class JustAMCPSceneTools;
 class JustAMCPResourceTools;
 class JustAMCPAnimationTools;
+class JustAMCPEditorTools;
+class JustAMCPNetworkingTools;
 class JustAMCPProjectTools;
+class JustAMCPAssetTools;
+#include "justamcp_analysis_tools.h"
+#include "justamcp_animation_tools.h"
+#include "justamcp_asset_tools.h"
+#include "justamcp_audio_tools.h"
+#include "justamcp_batch_tools.h"
+#include "justamcp_blueprint_tools.h"
+#include "justamcp_documentation_tools.h"
+#include "justamcp_draw_tools.h"
+#include "justamcp_editor_tools.h"
+#include "justamcp_environment_tools.h"
+#include "justamcp_export_tools.h"
+#include "justamcp_input_tools.h"
+#include "justamcp_networking_tools.h"
+#include "justamcp_node_tools.h"
+#include "justamcp_particle_tools.h"
+#include "justamcp_physics_tools.h"
+#include "justamcp_project_tools.h"
 class JustAMCPProfilingTools;
+class JustAMCPSpatialTools;
+class JustAMCPRuntimeTools;
 class JustAMCPExportTools;
 class JustAMCPBatchTools;
 class JustAMCPScriptTools;
@@ -62,21 +82,30 @@ private:
 	JustAMCPEditorPlugin *editor_plugin = nullptr;
 
 	JustAMCPAnalysisTools *analysis_tools = nullptr;
-	JustAMCPSceneTools *scene_tools = nullptr;
-	JustAMCPResourceTools *resource_tools = nullptr;
 	JustAMCPAnimationTools *animation_tools = nullptr;
-	JustAMCPProjectTools *project_tools = nullptr;
-	JustAMCPProfilingTools *profiling_tools = nullptr;
-	JustAMCPExportTools *export_tools = nullptr;
-	JustAMCPBatchTools *batch_tools = nullptr;
-	JustAMCPScriptTools *script_tools = nullptr;
-	JustAMCPNodeTools *node_tools = nullptr;
+	JustAMCPAssetTools *asset_tools = nullptr;
+	JustAMCPBlueprintTools *blueprint_tools = nullptr;
 	JustAMCPAudioTools *audio_tools = nullptr;
+	JustAMCPBatchTools *batch_tools = nullptr;
+	JustAMCPDocumentationTools *documentation_tools = nullptr;
+	JustAMCPDrawTools *draw_tools = nullptr;
+	JustAMCPEditorTools *editor_tools = nullptr;
+	JustAMCPEnvironmentTools *environment_tools = nullptr;
+	JustAMCPExportTools *export_tools = nullptr;
 	JustAMCPInputTools *input_tools = nullptr;
+	JustAMCPNetworkingTools *networking_tools = nullptr;
+	JustAMCPNodeTools *node_tools = nullptr;
 	JustAMCPParticleTools *particle_tools = nullptr;
 	JustAMCPPhysicsTools *physics_tools = nullptr;
+	JustAMCPProjectTools *project_tools = nullptr;
+	JustAMCPProfilingTools *profiling_tools = nullptr;
+	JustAMCPResourceTools *resource_tools = nullptr;
+	JustAMCPRuntimeTools *runtime_tools = nullptr;
 	JustAMCPScene3DTools *scene_3d_tools = nullptr;
+	JustAMCPSceneTools *scene_tools = nullptr;
+	JustAMCPScriptTools *script_tools = nullptr;
 	JustAMCPShaderTools *shader_tools = nullptr;
+	JustAMCPSpatialTools *spatial_tools = nullptr;
 	JustAMCPThemeTools *theme_tools = nullptr;
 	JustAMCPTileMapTools *tilemap_tools = nullptr;
 	JustAMCPAutoworkTools *autowork_tools = nullptr;
@@ -102,5 +131,3 @@ public:
 	JustAMCPToolExecutor();
 	~JustAMCPToolExecutor();
 };
-
-#endif // TOOLS_ENABLED

@@ -30,6 +30,7 @@
 #ifdef TOOLS_ENABLED
 
 #include "justamcp_resource_system_logs.h"
+#include "../../justamcp_server.h"
 
 void JustAMCPResourceSystemLogs::_bind_methods() {}
 
@@ -37,7 +38,7 @@ JustAMCPResourceSystemLogs::JustAMCPResourceSystemLogs() {}
 JustAMCPResourceSystemLogs::~JustAMCPResourceSystemLogs() {}
 
 String JustAMCPResourceSystemLogs::get_uri() const {
-	return "godot://system/logs";
+	return "blazium://system/logs";
 }
 
 String JustAMCPResourceSystemLogs::get_name() const {
@@ -60,7 +61,7 @@ Dictionary JustAMCPResourceSystemLogs::get_schema() const {
 Dictionary JustAMCPResourceSystemLogs::read_resource(const String &p_uri) {
 	Dictionary result;
 
-	if (p_uri != get_uri()) {
+	if (p_uri != get_uri() && p_uri != "godot://system/logs") {
 		result["ok"] = false;
 		result["error_code"] = -32602;
 		result["error"] = "Mismatch URI.";
@@ -71,9 +72,23 @@ Dictionary JustAMCPResourceSystemLogs::read_resource(const String &p_uri) {
 	Array contents;
 	Dictionary text_content;
 	text_content["uri"] = p_uri;
+	String full_log = "";
+	if (JustAMCPServer::get_singleton()) {
+		Vector<String> engine_logs = JustAMCPServer::get_singleton()->get_engine_logs();
+		for (int i = 0; i < engine_logs.size(); i++) {
+			full_log += engine_logs[i] + "\n";
+		}
+		if (full_log.is_empty()) {
+			full_log = "Log is empty or hasn't started capturing yet.";
+		}
+	} else {
+		full_log = "JustAMCP System Log Capture Not Available.";
+	}
+
 	text_content["mimeType"] = "text/plain";
-	text_content["text"] = "Engine running successfully... Request processed natively. (Live logging integration expanding!)";
+	text_content["text"] = full_log;
 	contents.push_back(text_content);
+
 	result["contents"] = contents;
 	return result;
 }
