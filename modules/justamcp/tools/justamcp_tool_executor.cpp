@@ -63,6 +63,7 @@
 #include "../justamcp_editor_plugin.h"
 #include "editor/editor_file_system.h"
 #include "editor/editor_interface.h"
+#include "editor/editor_node.h"
 #include "editor/editor_settings.h"
 #include "scene/main/node.h"
 #include "scene/resources/material.h"
@@ -93,7 +94,7 @@ static Node *_justamcp_get_edited_root() {
 	if (JustAMCPToolExecutor::get_test_scene_root()) {
 		return JustAMCPToolExecutor::get_test_scene_root();
 	}
-	if (EditorInterface::get_singleton()) {
+	if (EditorNode::get_singleton() && EditorInterface::get_singleton()) {
 		return EditorInterface::get_singleton()->get_edited_scene_root();
 	}
 	return nullptr;
@@ -1402,6 +1403,7 @@ Dictionary JustAMCPToolExecutor::execute_tool(const String &p_tool_name, const D
 		if (!contents.is_empty()) {
 			Dictionary first = contents[0];
 			result["text"] = first.get("text", "");
+			result["content"] = result["text"];
 			result["mime_type"] = first.get("mimeType", "text/markdown");
 		}
 		return result;
@@ -1969,8 +1971,9 @@ Dictionary JustAMCPToolExecutor::execute_tool(const String &p_tool_name, const D
 		ret["ok"] = true;
 		ret["runtime_available"] = JustAMCPRuntime::get_singleton() != nullptr;
 #ifdef TOOLS_ENABLED
-		ret["editor_playing"] = EditorInterface::get_singleton() ? EditorInterface::get_singleton()->is_playing_scene() : false;
-		ret["playing_scene"] = EditorInterface::get_singleton() ? EditorInterface::get_singleton()->get_playing_scene() : String();
+		bool editor_ready = EditorNode::get_singleton() && EditorInterface::get_singleton();
+		ret["editor_playing"] = editor_ready ? EditorInterface::get_singleton()->is_playing_scene() : false;
+		ret["playing_scene"] = editor_ready ? EditorInterface::get_singleton()->get_playing_scene() : String();
 #else
 		ret["editor_playing"] = false;
 		ret["playing_scene"] = String();

@@ -428,7 +428,12 @@ Dictionary JustAMCPEditorTools::editor_get_errors(const Dictionary &p_args) {
 Dictionary JustAMCPEditorTools::editor_reload_project(const Dictionary &p_args) {
 	Dictionary result;
 	bool save = p_args.get("save", true);
-	if (EditorInterface::get_singleton()) {
+	if (DisplayServer::get_singleton() && DisplayServer::get_singleton()->get_name() == "headless") {
+		result["ok"] = false;
+		result["error"] = "Project reload is unavailable in headless mode.";
+		return result;
+	}
+	if (EditorNode::get_singleton() && EditorInterface::get_singleton()) {
 		EditorInterface::get_singleton()->restart_editor(save);
 		result["ok"] = true;
 		result["save"] = save;
@@ -442,7 +447,7 @@ Dictionary JustAMCPEditorTools::editor_reload_project(const Dictionary &p_args) 
 
 Dictionary JustAMCPEditorTools::editor_save_all_scenes(const Dictionary &p_args) {
 	Dictionary result;
-	if (EditorInterface::get_singleton()) {
+	if (EditorNode::get_singleton() && EditorInterface::get_singleton()) {
 		EditorInterface::get_singleton()->save_all_scenes();
 		result["ok"] = true;
 		result["message"] = "All open scenes saved.";

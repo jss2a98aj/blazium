@@ -666,7 +666,8 @@ Dictionary JustAMCPSceneTools::get_scene_exports(const Dictionary &p_args) {
 }
 
 Dictionary JustAMCPSceneTools::get_current_scene(const Dictionary &p_args) {
-	Node *root = EditorInterface::get_singleton() ? EditorInterface::get_singleton()->get_edited_scene_root() : nullptr;
+	bool editor_ready = EditorNode::get_singleton() && EditorInterface::get_singleton();
+	Node *root = editor_ready ? EditorInterface::get_singleton()->get_edited_scene_root() : nullptr;
 	if (!root) {
 		Dictionary ret;
 		ret["ok"] = false;
@@ -685,7 +686,7 @@ Dictionary JustAMCPSceneTools::get_current_scene(const Dictionary &p_args) {
 Dictionary JustAMCPSceneTools::list_open_scenes(const Dictionary &p_args) {
 	Array scenes;
 	String current_path;
-	if (EditorInterface::get_singleton()) {
+	if (EditorNode::get_singleton() && EditorInterface::get_singleton()) {
 		PackedStringArray open_scenes = EditorInterface::get_singleton()->get_open_scenes();
 		for (int i = 0; i < open_scenes.size(); i++) {
 			scenes.push_back(open_scenes[i]);

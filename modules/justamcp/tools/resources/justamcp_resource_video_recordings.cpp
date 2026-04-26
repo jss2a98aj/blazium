@@ -31,6 +31,7 @@
 
 #include "justamcp_resource_video_recordings.h"
 #include "core/io/dir_access.h"
+#include "core/io/json.h"
 
 void JustAMCPResourceVideoRecordings::_bind_methods() {}
 
@@ -60,9 +61,9 @@ Dictionary JustAMCPResourceVideoRecordings::get_schema() const {
 
 Dictionary JustAMCPResourceVideoRecordings::read_resource(const String &p_uri) {
 	Dictionary result;
+	Array files;
 	Ref<DirAccess> dir = DirAccess::open("res://");
 	if (dir.is_valid() && dir->dir_exists(".video_recordings")) {
-		Array files;
 		Ref<DirAccess> vid_dir = DirAccess::open("res://.video_recordings");
 		if (vid_dir.is_valid()) {
 			vid_dir->list_dir_begin();
@@ -77,19 +78,23 @@ Dictionary JustAMCPResourceVideoRecordings::read_resource(const String &p_uri) {
 		}
 
 		files.sort();
-		result["ok"] = true;
-
-		// Return JSON format as requested by schema
-		Dictionary contents;
-		contents["frames_captured"] = files.size();
-		contents["files"] = files;
-		contents["path"] = "res://.video_recordings";
-
-		result["content"] = Variant(contents).to_json_string();
-	} else {
-		result["ok"] = false;
-		result["error"] = "No .video_recordings directory exists. Ensure a video recording runtime tool ran previously.";
 	}
+
+	Dictionary payload;
+	payload["available"] = dir.is_valid() && dir->dir_exists(".video_recordings");
+	payload["frames_captured"] = files.size();
+	payload["files"] = files;
+	payload["path"] = "res://.video_recordings";
+
+	Array contents;
+	Dictionary item;
+	item["uri"] = p_uri;
+	item["mimeType"] = "application/json";
+	item["text"] = JSON::stringify(payload);
+	contents.push_back(item);
+
+	result["ok"] = true;
+	result["contents"] = contents;
 	return result;
 }
 

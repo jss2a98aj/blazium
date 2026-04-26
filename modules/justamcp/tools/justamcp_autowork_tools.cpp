@@ -97,8 +97,33 @@ static Dictionary _execute_autowork(Autowork *p_autowork) {
 	return result;
 }
 
+static bool _is_autowork_already_running() {
+	SceneTree *tree = Object::cast_to<SceneTree>(OS::get_singleton()->get_main_loop());
+	if (!tree || !tree->get_root()) {
+		return false;
+	}
+
+	for (int i = 0; i < tree->get_root()->get_child_count(); i++) {
+		Node *child = tree->get_root()->get_child(i);
+		if (child && child->is_class("Autowork")) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static Dictionary _nested_autowork_error() {
+	Dictionary err;
+	err["ok"] = false;
+	err["error"] = "Autowork is already running. Nested Autowork execution is blocked to avoid recursively launching the active test suite.";
+	return err;
+}
+
 Dictionary JustAMCPAutoworkTools::execute_tool(const String &p_tool_name, const Dictionary &p_args) {
 	if (p_tool_name == "blazium_autowork_run_all_tests" || p_tool_name == "autowork_run_all_tests") {
+		if (_is_autowork_already_running()) {
+			return _nested_autowork_error();
+		}
 		Autowork *aw = memnew(Autowork);
 		aw->add_directory("res://");
 		return _execute_autowork(aw);
@@ -112,6 +137,9 @@ Dictionary JustAMCPAutoworkTools::execute_tool(const String &p_tool_name, const 
 			return err;
 		}
 
+		if (_is_autowork_already_running()) {
+			return _nested_autowork_error();
+		}
 		Autowork *aw = memnew(Autowork);
 		aw->add_directory(p_args["directory_path"]);
 		return _execute_autowork(aw);
@@ -125,6 +153,9 @@ Dictionary JustAMCPAutoworkTools::execute_tool(const String &p_tool_name, const 
 			return err;
 		}
 
+		if (_is_autowork_already_running()) {
+			return _nested_autowork_error();
+		}
 		Autowork *aw = memnew(Autowork);
 		aw->add_script(p_args["script_path"]);
 		return _execute_autowork(aw);
@@ -138,6 +169,9 @@ Dictionary JustAMCPAutoworkTools::execute_tool(const String &p_tool_name, const 
 			return err;
 		}
 
+		if (_is_autowork_already_running()) {
+			return _nested_autowork_error();
+		}
 		Autowork *aw = memnew(Autowork);
 		aw->add_directory("res://");
 		aw->set_select(p_args["test_name"]);

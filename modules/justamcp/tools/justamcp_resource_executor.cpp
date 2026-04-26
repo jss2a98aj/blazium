@@ -353,7 +353,7 @@ Dictionary JustAMCPResourceExecutor::read_resource(const String &p_uri) {
 		}
 	}
 
-	if (p_uri.begins_with("blazium://") || p_uri.begins_with("godot://")) {
+	if (canonical_uri.begins_with("blazium://")) {
 		Dictionary result = _read_blazium_resource(p_uri);
 		if (result.get("ok", false)) {
 			return result;
@@ -474,8 +474,9 @@ Dictionary JustAMCPResourceExecutor::_read_guide_resource(const String &p_uri) c
 			   "- If an API call fails, verify the target class with `blazium_classdb_query` or `blazium_docs_get_class` before editing code.\n"
 			   "- If project settings were edited, restart or reload the project when the setting is only read during startup.\n";
 	} else if (slug == "tool-index") {
-		title = "Quick Tool Index by Goal";
-		body = "- Files and scripts: `blazium_read_file`, `blazium_create_script`, `blazium_edit_script`, `blazium_validate_script`, `blazium_search_in_scripts`.\n"
+		title = "JustAMCP Quick Tool Index by Goal";
+		body = "JustAMCP groups common Blazium editor, runtime, documentation, and asset workflows into these tool families:\n"
+			   "- Files and scripts: `blazium_read_file`, `blazium_create_script`, `blazium_edit_script`, `blazium_validate_script`, `blazium_search_in_scripts`.\n"
 			   "- Scenes and nodes: `blazium_create_scene`, `blazium_list_scene_nodes`, `blazium_add_node`, `blazium_duplicate_node`, `blazium_scene_tree_dump`.\n"
 			   "- Project: `blazium_project_list_settings`, `blazium_project_update_settings`, `blazium_project_get_input_actions`, `blazium_project_set_input_action`.\n"
 			   "- Runtime: `blazium_editor_play_scene`, `blazium_runtime_info`, `blazium_wait`, `blazium_take_game_screenshot`, `blazium_editor_stop_play`.\n"
@@ -490,6 +491,7 @@ Dictionary JustAMCPResourceExecutor::_read_guide_resource(const String &p_uri) c
 Dictionary JustAMCPResourceExecutor::_read_blazium_resource(const String &p_uri) const {
 	Node *root = _get_edited_root();
 	String canonical_uri = _canonicalize_resource_uri(p_uri);
+	bool editor_ready = EditorNode::get_singleton() && EditorInterface::get_singleton();
 
 	if (canonical_uri.begins_with("blazium://guide/")) {
 		return _read_guide_resource(p_uri);
@@ -516,7 +518,7 @@ Dictionary JustAMCPResourceExecutor::_read_blazium_resource(const String &p_uri)
 		payload["current_scene"] = root && root->get_scene_file_path().is_empty() ? String() : (root ? root->get_scene_file_path() : String());
 		payload["root"] = root ? _serialize_node_brief(root, root) : Dictionary();
 		payload["project_name"] = ProjectSettings::get_singleton()->get_setting("application/config/name", "");
-		payload["is_playing"] = EditorInterface::get_singleton() ? EditorInterface::get_singleton()->is_playing_scene() : false;
+		payload["is_playing"] = editor_ready ? EditorInterface::get_singleton()->is_playing_scene() : false;
 		return _make_json_contents(p_uri, payload);
 	}
 
@@ -535,7 +537,7 @@ Dictionary JustAMCPResourceExecutor::_read_blazium_resource(const String &p_uri)
 	if (canonical_uri == "blazium://selection/current") {
 		Array selected_paths;
 		Array selected_nodes;
-		if (EditorInterface::get_singleton() && EditorInterface::get_singleton()->get_selection()) {
+		if (editor_ready && EditorInterface::get_singleton()->get_selection()) {
 			Array selected = EditorInterface::get_singleton()->get_selection()->get_selected_nodes();
 			for (int i = 0; i < selected.size(); i++) {
 				Node *node = Object::cast_to<Node>(selected[i]);
@@ -563,7 +565,7 @@ Dictionary JustAMCPResourceExecutor::_read_blazium_resource(const String &p_uri)
 		payload["project_path"] = ProjectSettings::get_singleton()->get_resource_path();
 		payload["project_name"] = ProjectSettings::get_singleton()->get_setting("application/config/name", "");
 		payload["current_scene"] = root ? root->get_scene_file_path() : String();
-		payload["is_playing"] = EditorInterface::get_singleton() ? EditorInterface::get_singleton()->is_playing_scene() : false;
+		payload["is_playing"] = editor_ready ? EditorInterface::get_singleton()->is_playing_scene() : false;
 		payload["is_active"] = JustAMCPServer::get_singleton() ? JustAMCPServer::get_singleton()->is_server_started() : true;
 		payload["readiness"] = !root ? "no_scene" : (bool(payload["is_playing"]) ? "playing" : "ready");
 		return _make_json_contents(p_uri, payload);
@@ -624,7 +626,7 @@ Dictionary JustAMCPResourceExecutor::_read_blazium_resource(const String &p_uri)
 		payload["godot_version"] = Engine::get_singleton()->get_version_info().get("string", "unknown");
 		payload["project_name"] = ProjectSettings::get_singleton()->get_setting("application/config/name", "");
 		payload["current_scene"] = root ? root->get_scene_file_path() : String();
-		payload["is_playing"] = EditorInterface::get_singleton() ? EditorInterface::get_singleton()->is_playing_scene() : false;
+		payload["is_playing"] = editor_ready ? EditorInterface::get_singleton()->is_playing_scene() : false;
 		payload["readiness"] = !root ? "no_scene" : (bool(payload["is_playing"]) ? "playing" : "ready");
 		return _make_json_contents(p_uri, payload);
 	}

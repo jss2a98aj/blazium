@@ -338,7 +338,9 @@ Dictionary JustAMCPBatchTools::_batch_add_nodes(const Dictionary &p_params) {
 		}
 		node->set_name(def.get("name", type_name));
 		parent->add_child(node);
-		node->set_owner(root);
+		if (root == node || root->is_ancestor_of(node)) {
+			node->set_owner(root);
+		}
 		Dictionary properties = def.get("properties", Dictionary());
 		Array keys = properties.keys();
 		for (int j = 0; j < keys.size(); j++) {
@@ -353,7 +355,7 @@ Dictionary JustAMCPBatchTools::_batch_add_nodes(const Dictionary &p_params) {
 	}
 
 #ifdef TOOLS_ENABLED
-	if (!created.is_empty() && EditorInterface::get_singleton()) {
+	if (!created.is_empty() && EditorNode::get_singleton() && EditorInterface::get_singleton()) {
 		EditorInterface::get_singleton()->mark_scene_as_unsaved();
 	}
 #endif
