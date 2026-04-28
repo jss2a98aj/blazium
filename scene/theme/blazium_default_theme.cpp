@@ -221,7 +221,7 @@ PackedStringArray get_icons_list() {
 	return icons_list;
 }
 
-void update_theme_icons(Ref<Theme> &p_theme, const Color &p_font_color, const Color &p_accent_color) {
+void update_theme_icons(const Ref<Theme> &p_theme, const Color &p_font_color, const Color &p_accent_color) {
 	if (icons.is_empty()) {
 		Ref<Texture2D> empty_icon = memnew(ImageTexture);
 		p_theme->set_icon("increment", "HScrollBar", empty_icon);
@@ -499,7 +499,7 @@ Color contrast_color(const Color &p_color, float p_contrast) {
 // `Panel` and `PanelContainer` uses the `base_color` by default, another variation `FlatPanel` and `FlatPanelContainer` uses `bg_color`.
 // `TabContainer` and `FoldableContainer` panels uses the `bg_color` by default, another variation `FlatTabContainer` and `FlatFoldableContainer` uses `base_color`.
 // Other panels that doesn't allow having children like `Tree` and `ItemList` uses `style_normal_color` by default.
-void update_theme_colors(Ref<Theme> &p_theme, const Color &p_base_color, const Color &p_accent_color, float p_contrast, float p_normal_contrast, float p_hover_contrast, float p_pressed_contrast, float p_bg_contrast) {
+void update_theme_colors(const Ref<Theme> &p_theme, const Color &p_base_color, const Color &p_accent_color, float p_contrast, float p_normal_contrast, float p_hover_contrast, float p_pressed_contrast, float p_bg_contrast) {
 	const Color base_color = p_base_color.clamp();
 	const Color accent_color = p_accent_color.clamp();
 
@@ -631,7 +631,7 @@ void update_theme_colors(Ref<Theme> &p_theme, const Color &p_base_color, const C
 	p_theme->set_color("mono_color", "Colors", mono_color);
 }
 
-void update_font_color(Ref<Theme> &p_theme, const Color &p_color) {
+void update_font_color(const Ref<Theme> &p_theme, const Color &p_color) {
 	Color font_color = p_color.clamp();
 	is_dark_theme = font_color.get_luminance() > 0.5;
 
@@ -768,7 +768,7 @@ void update_font_color(Ref<Theme> &p_theme, const Color &p_color) {
 	p_theme->set_color("font_color", "Colors", p_color);
 }
 
-void update_font_outline_color(Ref<Theme> &p_theme, const Color &p_color) {
+void update_font_outline_color(const Ref<Theme> &p_theme, const Color &p_color) {
 	Color outline_color = p_color.clamp();
 	p_theme->set_color("font_outline_color", "Button", outline_color);
 	p_theme->set_color("font_outline_color", "RichTextLabel", outline_color);
@@ -798,7 +798,7 @@ void update_font_outline_color(Ref<Theme> &p_theme, const Color &p_color) {
 	p_theme->set_color("font_outline_color", "Colors", outline_color);
 }
 
-void update_font_outline_size(Ref<Theme> &p_theme, int p_outline_size) {
+void update_font_outline_size(const Ref<Theme> &p_theme, int p_outline_size) {
 	int outline_size = p_outline_size * MAX(p_theme->get_default_base_scale(), 0.5);
 
 	p_theme->set_constant("outline_size", "Button", outline_size);
@@ -829,7 +829,7 @@ void update_font_outline_size(Ref<Theme> &p_theme, int p_outline_size) {
 	p_theme->set_constant("font_outline_size", "Constants", outline_size);
 }
 
-void update_font_size(Ref<Theme> &p_theme, int p_font_size) {
+void update_font_size(const Ref<Theme> &p_theme, int p_font_size) {
 	p_theme->set_default_font_size(p_font_size);
 
 	p_theme->set_font_size(SceneStringName(font_size), "HeaderSmall", p_font_size + 4);
@@ -893,7 +893,7 @@ void update_font_spacing_bottom(int p_spacing) {
 	italics_font->set_spacing(TextServer::SPACING_BOTTOM, p_spacing);
 }
 
-void update_theme_font(Ref<Theme> &p_theme, Ref<Font> p_font) {
+void update_theme_font(const Ref<Theme> &p_theme, Ref<Font> p_font) {
 	if (p_font.is_valid() && p_font->is_class("FontVariation")) {
 		custom_font_variation = p_font;
 
@@ -973,7 +973,7 @@ void update_font_generate_mipmaps(bool p_font_generate_mipmaps) {
 	base_font->set_generate_mipmaps(p_font_generate_mipmaps);
 }
 
-void update_theme_margins(Ref<Theme> &p_theme, int p_margin) {
+void update_theme_margins(const Ref<Theme> &p_theme, int p_margin) {
 	int margin = p_margin * MAX(p_theme->get_default_base_scale(), 0.5);
 
 	p_theme->set_constant("h_separation", "Button", margin);
@@ -1011,7 +1011,7 @@ void update_theme_margins(Ref<Theme> &p_theme, int p_margin) {
 	p_theme->set_constant("margin", "Constants", margin);
 }
 
-void update_theme_padding(Ref<Theme> &p_theme, int p_padding) {
+void update_theme_padding(const Ref<Theme> &p_theme, int p_padding) {
 	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
 	int padding = p_padding * base_scale;
 
@@ -1036,7 +1036,7 @@ void update_theme_padding(Ref<Theme> &p_theme, int p_padding) {
 	p_theme->set_constant("padding", "Constants", padding);
 }
 
-void update_theme_corner_radius(Ref<Theme> &p_theme, int p_corner_radius) {
+void update_theme_corner_radius(const Ref<Theme> &p_theme, int p_corner_radius) {
 	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
 	int corners = p_corner_radius * base_scale;
 
@@ -1076,7 +1076,7 @@ void update_theme_corner_radius(Ref<Theme> &p_theme, int p_corner_radius) {
 	p_theme->set_constant("focus_corners", "Constants", focus_border);
 }
 
-void update_theme_border_width(Ref<Theme> &p_theme, int p_border_width) {
+void update_theme_border_width(const Ref<Theme> &p_theme, int p_border_width) {
 	int border_width = p_border_width * MAX(p_theme->get_default_base_scale(), 0.5);
 
 	popup_panel_style->set_content_margin_all(MAX(border_width, 1));
@@ -1085,7 +1085,7 @@ void update_theme_border_width(Ref<Theme> &p_theme, int p_border_width) {
 	p_theme->set_constant("border_width", "Constants", border_width);
 }
 
-void update_theme_border_padding(Ref<Theme> &p_theme, int p_border_padding) {
+void update_theme_border_padding(const Ref<Theme> &p_theme, int p_border_padding) {
 	int border_padding = p_border_padding * MAX(p_theme->get_default_base_scale(), 0.5);
 
 	button_normal_style->set_content_margin_all(border_padding);
@@ -1110,7 +1110,7 @@ void update_theme_border_padding(Ref<Theme> &p_theme, int p_border_padding) {
 	p_theme->set_constant("border_padding", "Constants", border_padding);
 }
 
-void update_theme_scale(Ref<Theme> &p_theme) {
+void update_theme_scale(const Ref<Theme> &p_theme) {
 	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
 	int int_scale = MAX(Math::floor(base_scale), 1);
 	int x2_scale = 2 * base_scale;
