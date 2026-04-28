@@ -33,6 +33,42 @@
 
 #include "scene/resources/theme.h"
 
+struct ThemeTemplate {
+	Color base_color = Color(0.188, 0.188, 0.188);
+	Color accent_color = Color(0.226, 0.478, 0.921);
+	Color font_color = Color(0.875, 0.875, 0.875);
+	Color font_outline_color = Color(0, 0, 0, 1);
+
+	float scale = 1.f;
+
+	float contrast = -0.6f;
+	float bg_contrast = 0.2f;
+	float normal_contrast = 0.4f;
+	float hover_contrast = -0.2f;
+	float pressed_contrast = 0.6f;
+
+	int margin = 4;
+	int padding = 4;
+	int border_width = 2;
+	int corner_radius = 6;
+
+	float font_embolden = 0.f;
+	int font_size = 16;
+	int font_outline_size = 0;
+	int font_spacing_glyph = 0;
+	int font_spacing_space = 0;
+	int font_spacing_top = 0;
+	int font_spacing_bottom = 0;
+
+	TextServer::SubpixelPositioning font_subpixel = TextServer::SUBPIXEL_POSITIONING_AUTO;
+	TextServer::Hinting font_hinting = TextServer::HINTING_LIGHT;
+	TextServer::FontAntialiasing font_antialiasing = TextServer::FONT_ANTIALIASING_GRAY;
+	TextServer::FontLCDSubpixelLayout font_lcd_subpixel_layout = TextServer::FontLCDSubpixelLayout::FONT_LCD_SUBPIXEL_LAYOUT_HRGB;
+
+	bool font_msdf = false;
+	bool font_generate_mipmaps = false;
+};
+
 class ImageTexture;
 
 Error add_user_icon(const String &p_icon_name, const String &p_icon_source, float p_scale, const Color &p_font_color, const Color &p_accent_color);
@@ -67,5 +103,5 @@ void update_font_lcd_subpixel_layout(TextServer::FontLCDSubpixelLayout p_font_lc
 void update_font_hinting(TextServer::Hinting p_font_hinting);
 void update_font_msdf(bool p_font_msdf);
 void update_font_generate_mipmaps(bool p_font_generate_mipmaps);
-void make_default_theme(Ref<Font> p_font, float p_scale = 1.f, TextServer::SubpixelPositioning p_font_subpixel = TextServer::SUBPIXEL_POSITIONING_AUTO, TextServer::Hinting p_font_hinting = TextServer::HINTING_LIGHT, TextServer::FontAntialiasing p_font_antialiased = TextServer::FONT_ANTIALIASING_GRAY, TextServer::FontLCDSubpixelLayout p_font_lcd_subpixel_layout = TextServer::FontLCDSubpixelLayout::FONT_LCD_SUBPIXEL_LAYOUT_HRGB, bool p_font_msdf = false, bool p_font_generate_mipmaps = false, const Color &p_base_color = Color(0.188, 0.188, 0.188), const Color &p_accent_color = Color(0.226, 0.478, 0.921), const Color &p_font_color = Color(0.875, 0.875, 0.875), const Color &p_font_outline_color = Color(0, 0, 0, 1), float p_contrast = -0.6f, float p_normal_contrast = 0.4f, float p_hover_contrast = -0.2f, float p_pressed_contrast = 0.6f, float p_bg_contrast = 0.2f, int p_margin = 4, int p_padding = 4, int p_border_width = 2, int p_corner_radius = 6, int p_font_size = 16, int p_font_outline_size = 0, float p_font_embolden = 0.f, int p_font_spacing_glyph = 0, int p_font_spacing_space = 0, int p_font_spacing_top = 0, int p_font_spacing_bottom = 0);
+void make_default_theme(Ref<Font> p_font, ThemeTemplate &p_template);
 void finalize_default_theme();
