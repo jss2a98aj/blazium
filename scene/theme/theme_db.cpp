@@ -496,7 +496,7 @@ void ThemeDB::_update_default_theme() {
 	bool border_padding_changed = false;
 	bool update_colors = false;
 
-	float _scale = GLOBAL_GET("gui/theme/default_theme_scale");
+	float _scale = MAX((float)GLOBAL_GET("gui/theme/default_theme_scale"), 0.5f);
 	if (default_theme->get_default_base_scale() != _scale) {
 		default_theme->set_default_base_scale(_scale);
 		scale_changed = true;
