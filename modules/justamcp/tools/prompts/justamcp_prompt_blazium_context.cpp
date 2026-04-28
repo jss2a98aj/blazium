@@ -44,7 +44,7 @@ Dictionary JustAMCPPromptBlaziumContext::get_prompt() const {
 	Dictionary result;
 	result["name"] = "blazium_context";
 	result["title"] = "Blazium Context Info";
-	result["description"] = "Retrieves information about Blazium Engine JustAMCP operations.";
+	result["description"] = "Retrieves Blazium Engine JustAMCP context and points users to the richer blazium_project_intake workflow.";
 	Array arguments;
 	Dictionary mode;
 	mode["name"] = "mode";
@@ -60,15 +60,15 @@ Dictionary JustAMCPPromptBlaziumContext::get_messages(const Dictionary &p_args) 
 	result["description"] = "Blazium Environment Context";
 
 	Array messages;
-	Dictionary msg;
-	msg["role"] = "user";
+	String mode = p_args.has("mode") ? String(p_args["mode"]) : "strict";
+	String text = "The Blazium Engine MCP server is active and exposes tools, resources, prompts, and tasks over JSON-RPC.\n";
+	text += "Mode: " + mode + "\n\n";
+	text += "For substantial work, prefer the `blazium_project_intake` prompt first. It embeds project, scene, selection, and JustAMCP guide resources so the client starts with reliable context.\n";
+	text += "Use `blazium://guide/tool-index` and `blazium://guide/troubleshooting` for orientation, and prefer deterministic `blazium_*` tools for editor/runtime state, validation, tests, and resource reads.";
 
-	Dictionary content;
-	content["type"] = "text";
-	content["text"] = "The Blazium Engine MCP server is actively running! We communicate using JSON-RPC via SSE on localhost. Use tools to interact with the engine.";
-	msg["content"] = content;
-
-	messages.push_back(msg);
+	messages.push_back(_make_text_message(text));
+	messages.push_back(_make_resource_message("blazium://project/info"));
+	messages.push_back(_make_resource_message("blazium://guide/tool-index"));
 	result["messages"] = messages;
 	result["ok"] = true;
 	return result;

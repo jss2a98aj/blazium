@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  justamcp_prompt.h                                                     */
+/*  justamcp_prompt_blazium_workflows.h                                   */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             BLAZIUM ENGINE                             */
@@ -31,30 +31,44 @@
 
 #ifdef TOOLS_ENABLED
 
-#include "core/object/ref_counted.h"
+#include "justamcp_prompt.h"
 
-class JustAMCPPrompt : public RefCounted {
-	GDCLASS(JustAMCPPrompt, RefCounted);
+class JustAMCPPromptBlaziumWorkflow : public JustAMCPPrompt {
+	GDCLASS(JustAMCPPromptBlaziumWorkflow, JustAMCPPrompt);
+
+public:
+	enum WorkflowKind {
+		PROJECT_INTAKE,
+		SCENE_BUILD,
+		RUNTIME_TEST_LOOP,
+		AUTOWORK_FIX_LOOP,
+		DIAGNOSTICS_TRIAGE,
+	};
+
+private:
+	WorkflowKind kind = PROJECT_INTAKE;
+
+	String _get_title() const;
+	String _get_description() const;
+	Array _get_arguments() const;
+	void _append_common_context(Array &r_messages) const;
+	Dictionary _get_project_intake_messages(const Dictionary &p_args);
+	Dictionary _get_scene_build_messages(const Dictionary &p_args);
+	Dictionary _get_runtime_test_loop_messages(const Dictionary &p_args);
+	Dictionary _get_autowork_fix_loop_messages(const Dictionary &p_args);
+	Dictionary _get_diagnostics_triage_messages(const Dictionary &p_args);
 
 protected:
 	static void _bind_methods();
-	static Dictionary _make_text_message(const String &p_text, const String &p_role = "user");
-	static Dictionary _make_resource_message(const String &p_uri);
-	static Dictionary _make_prompt_argument(const String &p_name, const String &p_description, bool p_required);
-	static Dictionary _make_error_result(const String &p_error, int p_error_code = -32602);
-	static bool _has_non_empty_argument(const Dictionary &p_args, const String &p_name);
-	static Dictionary _validate_required_arguments(const Dictionary &p_args, const Vector<String> &p_required);
-	static Dictionary _make_completion(const Vector<String> &p_values, const String &p_prefix);
-	static Dictionary _make_empty_completion();
 
 public:
-	virtual String get_name() const { return ""; }
-	virtual Dictionary get_prompt() const { return Dictionary(); }
-	virtual Dictionary get_messages(const Dictionary &p_args) { return Dictionary(); }
-	virtual Dictionary complete(const Dictionary &p_argument) { return Dictionary(); }
+	virtual String get_name() const override;
+	virtual Dictionary get_prompt() const override;
+	virtual Dictionary get_messages(const Dictionary &p_args) override;
+	virtual Dictionary complete(const Dictionary &p_argument) override;
 
-	JustAMCPPrompt();
-	~JustAMCPPrompt();
+	JustAMCPPromptBlaziumWorkflow(WorkflowKind p_kind = PROJECT_INTAKE);
+	~JustAMCPPromptBlaziumWorkflow();
 };
 
 #endif // TOOLS_ENABLED

@@ -4,7 +4,7 @@
 		Provides a built-in prompt with Blazium and Godot engine context.
 	</brief_description>
 	<description>
-		A [JustAMCPPrompt] implementation that returns version, module, and engine-environment context for MCP clients. Use it when an agent needs to understand the current Blazium runtime before answering or editing code.
+		A [JustAMCPPrompt] implementation that returns version, module, and engine-environment context for MCP clients. Use it for a lightweight server status check. For substantial work, prefer [code]blazium_project_intake[/code], which embeds richer project, scene, selection, and guide resources.
 	</description>
 	<tutorials>
 		<link title="Model Context Protocol (MCP)">https://modelcontextprotocol.io/</link>

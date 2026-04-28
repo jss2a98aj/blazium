@@ -41,6 +41,7 @@
 #include "prompts/justamcp_prompt_blazium_scene_architect.h"
 #include "prompts/justamcp_prompt_blazium_shader_expert.h"
 #include "prompts/justamcp_prompt_blazium_ui_scaffolder.h"
+#include "prompts/justamcp_prompt_blazium_workflows.h"
 #include "prompts/justamcp_prompt_editor_state.h"
 #include "prompts/justamcp_prompt_project_info.h"
 
@@ -74,6 +75,11 @@ void JustAMCPPromptExecutor::register_settings() {
 
 JustAMCPPromptExecutor::JustAMCPPromptExecutor() {
 	add_prompt(memnew(JustAMCPPromptBlaziumContext));
+	add_prompt(memnew(JustAMCPPromptBlaziumWorkflow(JustAMCPPromptBlaziumWorkflow::PROJECT_INTAKE)));
+	add_prompt(memnew(JustAMCPPromptBlaziumWorkflow(JustAMCPPromptBlaziumWorkflow::SCENE_BUILD)));
+	add_prompt(memnew(JustAMCPPromptBlaziumWorkflow(JustAMCPPromptBlaziumWorkflow::RUNTIME_TEST_LOOP)));
+	add_prompt(memnew(JustAMCPPromptBlaziumWorkflow(JustAMCPPromptBlaziumWorkflow::AUTOWORK_FIX_LOOP)));
+	add_prompt(memnew(JustAMCPPromptBlaziumWorkflow(JustAMCPPromptBlaziumWorkflow::DIAGNOSTICS_TRIAGE)));
 	add_prompt(memnew(JustAMCPPromptProjectInfo));
 	add_prompt(memnew(JustAMCPPromptEditorState));
 	add_prompt(memnew(JustAMCPPromptAutoworkTestGenerator));
@@ -97,10 +103,24 @@ void JustAMCPPromptExecutor::add_prompt(const Ref<JustAMCPPrompt> &p_prompt) {
 Dictionary JustAMCPPromptExecutor::list_prompts(const String &cursor) {
 	Dictionary result;
 	Array prompts;
+	int offset = cursor.is_valid_int() ? cursor.to_int() : 0;
+	if (offset < 0) {
+		offset = 0;
+	}
+	const int page_size = 50;
+	int emitted = 0;
 
 	for (int i = 0; i < registered_prompts.size(); i++) {
 		if (registered_prompts[i].is_valid()) {
+			if (i < offset) {
+				continue;
+			}
+			if (emitted >= page_size) {
+				result["nextCursor"] = itos(i);
+				break;
+			}
 			prompts.push_back(registered_prompts[i]->get_prompt());
+			emitted++;
 		}
 	}
 
@@ -111,6 +131,23 @@ Dictionary JustAMCPPromptExecutor::list_prompts(const String &cursor) {
 Dictionary JustAMCPPromptExecutor::get_prompt(const String &p_name, const Dictionary &p_args) {
 	for (int i = 0; i < registered_prompts.size(); i++) {
 		if (registered_prompts[i].is_valid() && registered_prompts[i]->get_name() == p_name) {
+			Dictionary schema = registered_prompts[i]->get_prompt();
+			Array arguments = schema.get("arguments", Array());
+			for (int j = 0; j < arguments.size(); j++) {
+				Dictionary argument = arguments[j];
+				bool required = argument.get("required", false);
+				String arg_name = argument.get("name", "");
+				if (!required || arg_name.is_empty()) {
+					continue;
+				}
+				if (!p_args.has(arg_name) || p_args[arg_name].get_type() == Variant::NIL || (p_args[arg_name].get_type() == Variant::STRING && String(p_args[arg_name]).strip_edges().is_empty())) {
+					Dictionary result;
+					result["ok"] = false;
+					result["error_code"] = -32602;
+					result["error"] = "Missing required prompt argument: " + arg_name;
+					return result;
+				}
+			}
 			return registered_prompts[i]->get_messages(p_args);
 		}
 	}
