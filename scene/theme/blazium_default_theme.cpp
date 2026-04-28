@@ -1046,10 +1046,10 @@ void update_theme_corner_radius(Ref<Theme> &p_theme, int p_corner_radius) {
 	button_normal_style->set_corner_radius_all(corners);
 	button_pressed_style->set_corner_radius_all(corners);
 	button_disabled_style->set_corner_radius_all(corners);
-	color_button_normal_style->set_corner_radius_all(corners);
-	color_button_hover_style->set_corner_radius_all(corners);
-	color_button_pressed_style->set_corner_radius_all(corners);
-	color_button_disabled_style->set_corner_radius_all(corners);
+	color_button_normal_style->set_corner_radius_all(MIN(corners, 2 * base_scale));
+	color_button_hover_style->set_corner_radius_all(MIN(corners, 2 * base_scale));
+	color_button_pressed_style->set_corner_radius_all(MIN(corners, 2 * base_scale));
+	color_button_disabled_style->set_corner_radius_all(MIN(corners, 2 * base_scale));
 	grabber_style->set_corner_radius_all(corners);
 	grabber_highlight_style->set_corner_radius_all(corners);
 	slider_style->set_corner_radius_all(corners);
@@ -1070,7 +1070,7 @@ void update_theme_corner_radius(Ref<Theme> &p_theme, int p_corner_radius) {
 
 	int focus_border = MAX(p_corner_radius - 2, 0) * base_scale;
 	button_focus_style->set_corner_radius_all(focus_border);
-	color_button_focus_style->set_corner_radius_all(focus_border);
+	color_button_focus_style->set_corner_radius_all(MIN(focus_border, 2 * base_scale));
 
 	p_theme->set_constant("corner_radius", "Constants", corners);
 	p_theme->set_constant("focus_corners", "Constants", focus_border);
