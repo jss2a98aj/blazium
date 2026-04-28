@@ -172,6 +172,7 @@ class ColorPickerShapeWheel : public ColorPickerShape {
 
 	static constexpr float WHEEL_RADIUS = 0.42;
 
+	MarginContainer *wheel_margin = nullptr;
 	Control *wheel = nullptr;
 	Control *wheel_uv = nullptr;
 
@@ -205,6 +206,7 @@ class ColorPickerShapeCircle : public ColorPickerShape {
 	GDCLASS(ColorPickerShapeCircle, ColorPickerShape);
 
 protected:
+	MarginContainer *circle_margin = nullptr;
 	Control *circle = nullptr;
 	Control *circle_overlay = nullptr;
 	Control *value_slider = nullptr;
