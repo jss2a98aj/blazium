@@ -737,12 +737,13 @@ void ColorPicker::_html_submitted(const String &p_html) {
 		return;
 	}
 	color = new_color;
+	_copy_color_to_normalized_and_intensity();
 
 	if (!is_inside_tree()) {
 		return;
 	}
 
-	set_pick_color(color);
+	_set_pick_color(color, true, false);
 	emit_signal(SNAME("color_changed"), color);
 }
 
