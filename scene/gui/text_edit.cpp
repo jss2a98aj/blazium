@@ -3495,6 +3495,8 @@ void TextEdit::set_editable(bool p_editable) {
 	if (editable) {
 		draw_caret = true;
 	}
+
+	queue_redraw();
 	update_minimum_size();
 }
 
