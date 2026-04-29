@@ -15,13 +15,6 @@
 				Returns keys that appeared more than once when the index was built in unique mode.
 			</description>
 		</method>
-		<method name="get_row" qualifiers="const">
-			<return type="Variant" />
-			<param index="0" name="value" type="Variant" />
-			<description>
-				Returns the first row for [param value], or [code]null[/code] when no row matches.
-			</description>
-		</method>
 		<method name="get_all" qualifiers="const">
 			<return type="Array" />
 			<param index="0" name="value" type="Variant" />
@@ -33,6 +26,13 @@
 			<return type="StringName" />
 			<description>
 				Returns the indexed column name.
+			</description>
+		</method>
+		<method name="get_row" qualifiers="const">
+			<return type="Variant" />
+			<param index="0" name="value" type="Variant" />
+			<description>
+				Returns the first row for [param value], or [code]null[/code] when no row matches.
 			</description>
 		</method>
 		<method name="has" qualifiers="const">

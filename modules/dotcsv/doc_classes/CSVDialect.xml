@@ -23,30 +23,6 @@
 				Creates a built-in dialect profile. Supported names include [code]csv[/code], [code]rfc4180[/code], [code]tsv[/code], [code]excel[/code], and [code]pipes[/code].
 			</description>
 		</method>
-		<method name="get_cast_fields" qualifiers="const">
-			<return type="bool" />
-			<description>
-				Returns whether imported fields are converted to typed values.
-			</description>
-		</method>
-		<method name="get_delimiter" qualifiers="const">
-			<return type="String" />
-			<description>
-				Returns the delimiter.
-			</description>
-		</method>
-		<method name="get_headers" qualifiers="const">
-			<return type="bool" />
-			<description>
-				Returns whether the first row is treated as headers.
-			</description>
-		</method>
-		<method name="get_options" qualifiers="const">
-			<return type="Dictionary" />
-			<description>
-				Returns parser options used by this dialect.
-			</description>
-		</method>
 		<method name="import_file" qualifiers="const">
 			<return type="Array" />
 			<param index="0" name="path" type="String" />
@@ -59,34 +35,6 @@
 			<param index="0" name="string" type="String" />
 			<description>
 				Imports [param string] using this dialect.
-			</description>
-		</method>
-		<method name="set_cast_fields">
-			<return type="void" />
-			<param index="0" name="cast_fields" type="bool" />
-			<description>
-				Sets whether imported fields are converted to typed values.
-			</description>
-		</method>
-		<method name="set_delimiter">
-			<return type="void" />
-			<param index="0" name="delimiter" type="String" />
-			<description>
-				Sets the delimiter.
-			</description>
-		</method>
-		<method name="set_headers">
-			<return type="void" />
-			<param index="0" name="headers" type="bool" />
-			<description>
-				Sets whether the first row is treated as headers.
-			</description>
-		</method>
-		<method name="set_options">
-			<return type="void" />
-			<param index="0" name="options" type="Dictionary" />
-			<description>
-				Sets parser options used by this dialect.
 			</description>
 		</method>
 		<method name="sniff" qualifiers="static">

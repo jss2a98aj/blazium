@@ -21,16 +21,16 @@
 				Returns the last error produced by [method open] or [method read_row].
 			</description>
 		</method>
-		<method name="get_line" qualifiers="const">
-			<return type="int" />
-			<description>
-				Returns the current one-based input line number.
-			</description>
-		</method>
 		<method name="get_length" qualifiers="const">
 			<return type="int" />
 			<description>
 				Returns the current file length in bytes, or [code]0[/code] when no file is open.
+			</description>
+		</method>
+		<method name="get_line" qualifiers="const">
+			<return type="int" />
+			<description>
+				Returns the current one-based input line number.
 			</description>
 		</method>
 		<method name="get_position" qualifiers="const">
