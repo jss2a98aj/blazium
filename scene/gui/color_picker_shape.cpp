@@ -462,8 +462,9 @@ void ColorPickerShapeRectangle::_update_cursor(const Vector2 &p_color_change_vec
 
 void ColorPickerShapeRectangle::update_theme() {
 	const ColorPicker::ThemeCache &theme_cache = color_picker->theme_cache;
-	sv_square->set_custom_minimum_size(Size2(theme_cache.sv_width, theme_cache.sv_height));
-	hue_slider->set_custom_minimum_size(Size2(theme_cache.h_width, 0));
+	const int shape_width = MAX(theme_cache.sv_width, 64 * theme_cache.base_scale);
+	sv_square->set_custom_minimum_size(Size2(shape_width, MAX(theme_cache.sv_height, 64 * theme_cache.base_scale)));
+	hue_slider->set_custom_minimum_size(Size2(MAX(8 * theme_cache.base_scale, theme_cache.h_width), 0));
 }
 
 void ColorPickerShapeRectangle::grab_focus() {
@@ -505,8 +506,9 @@ void ColorPickerShapeOKHSRectangle::_initialize_controls() {
 
 void ColorPickerShapeOKHSRectangle::update_theme() {
 	const ColorPicker::ThemeCache &theme_cache = color_picker->theme_cache;
-	rectangle_margin->set_custom_minimum_size(Size2(theme_cache.sv_width, theme_cache.sv_height));
-	value_slider->set_custom_minimum_size(Size2(theme_cache.h_width, 0));
+	const int shape_width = MAX(theme_cache.sv_width, 64 * theme_cache.base_scale);
+	rectangle_margin->set_custom_minimum_size(Size2(shape_width, MAX(theme_cache.sv_height, 64 * theme_cache.base_scale)));
+	value_slider->set_custom_minimum_size(Size2(MAX(8 * theme_cache.base_scale, theme_cache.h_width), 0));
 }
 
 void ColorPickerShapeOKHSRectangle::grab_focus() {
@@ -812,9 +814,12 @@ void ColorPickerShapeWheel::_initialize_controls() {
 	material->set_shader(ColorPickerShape::wheel_shader);
 	material->set_shader_parameter("wheel_radius", WHEEL_RADIUS);
 
+	wheel_margin = memnew(MarginContainer);
+	color_picker->shape_container->add_child(wheel_margin);
+
 	wheel = memnew(Control);
 	wheel->set_material(material);
-	color_picker->shape_container->add_child(wheel);
+	wheel_margin->add_child(wheel);
 	wheel->connect(SceneStringName(draw), callable_mp(this, &ColorPickerShapeWheel::_wheel_draw));
 
 	wheel_uv = memnew(Control);
@@ -825,6 +830,7 @@ void ColorPickerShapeWheel::_initialize_controls() {
 	wheel_uv->connect(SceneStringName(draw), callable_mp(this, &ColorPickerShapeWheel::_wheel_uv_draw));
 	connect_shape_focus(wheel_uv);
 
+	controls.append(wheel_margin);
 	controls.append(wheel);
 	controls.append(wheel_uv);
 }
@@ -845,7 +851,9 @@ void ColorPickerShapeWheel::_update_cursor(const Vector2 &p_color_change_vector,
 
 void ColorPickerShapeWheel::update_theme() {
 	const ColorPicker::ThemeCache &theme_cache = color_picker->theme_cache;
-	wheel->set_custom_minimum_size(Size2(theme_cache.sv_width, theme_cache.sv_height));
+	const int shape_size = MAX(MIN(theme_cache.sv_width, theme_cache.sv_height), 64 * theme_cache.base_scale);
+	wheel_margin->set_custom_minimum_size(Size2(shape_size, shape_size));
+	wheel_margin->add_theme_constant_override(SNAME("margin_bottom"), 8 * theme_cache.base_scale);
 }
 
 void ColorPickerShapeWheel::grab_focus() {
@@ -877,9 +885,12 @@ void ColorPickerShapeCircle::_initialize_controls() {
 	material.instantiate();
 	material->set_shader(_get_shader());
 
+	circle_margin = memnew(MarginContainer);
+	color_picker->shape_container->add_child(circle_margin);
+
 	circle = memnew(Control);
 	circle->set_material(material);
-	color_picker->shape_container->add_child(circle);
+	circle_margin->add_child(circle);
 	circle->connect(SceneStringName(draw), callable_mp(this, &ColorPickerShapeCircle::_circle_draw));
 
 	circle_overlay = memnew(Control);
@@ -895,6 +906,7 @@ void ColorPickerShapeCircle::_initialize_controls() {
 	value_slider->connect(SceneStringName(draw), callable_mp(this, &ColorPickerShapeCircle::_value_slider_draw));
 	connect_shape_focus(value_slider);
 
+	controls.append(circle_margin);
 	controls.append(circle);
 	controls.append(circle_overlay);
 	controls.append(value_slider);
@@ -902,8 +914,10 @@ void ColorPickerShapeCircle::_initialize_controls() {
 
 void ColorPickerShapeCircle::update_theme() {
 	const ColorPicker::ThemeCache &theme_cache = color_picker->theme_cache;
-	circle->set_custom_minimum_size(Size2(theme_cache.sv_width, theme_cache.sv_height));
-	value_slider->set_custom_minimum_size(Size2(theme_cache.h_width, 0));
+	const int shape_size = MAX(MIN(theme_cache.sv_width, theme_cache.sv_height), 64 * theme_cache.base_scale);
+	circle_margin->set_custom_minimum_size(Size2(shape_size, shape_size));
+	circle_margin->add_theme_constant_override(SNAME("margin_bottom"), 8 * theme_cache.base_scale);
+	value_slider->set_custom_minimum_size(Size2(MAX(8 * theme_cache.base_scale, theme_cache.h_width), 0));
 }
 
 void ColorPickerShapeCircle::grab_focus() {

@@ -2841,7 +2841,9 @@ void TextServerFallback::_font_draw_glyph_outline(const RID &p_font_rid, const R
 		return; // Non visual character, skip.
 	}
 	FontFallback *fd = _get_font_data(p_font_rid);
-	ERR_FAIL_NULL(fd);
+	if (!fd) {
+		return;
+	}
 
 	MutexLock lock(fd->mutex);
 	Vector2i size = _get_size_outline(fd, Vector2i(p_size, p_outline_size));

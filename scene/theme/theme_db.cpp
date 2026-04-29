@@ -115,7 +115,34 @@ void ThemeDB::initialize_theme() {
 #ifdef USE_LEGACY_THEME
 		make_default_theme(default_theme_scale, project_font, font_subpixel_positioning, font_hinting, font_antialiasing, lcd_subpixel_layout, font_msdf, font_generate_mipmaps);
 #else
-		make_default_theme(project_font, scale, font_subpixel_positioning, font_hinting, font_antialiasing, font_lcd_subpixel_layout, font_msdf, font_generate_mipmaps, base_color, accent_color, _get_font_color(), font_outline_color, contrast, normal_contrast, hover_contrast, pressed_contrast, bg_contrast, margin, padding, border_width, corner_radius, font_size, font_outline_size, font_embolden, font_spacing_glyph, font_spacing_space, font_spacing_top, font_spacing_bottom);
+		ThemeTemplate t = {
+			base_color,
+			accent_color,
+			font_color,
+			font_outline_color,
+			scale,
+			contrast,
+			bg_contrast,
+			normal_contrast,
+			hover_contrast,
+			pressed_contrast,
+			margin,
+			padding,
+			border_width,
+			corner_radius,
+			font_embolden,
+			font_size,
+			font_outline_size,
+			font_spacing_glyph,
+			font_spacing_space,
+			font_spacing_top,
+			font_spacing_bottom,
+			font_subpixel_positioning,
+			font_hinting,
+			font_antialiasing,
+			font_lcd_subpixel_layout
+		};
+		make_default_theme(project_font, t);
 #endif // USE_LEGACY_THEME
 	}
 
@@ -127,7 +154,8 @@ void ThemeDB::initialize_theme_noproject() {
 #ifdef USE_LEGACY_THEME
 		make_default_theme(1.0, Ref<Font>());
 #else
-		make_default_theme(Ref<Font>());
+		ThemeTemplate t = {};
+		make_default_theme(Ref<Font>(), t);
 #endif // USE_LEGACY_THEME
 	}
 
@@ -468,7 +496,7 @@ void ThemeDB::_update_default_theme() {
 	bool border_padding_changed = false;
 	bool update_colors = false;
 
-	float _scale = GLOBAL_GET("gui/theme/default_theme_scale");
+	float _scale = MAX((float)GLOBAL_GET("gui/theme/default_theme_scale"), 0.5f);
 	if (default_theme->get_default_base_scale() != _scale) {
 		default_theme->set_default_base_scale(_scale);
 		scale_changed = true;

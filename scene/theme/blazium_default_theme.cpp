@@ -221,7 +221,7 @@ PackedStringArray get_icons_list() {
 	return icons_list;
 }
 
-void update_theme_icons(Ref<Theme> &p_theme, const Color &p_font_color, const Color &p_accent_color) {
+void update_theme_icons(const Ref<Theme> &p_theme, const Color &p_font_color, const Color &p_accent_color) {
 	if (icons.is_empty()) {
 		Ref<Texture2D> empty_icon = memnew(ImageTexture);
 		p_theme->set_icon("increment", "HScrollBar", empty_icon);
@@ -499,7 +499,7 @@ Color contrast_color(const Color &p_color, float p_contrast) {
 // `Panel` and `PanelContainer` uses the `base_color` by default, another variation `FlatPanel` and `FlatPanelContainer` uses `bg_color`.
 // `TabContainer` and `FoldableContainer` panels uses the `bg_color` by default, another variation `FlatTabContainer` and `FlatFoldableContainer` uses `base_color`.
 // Other panels that doesn't allow having children like `Tree` and `ItemList` uses `style_normal_color` by default.
-void update_theme_colors(Ref<Theme> &p_theme, const Color &p_base_color, const Color &p_accent_color, float p_contrast, float p_normal_contrast, float p_hover_contrast, float p_pressed_contrast, float p_bg_contrast) {
+void update_theme_colors(const Ref<Theme> &p_theme, const Color &p_base_color, const Color &p_accent_color, float p_contrast, float p_normal_contrast, float p_hover_contrast, float p_pressed_contrast, float p_bg_contrast) {
 	const Color base_color = p_base_color.clamp();
 	const Color accent_color = p_accent_color.clamp();
 
@@ -631,7 +631,7 @@ void update_theme_colors(Ref<Theme> &p_theme, const Color &p_base_color, const C
 	p_theme->set_color("mono_color", "Colors", mono_color);
 }
 
-void update_font_color(Ref<Theme> &p_theme, const Color &p_color) {
+void update_font_color(const Ref<Theme> &p_theme, const Color &p_color) {
 	Color font_color = p_color.clamp();
 	is_dark_theme = font_color.get_luminance() > 0.5;
 
@@ -768,7 +768,7 @@ void update_font_color(Ref<Theme> &p_theme, const Color &p_color) {
 	p_theme->set_color("font_color", "Colors", p_color);
 }
 
-void update_font_outline_color(Ref<Theme> &p_theme, const Color &p_color) {
+void update_font_outline_color(const Ref<Theme> &p_theme, const Color &p_color) {
 	Color outline_color = p_color.clamp();
 	p_theme->set_color("font_outline_color", "Button", outline_color);
 	p_theme->set_color("font_outline_color", "RichTextLabel", outline_color);
@@ -798,7 +798,7 @@ void update_font_outline_color(Ref<Theme> &p_theme, const Color &p_color) {
 	p_theme->set_color("font_outline_color", "Colors", outline_color);
 }
 
-void update_font_outline_size(Ref<Theme> &p_theme, int p_outline_size) {
+void update_font_outline_size(const Ref<Theme> &p_theme, int p_outline_size) {
 	int outline_size = p_outline_size * MAX(p_theme->get_default_base_scale(), 0.5);
 
 	p_theme->set_constant("outline_size", "Button", outline_size);
@@ -829,7 +829,7 @@ void update_font_outline_size(Ref<Theme> &p_theme, int p_outline_size) {
 	p_theme->set_constant("font_outline_size", "Constants", outline_size);
 }
 
-void update_font_size(Ref<Theme> &p_theme, int p_font_size) {
+void update_font_size(const Ref<Theme> &p_theme, int p_font_size) {
 	p_theme->set_default_font_size(p_font_size);
 
 	p_theme->set_font_size(SceneStringName(font_size), "HeaderSmall", p_font_size + 4);
@@ -893,7 +893,7 @@ void update_font_spacing_bottom(int p_spacing) {
 	italics_font->set_spacing(TextServer::SPACING_BOTTOM, p_spacing);
 }
 
-void update_theme_font(Ref<Theme> &p_theme, Ref<Font> p_font) {
+void update_theme_font(const Ref<Theme> &p_theme, Ref<Font> p_font) {
 	if (p_font.is_valid() && p_font->is_class("FontVariation")) {
 		custom_font_variation = p_font;
 
@@ -973,7 +973,7 @@ void update_font_generate_mipmaps(bool p_font_generate_mipmaps) {
 	base_font->set_generate_mipmaps(p_font_generate_mipmaps);
 }
 
-void update_theme_margins(Ref<Theme> &p_theme, int p_margin) {
+void update_theme_margins(const Ref<Theme> &p_theme, int p_margin) {
 	int margin = p_margin * MAX(p_theme->get_default_base_scale(), 0.5);
 
 	p_theme->set_constant("h_separation", "Button", margin);
@@ -1011,7 +1011,7 @@ void update_theme_margins(Ref<Theme> &p_theme, int p_margin) {
 	p_theme->set_constant("margin", "Constants", margin);
 }
 
-void update_theme_padding(Ref<Theme> &p_theme, int p_padding) {
+void update_theme_padding(const Ref<Theme> &p_theme, int p_padding) {
 	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
 	int padding = p_padding * base_scale;
 
@@ -1036,7 +1036,7 @@ void update_theme_padding(Ref<Theme> &p_theme, int p_padding) {
 	p_theme->set_constant("padding", "Constants", padding);
 }
 
-void update_theme_corner_radius(Ref<Theme> &p_theme, int p_corner_radius) {
+void update_theme_corner_radius(const Ref<Theme> &p_theme, int p_corner_radius) {
 	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
 	int corners = p_corner_radius * base_scale;
 
@@ -1046,10 +1046,10 @@ void update_theme_corner_radius(Ref<Theme> &p_theme, int p_corner_radius) {
 	button_normal_style->set_corner_radius_all(corners);
 	button_pressed_style->set_corner_radius_all(corners);
 	button_disabled_style->set_corner_radius_all(corners);
-	color_button_normal_style->set_corner_radius_all(corners);
-	color_button_hover_style->set_corner_radius_all(corners);
-	color_button_pressed_style->set_corner_radius_all(corners);
-	color_button_disabled_style->set_corner_radius_all(corners);
+	color_button_normal_style->set_corner_radius_all(MIN(corners, 2 * base_scale));
+	color_button_hover_style->set_corner_radius_all(MIN(corners, 2 * base_scale));
+	color_button_pressed_style->set_corner_radius_all(MIN(corners, 2 * base_scale));
+	color_button_disabled_style->set_corner_radius_all(MIN(corners, 2 * base_scale));
 	grabber_style->set_corner_radius_all(corners);
 	grabber_highlight_style->set_corner_radius_all(corners);
 	slider_style->set_corner_radius_all(corners);
@@ -1070,13 +1070,13 @@ void update_theme_corner_radius(Ref<Theme> &p_theme, int p_corner_radius) {
 
 	int focus_border = MAX(p_corner_radius - 2, 0) * base_scale;
 	button_focus_style->set_corner_radius_all(focus_border);
-	color_button_focus_style->set_corner_radius_all(focus_border);
+	color_button_focus_style->set_corner_radius_all(MIN(focus_border, 2 * base_scale));
 
 	p_theme->set_constant("corner_radius", "Constants", corners);
 	p_theme->set_constant("focus_corners", "Constants", focus_border);
 }
 
-void update_theme_border_width(Ref<Theme> &p_theme, int p_border_width) {
+void update_theme_border_width(const Ref<Theme> &p_theme, int p_border_width) {
 	int border_width = p_border_width * MAX(p_theme->get_default_base_scale(), 0.5);
 
 	popup_panel_style->set_content_margin_all(MAX(border_width, 1));
@@ -1085,7 +1085,7 @@ void update_theme_border_width(Ref<Theme> &p_theme, int p_border_width) {
 	p_theme->set_constant("border_width", "Constants", border_width);
 }
 
-void update_theme_border_padding(Ref<Theme> &p_theme, int p_border_padding) {
+void update_theme_border_padding(const Ref<Theme> &p_theme, int p_border_padding) {
 	int border_padding = p_border_padding * MAX(p_theme->get_default_base_scale(), 0.5);
 
 	button_normal_style->set_content_margin_all(border_padding);
@@ -1110,7 +1110,7 @@ void update_theme_border_padding(Ref<Theme> &p_theme, int p_border_padding) {
 	p_theme->set_constant("border_padding", "Constants", border_padding);
 }
 
-void update_theme_scale(Ref<Theme> &p_theme) {
+void update_theme_scale(const Ref<Theme> &p_theme) {
 	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
 	int int_scale = MAX(Math::floor(base_scale), 1);
 	int x2_scale = 2 * base_scale;
@@ -1237,8 +1237,8 @@ void update_theme_scale(Ref<Theme> &p_theme) {
 	flat_tab_selected_style->set_content_margin_individual(x6_scale, x4_scale, x6_scale, x2_scale);
 }
 
-void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPositioning p_font_subpixel, TextServer::Hinting p_font_hinting, TextServer::FontAntialiasing p_font_antialiasing, TextServer::FontLCDSubpixelLayout p_font_lcd_subpixel_layout, bool p_font_msdf, bool p_font_generate_mipmaps, const Color &p_base_color, const Color &p_accent_color, const Color &p_font_color, const Color &p_font_outline_color, float p_contrast, float p_normal_contrast, float p_hover_contrast, float p_pressed_contrast, float p_bg_contrast, int p_margin, int p_padding, int p_border_width, int p_corner_radius, int p_font_size, int p_font_outline, float p_font_embolden, int p_font_spacing_glyph, int p_font_spacing_space, int p_font_spacing_top, int p_font_spacing_bottom) {
-	float scale = CLAMP(p_scale, 0.5, 8.0);
+void make_default_theme(Ref<Font> p_font, ThemeTemplate &p_template) {
+	float scale = CLAMP(p_template.scale, 0.5, 8.0);
 
 	Ref<Theme> t;
 	t.instantiate();
@@ -1333,29 +1333,29 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	v_split_bar_background.instantiate();
 
 	update_theme_font(t, p_font);
-	update_theme_margins(t, p_margin);
-	update_theme_padding(t, p_padding);
-	update_theme_corner_radius(t, p_corner_radius);
-	update_theme_border_width(t, p_border_width);
-	update_theme_border_padding(t, p_border_width + p_padding);
+	update_theme_margins(t, p_template.margin);
+	update_theme_padding(t, p_template.padding);
+	update_theme_corner_radius(t, p_template.corner_radius);
+	update_theme_border_width(t, p_template.border_width);
+	update_theme_border_padding(t, p_template.border_width + p_template.padding);
 	update_theme_scale(t);
-	update_font_color(t, p_font_color); // Update font color before icons and theme colors.
-	update_font_outline_color(t, p_font_outline_color);
-	update_theme_icons(t, p_font_color, p_accent_color);
-	update_theme_colors(t, p_base_color, p_accent_color, p_contrast, p_normal_contrast, p_hover_contrast, p_pressed_contrast, p_bg_contrast);
-	update_font_outline_size(t, p_font_outline);
-	update_font_size(t, p_font_size);
-	update_font_embolden(p_font_embolden);
-	update_font_spacing_glyph(p_font_spacing_glyph);
-	update_font_spacing_space(p_font_spacing_space);
-	update_font_spacing_top(p_font_spacing_top);
-	update_font_spacing_bottom(p_font_spacing_bottom);
-	update_font_subpixel_positioning(p_font_subpixel);
-	update_font_lcd_subpixel_layout(p_font_lcd_subpixel_layout);
-	update_font_antialiasing(p_font_antialiasing);
-	update_font_hinting(p_font_hinting);
-	update_font_msdf(p_font_msdf);
-	update_font_generate_mipmaps(p_font_generate_mipmaps);
+	update_font_color(t, p_template.font_color); // Update font color before icons and theme colors.
+	update_font_outline_color(t, p_template.font_outline_color);
+	update_theme_icons(t, p_template.font_color, p_template.accent_color);
+	update_theme_colors(t, p_template.base_color, p_template.accent_color, p_template.contrast, p_template.normal_contrast, p_template.hover_contrast, p_template.pressed_contrast, p_template.bg_contrast);
+	update_font_outline_size(t, p_template.font_outline_size);
+	update_font_size(t, p_template.font_size);
+	update_font_embolden(p_template.font_embolden);
+	update_font_spacing_glyph(p_template.font_spacing_glyph);
+	update_font_spacing_space(p_template.font_spacing_space);
+	update_font_spacing_top(p_template.font_spacing_top);
+	update_font_spacing_bottom(p_template.font_spacing_bottom);
+	update_font_subpixel_positioning(p_template.font_subpixel);
+	update_font_lcd_subpixel_layout(p_template.font_lcd_subpixel_layout);
+	update_font_antialiasing(p_template.font_antialiasing);
+	update_font_hinting(p_template.font_hinting);
+	update_font_msdf(p_template.font_msdf);
+	update_font_generate_mipmaps(p_template.font_generate_mipmaps);
 
 	t->set_stylebox(CoreStringName(normal), "Button", button_normal_style);
 	t->set_stylebox(SceneStringName(pressed), "Button", button_pressed_style);
@@ -1730,7 +1730,7 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	ThemeDB::get_singleton()->set_default_theme(t);
 	ThemeDB::get_singleton()->set_fallback_base_scale(scale);
 	ThemeDB::get_singleton()->set_fallback_stylebox(empty_style);
-	ThemeDB::get_singleton()->set_fallback_font_size(p_font_size * scale);
+	ThemeDB::get_singleton()->set_fallback_font_size(p_template.font_size * scale);
 }
 
 void finalize_default_theme() {
