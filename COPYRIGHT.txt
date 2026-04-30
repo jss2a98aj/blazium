@@ -548,6 +548,11 @@ Comment: ThorVG
 Copyright: 2020-2024, The ThorVG Project
 License: Expat
 
+Files: thirdparty/tileson/*
+Comment: Tileson
+Copyright: 2020, Robin Berg Pettersen
+License: BSD-2-clause
+
 Files: thirdparty/tinyexr/*
 Comment: TinyEXR
 Copyright: 2014-2021, Syoyo Fujita
