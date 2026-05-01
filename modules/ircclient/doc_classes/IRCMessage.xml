@@ -117,12 +117,16 @@
 	</methods>
 	<members>
 		<member name="command" type="String" setter="set_command" getter="get_command" default="&quot;&quot;">
+			IRC command associated with this message.
 		</member>
 		<member name="params" type="PackedStringArray" setter="set_params" getter="get_params" default="PackedStringArray()">
+			Array of parameters supplied with the IRC message.
 		</member>
 		<member name="prefix" type="String" setter="set_prefix" getter="get_prefix" default="&quot;&quot;">
+			Prefix identifying the source of the message.
 		</member>
 		<member name="tags" type="Dictionary" setter="set_tags" getter="get_tags" default="{}">
+			Raw IRCv3 message tags.
 		</member>
 	</members>
 </class>

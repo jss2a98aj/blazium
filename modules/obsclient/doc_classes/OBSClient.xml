@@ -2310,73 +2310,106 @@
 			Subscribe to all standard events (excludes high-volume events).
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_UNKNOWN" value="0">
+			Unknown request status.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_NO_ERROR" value="10">
+			No error occurred, but no explicit success confirmation.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_SUCCESS" value="100">
 			Request completed successfully.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_MISSING_REQUEST_TYPE" value="203">
+			The request did not include a request type.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_UNKNOWN_REQUEST_TYPE" value="204">
+			The specified request type is not recognized.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_GENERIC_ERROR" value="205">
+			A generic error occurred while processing the request.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_UNSUPPORTED_REQUEST_BATCH_EXECUTION_TYPE" value="206">
+			The batch execution type provided is not supported.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_NOT_READY" value="207">
+			The system is not ready to process the request.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_MISSING_REQUEST_FIELD" value="300">
+			A required field is missing from the request.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_MISSING_REQUEST_DATA" value="301">
+			The request is missing required data payload.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_INVALID_REQUEST_FIELD" value="400">
+			A request field contains an invalid value.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_INVALID_REQUEST_FIELD_TYPE" value="401">
+			A request field has an invalid data type.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_REQUEST_FIELD_OUT_OF_RANGE" value="402">
+			A request field value is outside the allowed range.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_REQUEST_FIELD_EMPTY" value="403">
+			A required request field is empty.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_TOO_MANY_REQUEST_FIELDS" value="404">
+			Too many fields were provided in the request.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_OUTPUT_RUNNING" value="500">
+			The requested operation cannot be performed because the output is already running.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_OUTPUT_NOT_RUNNING" value="501">
+			The requested operation requires a running output, but none is active.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_OUTPUT_PAUSED" value="502">
+			The requested operation cannot be performed because the output is paused.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_OUTPUT_NOT_PAUSED" value="503">
+			The requested operation requires a paused output, but it is not paused.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_OUTPUT_DISABLED" value="504">
+			The output is disabled and cannot perform the requested action.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_STUDIO_MODE_ACTIVE" value="505">
+			The requested operation cannot be performed while Studio Mode is active.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_STUDIO_MODE_NOT_ACTIVE" value="506">
+			The requested operation requires Studio Mode to be active.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_RESOURCE_NOT_FOUND" value="600">
+			The specified resource could not be found.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_RESOURCE_ALREADY_EXISTS" value="601">
+			The resource already exists.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_INVALID_RESOURCE_TYPE" value="602">
+			The resource type is invalid or unsupported.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_NOT_ENOUGH_RESOURCES" value="603">
+			Insufficient resources to complete the request.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_INVALID_RESOURCE_STATE" value="604">
+			The resource is in an invalid state for this operation.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_INVALID_INPUT_KIND" value="605">
+			The input kind specified is invalid.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_RESOURCE_NOT_CONFIGURABLE" value="606">
+			The resource cannot be configured.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_INVALID_FILTER_KIND" value="607">
+			The filter kind specified is invalid.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_RESOURCE_CREATION_FAILED" value="700">
+			Failed to create the requested resource.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_RESOURCE_ACTION_FAILED" value="701">
+			The action on the resource failed.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_REQUEST_PROCESSING_FAILED" value="702">
+			The request could not be processed.
 		</constant>
 		<constant name="OBS_REQUEST_STATUS_CANNOT_ACT" value="703">
+			The system cannot perform the requested action in the current state.
 		</constant>
 		<constant name="OBS_REQUEST_BATCH_EXECUTION_TYPE_NONE" value="-1">
 			Not a request batch.
@@ -2391,31 +2424,43 @@
 			Process requests in parallel using thread pool.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_DONT_CLOSE" value="0">
+			Do not close the WebSocket connection.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_UNKNOWN_REASON" value="4000">
+			Connection closed for an unknown reason.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_MESSAGE_DECODE_ERROR" value="4002">
+			Failed to decode the incoming message.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_MISSING_DATA_FIELD" value="4003">
+			A required data field is missing in the message.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_INVALID_DATA_FIELD_TYPE" value="4004">
+			A data field has an invalid type.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_INVALID_DATA_FIELD_VALUE" value="4005">
+			A data field contains an invalid value.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_UNKNOWN_OPCODE" value="4006">
+			The opcode provided is unknown.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_NOT_IDENTIFIED" value="4007">
+			Client attempted an operation before identifying.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_ALREADY_IDENTIFIED" value="4008">
+			Client attempted to identify more than once.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_AUTHENTICATION_FAILED" value="4009">
 			WebSocket closed due to authentication failure.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_UNSUPPORTED_RPC_VERSION" value="4010">
+			The requested RPC version is not supported.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_SESSION_INVALIDATED" value="4011">
+			The session was invalidated.
 		</constant>
 		<constant name="OBS_WEBSOCKET_CLOSE_UNSUPPORTED_FEATURE" value="4012">
+			A requested feature is not supported.
 		</constant>
 		<constant name="OBS_MEDIA_INPUT_ACTION_NONE" value="0">
 			No media action.
@@ -2439,22 +2484,31 @@
 			Go to previous playlist item.
 		</constant>
 		<constant name="OBS_OUTPUT_STATE_UNKNOWN" value="0">
+			Output state is unknown.
 		</constant>
 		<constant name="OBS_OUTPUT_STATE_STARTING" value="1">
+			Output is starting.
 		</constant>
 		<constant name="OBS_OUTPUT_STATE_STARTED" value="2">
+			Output has started.
 		</constant>
 		<constant name="OBS_OUTPUT_STATE_STOPPING" value="3">
+			Output is stopping.
 		</constant>
 		<constant name="OBS_OUTPUT_STATE_STOPPED" value="4">
+			Output has stopped.
 		</constant>
 		<constant name="OBS_OUTPUT_STATE_RECONNECTING" value="5">
+			Output is reconnecting.
 		</constant>
 		<constant name="OBS_OUTPUT_STATE_RECONNECTED" value="6">
+			Output has reconnected.
 		</constant>
 		<constant name="OBS_OUTPUT_STATE_PAUSED" value="7">
+			Output is paused.
 		</constant>
 		<constant name="OBS_OUTPUT_STATE_RESUMED" value="8">
+			Output has resumed from a paused state.
 		</constant>
 	</constants>
 </class>

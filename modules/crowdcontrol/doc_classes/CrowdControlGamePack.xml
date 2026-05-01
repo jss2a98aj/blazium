@@ -46,8 +46,10 @@
 	</methods>
 	<members>
 		<member name="effects" type="CrowdControlEffect[]" setter="set_effects" getter="get_effects" default="[]">
+			Array of individual interactivity effects in the pack.
 		</member>
 		<member name="pack_meta" type="CrowdControlGamePackMeta" setter="set_pack_meta" getter="get_pack_meta">
+			Stores the metadata for the pack.
 		</member>
 	</members>
 </class>

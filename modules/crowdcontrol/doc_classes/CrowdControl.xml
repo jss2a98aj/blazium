@@ -279,30 +279,43 @@
 	</signals>
 	<constants>
 		<constant name="STATUS_SUCCESS" value="0" enum="EffectStatus">
+			The effect executed successfully.
 		</constant>
 		<constant name="STATUS_FAILURE" value="1" enum="EffectStatus">
+			The effect failed to execute.
 		</constant>
 		<constant name="STATUS_UNAVAILABLE" value="2" enum="EffectStatus">
+			The effect is currently unavailable and cannot be triggered.
 		</constant>
 		<constant name="STATUS_RETRY" value="3" enum="EffectStatus">
+			The effect execution failed but may succeed if retried.
 		</constant>
 		<constant name="STATUS_QUEUE" value="4" enum="EffectStatus">
+			The effect has been queued and will execute later.
 		</constant>
 		<constant name="STATUS_TIMED_BEGIN" value="5" enum="EffectStatus">
+			A timed effect has started.
 		</constant>
 		<constant name="STATUS_TIMED_PAUSE" value="6" enum="EffectStatus">
+			A timed effect has been paused.
 		</constant>
 		<constant name="STATUS_TIMED_RESUME" value="7" enum="EffectStatus">
+			A timed effect has resumed after being paused.
 		</constant>
 		<constant name="STATUS_TIMED_END" value="8" enum="EffectStatus">
+			A timed effect has completed or ended.
 		</constant>
 		<constant name="MENU_VISIBLE" value="0" enum="EffectReportStatus">
+			The effect is visible in the menu.
 		</constant>
 		<constant name="MENU_HIDDEN" value="1" enum="EffectReportStatus">
+			The effect is hidden from the menu.
 		</constant>
 		<constant name="MENU_AVAILABLE" value="2" enum="EffectReportStatus">
+			The effect is available for selection or triggering.
 		</constant>
 		<constant name="MENU_UNAVAILABLE" value="3" enum="EffectReportStatus">
+			The effect is visible but currently unavailable for triggering.
 		</constant>
 	</constants>
 </class>
