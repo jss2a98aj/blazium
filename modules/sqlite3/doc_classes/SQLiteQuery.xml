@@ -46,6 +46,10 @@
 			<param index="0" name="op" type="int" />
 			<param index="1" name="reset" type="bool" default="false" />
 			<description>
+				Returns the current value of a statement status counter identified by [param op].
+				These counters track how many times specific operations were performed by the prepared statement and can be used to analyze its performance characteristics.
+
+				If [param reset] is [code]true[/code], the selected counter is reset to zero after its value is retrieved. Otherwise, the counter value is left unchanged.
 			</description>
 		</method>
 		<method name="is_ready" qualifiers="const">
