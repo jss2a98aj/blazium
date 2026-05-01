@@ -14,7 +14,7 @@ comprehensive set of common tools, so that
 users can focus on making games without having to reinvent the wheel. Games can
 be exported with one click to a number of platforms, including the major desktop
 platforms (Linux, macOS, Windows), mobile platforms (Android, iOS), as well as
-Web-based platforms and [consoles](docs.godotengine.org/en/stable/tutorials/platform/consoles.html).
+Web-based platforms and [consoles](https://docs.blazium.app/tutorials/platform/consoles.html).
 
 ## Free, open source and community-driven
 
@@ -48,7 +48,7 @@ Official binaries for the Blazium editor can be found [on the Blazium website](h
 
 ### Compiling from source
 
-[See the official docs](docs.godotengine.org/en/stable/contributing/development/compiling/)
+[See the official docs](https://docs.blazium.app/contributing/development/compiling)
 for compilation instructions for every supported platform.
 
 ## Community and contributing
@@ -56,24 +56,22 @@ for compilation instructions for every supported platform.
 Blazium is not only an engine but an ever-growing community of users and engine developers.
 
 The best way to get in touch with the core engine developers is to join the
-[Official Discord Server](https://chat.blazium.app).
+[Official Discord Server](https://blazium.app/chat).
 
 To get started contributing to the project, see the [contributing guide](CONTRIBUTING.md).
 This document also includes guidelines for reporting bugs.
 
 ## Documentation and demos
-<!--
 The official documentation is hosted on [DigitalOcean](https://docs.blazium.app).
 It is maintained by the Blazium community in its own [GitHub repository](https://github.com/blazium-games/blazium-docs).
--->
 
-The [class reference](docs.godotengine.org/en/stable/classes/index.html)
+The [class reference](https://docs.blazium.app/classes/index.html)
 is also accessible from the Blazium editor.
 
 There are also a number of other
-[learning resources](docs.godotengine.org/en/stable/community/tutorials.html)
+[learning resources](https://docs.blazium.app/community/tutorials.html)
 provided by the community, such as text and video tutorials, demos, etc.
 
 
-![Alt](https://repobeats.axiom.co/api/embed/fd66cb7230a67870b789048b7543660798fb8126.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/1b819dee6b40c3805707313803df99f2ad12cb37.svg "Repobeats analytics image")
 [![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=c9796b8f52e2&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
