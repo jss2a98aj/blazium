@@ -34,14 +34,11 @@
 #include "scene/theme/theme_db.h"
 
 Size2 ProgressBar::get_minimum_size() const {
-	Size2 minimum_size = theme_cache.background_style->get_minimum_size();
-	minimum_size = minimum_size.max(theme_cache.fill_style->get_minimum_size());
+	Size2 minimum_size = theme_cache.background_style->get_minimum_size() + theme_cache.fill_style->get_minimum_size().maxf(1);
 	if (show_percentage) {
 		String txt = "100%";
 		TextLine tl = TextLine(txt, theme_cache.font, theme_cache.font_size);
 		minimum_size.height = MAX(minimum_size.height, theme_cache.background_style->get_minimum_size().height + tl.get_size().y);
-	} else { // this is needed, else the progressbar will collapse
-		minimum_size = minimum_size.maxf(1);
 	}
 	return minimum_size;
 }
@@ -105,31 +102,32 @@ void ProgressBar::_notification(int p_what) {
 			switch (mode) {
 				case FILL_BEGIN_TO_END:
 				case FILL_END_TO_BEGIN: {
-					int mp = theme_cache.fill_style->get_minimum_size().width;
+					int mp = theme_cache.background_style->get_minimum_size().width;
 					int p = std::round(r * (get_size().width - mp));
 					// We want FILL_BEGIN_TO_END to map to right to left when UI layout is RTL,
 					// and left to right otherwise. And likewise for FILL_END_TO_BEGIN.
 					bool right_to_left = mode == (is_layout_rtl() ? FILL_BEGIN_TO_END : FILL_END_TO_BEGIN);
 					if (p > 0) {
+						Rect2 bg_style_rect = Rect2(Point2(theme_cache.background_style->get_margin(right_to_left ? SIDE_RIGHT : SIDE_LEFT), theme_cache.background_style->get_margin(SIDE_TOP)), theme_cache.background_style->get_minimum_size());
 						if (right_to_left) {
-							int p_remaining = std::round((1.0 - r) * (get_size().width - mp));
-							draw_style_box(theme_cache.fill_style, Rect2(Point2(p_remaining, 0), Size2(p + theme_cache.fill_style->get_minimum_size().width, get_size().height)));
+							int p_remaining = std::round((1.0 - r) * (get_size().width - bg_style_rect.size.width));
+							draw_style_box(theme_cache.fill_style, Rect2(Point2(p_remaining + bg_style_rect.position.x, bg_style_rect.position.y), Size2(p, get_size().height - bg_style_rect.size.height)));
 						} else {
-							draw_style_box(theme_cache.fill_style, Rect2(Point2(0, 0), Size2(p + theme_cache.fill_style->get_minimum_size().width, get_size().height)));
+							draw_style_box(theme_cache.fill_style, Rect2(bg_style_rect.position, Size2(p, get_size().height - bg_style_rect.size.height)));
 						}
 					}
 				} break;
 				case FILL_TOP_TO_BOTTOM:
 				case FILL_BOTTOM_TO_TOP: {
-					int mp = theme_cache.fill_style->get_minimum_size().height;
+					int mp = theme_cache.background_style->get_minimum_size().height;
 					int p = std::round(r * (get_size().height - mp));
-
+					Rect2 bg_style_rect = Rect2(Point2(theme_cache.background_style->get_margin(is_layout_rtl() ? SIDE_RIGHT : SIDE_LEFT), theme_cache.background_style->get_margin(SIDE_TOP)), theme_cache.background_style->get_minimum_size());
 					if (p > 0) {
 						if (mode == FILL_TOP_TO_BOTTOM) {
-							draw_style_box(theme_cache.fill_style, Rect2(Point2(0, 0), Size2(get_size().width, p + theme_cache.fill_style->get_minimum_size().height)));
+							draw_style_box(theme_cache.fill_style, Rect2(bg_style_rect.position, Size2(get_size().width - bg_style_rect.size.width, p)));
 						} else {
 							int p_remaining = std::round((1.0 - r) * (get_size().height - mp));
-							draw_style_box(theme_cache.fill_style, Rect2(Point2(0, p_remaining), Size2(get_size().width, p + theme_cache.fill_style->get_minimum_size().height)));
+							draw_style_box(theme_cache.fill_style, Rect2(Point2(bg_style_rect.position.x, p_remaining + bg_style_rect.position.y), Size2(get_size().width - bg_style_rect.size.width, p)));
 						}
 					}
 				} break;
