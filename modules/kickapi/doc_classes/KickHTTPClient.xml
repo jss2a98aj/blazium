@@ -109,6 +109,7 @@
 			<return type="void" />
 			<param index="0" name="tls_options" type="TLSOptions" />
 			<description>
+				Sets the TLS configuration used for secure network communication.
 			</description>
 		</method>
 	</methods>

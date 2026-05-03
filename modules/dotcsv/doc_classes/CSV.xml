@@ -7,6 +7,7 @@
 		CSV stores rows parsed from CSV, TSV, PSV, or other delimiter-separated text. When [member headers] is enabled, the first row is used as dictionary keys. Otherwise rows are stored with numeric column indexes.
 	</description>
 	<tutorials>
+		<link title="DotCSV Module Test">https://github.com/blazium-games/dotcsv_module_tests</link>
 	</tutorials>
 	<methods>
 		<method name="convert_to_variant" qualifiers="const">

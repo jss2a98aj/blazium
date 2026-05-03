@@ -70,14 +70,19 @@
 	</methods>
 	<members>
 		<member name="modes" type="String" setter="set_modes" getter="get_modes" default="&quot;&quot;">
+			String representing the active channel modes.
 		</member>
 		<member name="name" type="String" setter="set_name" getter="get_name" default="&quot;&quot;">
+			Name of the IRC channel.
 		</member>
 		<member name="topic" type="String" setter="set_topic" getter="get_topic" default="&quot;&quot;">
+			Current topic of the channel.
 		</member>
 		<member name="topic_setter" type="String" setter="set_topic_setter" getter="get_topic_setter" default="&quot;&quot;">
+			Nickname of the user who last set the channel topic.
 		</member>
 		<member name="topic_time" type="int" setter="set_topic_time" getter="get_topic_time" default="0">
+			Unix timestamp indicating when the topic was last set.
 		</member>
 	</members>
 </class>
