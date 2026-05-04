@@ -690,6 +690,12 @@ void Main::print_help(const char *p_binary) {
 	print_help_option("--aw-post-run=<script>", "Run a script after Autowork tests finish.\n");
 	print_help_option("--aw-hide-orphans", "Do not print orphaned nodes during Autowork tests.\n");
 	print_help_option("--aw-include-subdirs", "Include subdirectories when scanning for Autowork tests.\n");
+	print_help_option("--aw-e2e", "Force start the embedded E2E server alongside the process.\n");
+	print_help_option("--aw-e2e-host <address>", "Bind the E2E server to a specific local address (default: 127.0.0.1).\n");
+	print_help_option("--aw-e2e-port <port>", "Bind the E2E server to a specific local port.\n");
+	print_help_option("--aw-e2e-token <token>", "Force override the E2E token dynamically.\n");
+	print_help_option("--aw-e2e-port-file <path>", "Write the E2E server port to a file.\n");
+	print_help_option("--aw-e2e-log", "Enable verbose logging for the E2E server.\n");
 #endif
 
 	OS::get_singleton()->print("\n");

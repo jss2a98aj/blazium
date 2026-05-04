@@ -33,6 +33,8 @@
 #include "autowork_collector.h"
 #include "autowork_config.h"
 #include "autowork_doubler.h"
+#include "autowork_e2e_config.h"
+#include "autowork_e2e_server.h"
 #include "autowork_hook_script.h"
 #include "autowork_input_sender.h"
 #include "autowork_json_exporter.h"
@@ -46,6 +48,7 @@
 #include "autowork_stubber.h"
 #include "autowork_test.h"
 #include "autowork_vscode_debugger.h"
+#include "core/config/project_settings.h"
 #include "core/object/class_db.h"
 
 #ifdef TOOLS_ENABLED
@@ -73,6 +76,14 @@ void initialize_autowork_module(ModuleInitializationLevel p_level) {
 		ClassDB::register_class<AutoworkVSCodeDebugger>();
 		ClassDB::register_class<AutoworkRuntimeUI>();
 		ClassDB::register_class<AutoworkHookScript>();
+		ClassDB::register_class<AutoworkE2EConfig>();
+		ClassDB::register_class<AutoworkE2EServer>();
+
+		GLOBAL_DEF_BASIC("blazium/autowork/e2e_enabled", false);
+
+		if (AutoworkE2EConfig::is_enabled()) {
+			ProjectSettings::get_singleton()->set("autoload/AutomationServer", "*AutoworkE2EServer");
+		}
 	}
 
 #ifdef TOOLS_ENABLED
