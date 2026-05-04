@@ -165,14 +165,31 @@ void JustAMCPServer::_on_settings_changed() {
 
 void JustAMCPServer::_setup_settings() {
 #ifdef TOOLS_ENABLED
-	EDITOR_DEF_BASIC("blazium/justamcp/server_enabled", false);
-	EDITOR_DEF_BASIC("blazium/justamcp/server_port", 6506);
-	EDITOR_DEF_BASIC("blazium/justamcp/oauth_enabled", false);
-	EDITOR_DEF_BASIC("blazium/justamcp/client_id", "");
-	EDITOR_DEF_BASIC("blazium/justamcp/client_secret", "");
-	EDITOR_DEF_BASIC("blazium/justamcp/z_mcp_config", "");
-	EDITOR_DEF_BASIC("blazium/justamcp/enable_debug_logging", true);
-	EDITOR_DEF_BASIC("blazium/justamcp/bind_to_localhost_only", true);
+	if (EditorSettings::get_singleton()) {
+		EDITOR_DEF_BASIC("blazium/justamcp/server_enabled", false);
+		EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::BOOL, "blazium/justamcp/server_enabled"));
+
+		EDITOR_DEF_BASIC("blazium/justamcp/server_port", 6506);
+		EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::INT, "blazium/justamcp/server_port"));
+
+		EDITOR_DEF_BASIC("blazium/justamcp/oauth_enabled", false);
+		EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::BOOL, "blazium/justamcp/oauth_enabled"));
+
+		EDITOR_DEF_BASIC("blazium/justamcp/client_id", "");
+		EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "blazium/justamcp/client_id"));
+
+		EDITOR_DEF_BASIC("blazium/justamcp/client_secret", "");
+		EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "blazium/justamcp/client_secret"));
+
+		EDITOR_DEF_BASIC("blazium/justamcp/z_mcp_config", "");
+		EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::STRING, "blazium/justamcp/z_mcp_config"));
+
+		EDITOR_DEF_BASIC("blazium/justamcp/enable_debug_logging", true);
+		EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::BOOL, "blazium/justamcp/enable_debug_logging"));
+
+		EDITOR_DEF_BASIC("blazium/justamcp/bind_to_localhost_only", true);
+		EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::BOOL, "blazium/justamcp/bind_to_localhost_only"));
+	}
 #endif
 
 	// Ensure ProjectSettings equivalents exist for override
