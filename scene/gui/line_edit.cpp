@@ -135,6 +135,8 @@ void LineEdit::_update_ime_window_position() {
 	if (get_window()->get_embedder()) {
 		pos += get_viewport()->get_popup_base_transform().get_origin();
 	}
+	// Take into account the window's transform.
+	pos = get_window()->get_screen_transform().xform(pos);
 	// The window will move to the updated position the next time the IME is updated, not immediately.
 	DisplayServer::get_singleton()->window_set_ime_position(pos, wid);
 }
@@ -1472,6 +1474,9 @@ void LineEdit::_notification(int p_what) {
 				if (ime_text == new_ime_text && ime_selection == new_ime_selection) {
 					break;
 				}
+				if (!window_has_focus && !new_ime_text.is_empty()) {
+					break;
+				}
 
 				ime_text = new_ime_text;
 				ime_selection = new_ime_selection;
@@ -1668,6 +1673,9 @@ void LineEdit::set_caret_at_pixel_pos(int p_x) {
 	}
 
 	int ofs = std::ceil(TS->shaped_text_hit_test_position(text_rid, p_x - x_ofs - scroll_offset));
+	if (ofs == -1) {
+		return;
+	}
 	if (!caret_mid_grapheme_enabled) {
 		ofs = TS->shaped_text_closest_character_pos(text_rid, ofs);
 	}
@@ -1863,22 +1871,39 @@ void LineEdit::delete_text(int p_from_column, int p_to_column) {
 	}
 }
 
-void LineEdit::set_text(String p_text) {
+void LineEdit::_set_text(String p_text, bool p_emit_signal) {
 	clear_internal();
+
+	String previous_text = get_text();
 	insert_text_at_caret(p_text);
-	_create_undo_state();
+
+	if (get_text() != previous_text) {
+		_create_undo_state();
+		if (p_emit_signal) {
+			_text_changed();
+		}
+	}
 
 	queue_redraw();
 	caret_column = 0;
 	scroll_offset = 0.0;
 }
 
+void LineEdit::set_text(String p_text) {
+	_set_text(p_text);
+}
+
 void LineEdit::set_text_with_selection(const String &p_text) {
 	Selection selection_copy = selection;
 
 	clear_internal();
+
+	String previous_text = get_text();
 	insert_text_at_caret(p_text);
-	_create_undo_state();
+
+	if (get_text() != previous_text) {
+		_create_undo_state();
+	}
 
 	int tlen = text.length();
 	selection = selection_copy;
@@ -1951,14 +1976,14 @@ TextServer::StructuredTextParser LineEdit::get_structured_text_bidi_override() c
 	return st_parser;
 }
 
-void LineEdit::set_structured_text_bidi_override_options(Array p_args) {
-	st_args = p_args;
+void LineEdit::set_structured_text_bidi_override_options(const Array &p_args) {
+	st_args = Array(p_args);
 	_shape();
 	queue_redraw();
 }
 
 Array LineEdit::get_structured_text_bidi_override_options() const {
-	return st_args;
+	return Array(st_args);
 }
 
 void LineEdit::clear() {
@@ -2512,7 +2537,6 @@ void LineEdit::show_emoji_and_symbol_picker() {
 void LineEdit::set_emoji_menu_enabled(bool p_enabled) {
 	if (emoji_menu_enabled != p_enabled) {
 		emoji_menu_enabled = p_enabled;
-		_update_context_menu();
 	}
 }
 
@@ -2954,6 +2978,10 @@ void LineEdit::_validate_property(PropertyInfo &p_property) const {
 }
 
 void LineEdit::_bind_methods() {
+	// Private exposed API.
+	ClassDB::bind_method(D_METHOD("_set_text", "text", "emit_signal"), &LineEdit::_set_text, DEFVAL(false));
+
+	// Public API.
 	ClassDB::bind_method(D_METHOD("has_ime_text"), &LineEdit::has_ime_text);
 	ClassDB::bind_method(D_METHOD("cancel_ime"), &LineEdit::cancel_ime);
 	ClassDB::bind_method(D_METHOD("apply_ime"), &LineEdit::apply_ime);

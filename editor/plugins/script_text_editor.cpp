@@ -95,7 +95,7 @@ void ConnectionInfoDialog::popup_connections(const String &p_method, const Vecto
 }
 
 ConnectionInfoDialog::ConnectionInfoDialog() {
-	set_title(TTR("Connections to method:"));
+	set_title(TTRC("Connections to method:"));
 
 	VBoxContainer *vbc = memnew(VBoxContainer);
 	vbc->set_anchor_and_offset(SIDE_LEFT, Control::ANCHOR_BEGIN, 8 * EDSCALE);
@@ -105,6 +105,7 @@ ConnectionInfoDialog::ConnectionInfoDialog() {
 	add_child(vbc);
 
 	method = memnew(Label);
+	method->set_auto_translate_mode(AUTO_TRANSLATE_MODE_DISABLED);
 	method->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
 	vbc->add_child(method);
 
@@ -113,9 +114,9 @@ ConnectionInfoDialog::ConnectionInfoDialog() {
 	tree->set_columns(3);
 	tree->set_hide_root(true);
 	tree->set_column_titles_visible(true);
-	tree->set_column_title(0, TTR("Source"));
-	tree->set_column_title(1, TTR("Signal"));
-	tree->set_column_title(2, TTR("Target"));
+	tree->set_column_title(0, TTRC("Source"));
+	tree->set_column_title(1, TTRC("Signal"));
+	tree->set_column_title(2, TTRC("Target"));
 	vbc->add_child(tree);
 	tree->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	tree->set_allow_rmb_select(true);
@@ -190,16 +191,22 @@ void ScriptTextEditor::enable_editor(Control *p_shortcut_context) {
 void ScriptTextEditor::_load_theme_settings() {
 	CodeEdit *text_edit = code_editor->get_text_editor();
 
+	Color updated_warning_line_color = EDITOR_GET("text_editor/theme/highlighting/warning_color");
 	Color updated_marked_line_color = EDITOR_GET("text_editor/theme/highlighting/mark_color");
 	Color updated_safe_line_number_color = EDITOR_GET("text_editor/theme/highlighting/safe_line_number_color");
 	Color updated_folded_code_region_color = EDITOR_GET("text_editor/theme/highlighting/folded_code_region_color");
 
-	bool safe_line_number_color_updated = updated_safe_line_number_color != safe_line_number_color;
+	bool warning_line_color_updated = updated_warning_line_color != warning_line_color;
 	bool marked_line_color_updated = updated_marked_line_color != marked_line_color;
+	bool safe_line_number_color_updated = updated_safe_line_number_color != safe_line_number_color;
 	bool folded_code_region_color_updated = updated_folded_code_region_color != folded_code_region_color;
-	if (safe_line_number_color_updated || marked_line_color_updated || folded_code_region_color_updated) {
+	if (safe_line_number_color_updated || warning_line_color_updated || marked_line_color_updated || folded_code_region_color_updated) {
 		safe_line_number_color = updated_safe_line_number_color;
 		for (int i = 0; i < text_edit->get_line_count(); i++) {
+			if (warning_line_color_updated && text_edit->get_line_background_color(i) == warning_line_color) {
+				text_edit->set_line_background_color(i, updated_warning_line_color);
+			}
+
 			if (marked_line_color_updated && text_edit->get_line_background_color(i) == marked_line_color) {
 				text_edit->set_line_background_color(i, updated_marked_line_color);
 			}
@@ -212,6 +219,7 @@ void ScriptTextEditor::_load_theme_settings() {
 				text_edit->set_line_background_color(i, updated_folded_code_region_color);
 			}
 		}
+		warning_line_color = updated_warning_line_color;
 		marked_line_color = updated_marked_line_color;
 		folded_code_region_color = updated_folded_code_region_color;
 	}
@@ -404,83 +412,103 @@ bool ScriptTextEditor::_is_valid_color_info(const Dictionary &p_info) {
 	return true;
 }
 
-Array ScriptTextEditor::_inline_object_parse(const String &p_text, int p_line) {
+Array ScriptTextEditor::_inline_object_parse(const String &p_text) {
 	Array result;
 	int i_end_previous = 0;
 	int i_start = p_text.find("Color");
 
 	while (i_start != -1) {
 		// Ignore words that just have "Color" in them.
-		if (i_start == 0 || !("_" + p_text.substr(i_start - 1, 1)).is_valid_ascii_identifier()) {
-			int i_par_start = p_text.find_char('(', i_start + 5);
-			if (i_par_start != -1) {
-				int i_par_end = p_text.find_char(')', i_start + 5);
-				if (i_par_end != -1) {
-					Dictionary color_info;
-					color_info["line"] = p_line;
-					color_info["column"] = i_start;
-					color_info["width_ratio"] = 1.0;
-					color_info["color_end"] = i_par_end;
+		if (i_start != 0 && ('_' + p_text.substr(i_start - 1, 1)).is_valid_ascii_identifier()) {
+			i_end_previous = MAX(i_end_previous, i_start);
+			i_start = p_text.find("Color", i_start + 1);
+			continue;
+		}
 
-					String fn_name = p_text.substr(i_start + 5, i_par_start - i_start - 5);
-					String s_params = p_text.substr(i_par_start + 1, i_par_end - i_par_start - 1);
-					bool has_added_color = false;
+		const int i_par_start = p_text.find_char('(', i_start + 5);
+		const int i_par_end = p_text.find_char(')', i_start + 5);
+		if (i_par_start == -1 || i_par_end == -1) {
+			i_end_previous = MAX(i_end_previous, i_start);
+			i_start = p_text.find("Color", i_start + 1);
+			continue;
+		}
 
-					if (fn_name.is_empty()) {
-						String stripped = s_params.strip_edges(true, true);
-						// String constructor.
-						if (stripped.length() > 0 && (stripped[0] == '\"')) {
-							String color_string = stripped.substr(1, stripped.length() - 2);
-							color_info["color"] = Color(color_string);
-							color_info["color_mode"] = MODE_STRING;
-							has_added_color = true;
-						}
-						// Hex constructor.
-						else if (stripped.length() == 10 && stripped.substr(0, 2) == "0x") {
-							color_info["color"] = Color(stripped.substr(2, stripped.length() - 2));
-							color_info["color_mode"] = MODE_HEX;
-							has_added_color = true;
-						}
-						// Empty Color() constructor.
-						else if (stripped.is_empty()) {
-							color_info["color"] = Color();
-							color_info["color_mode"] = MODE_RGB;
-							has_added_color = true;
-						}
-					}
-					// Float & int parameters.
-					if (!has_added_color && s_params.size() > 0) {
-						PackedFloat64Array params = s_params.split_floats(",", false);
-						if (params.size() == 3) {
-							params.resize(4);
-							params.set(3, 1.0);
-						}
-						if (params.size() == 4) {
-							has_added_color = true;
-							if (fn_name == ".from_ok_hsl") {
-								color_info["color"] = Color::from_ok_hsl(params[0], params[1], params[2], params[3]);
-								color_info["color_mode"] = MODE_OKHSL;
-							} else if (fn_name == ".from_hsv") {
-								color_info["color"] = Color::from_hsv(params[0], params[1], params[2], params[3]);
-								color_info["color_mode"] = MODE_HSV;
-							} else if (fn_name == ".from_rgba8") {
-								color_info["color"] = Color::from_rgba8(int(params[0]), int(params[1]), int(params[2]), int(params[3]));
-								color_info["color_mode"] = MODE_RGB8;
-							} else if (fn_name.is_empty()) {
-								color_info["color"] = Color(params[0], params[1], params[2], params[3]);
-								color_info["color_mode"] = MODE_RGB;
-							} else {
-								has_added_color = false;
-							}
-						}
-					}
+		Dictionary color_info;
+		color_info["column"] = i_start;
+		color_info["width_ratio"] = 1.0;
+		color_info["color_end"] = i_par_end;
 
-					if (has_added_color) {
-						result.push_back(color_info);
-						i_end_previous = i_par_end + 1;
+		const String fn_name = p_text.substr(i_start + 5, i_par_start - i_start - 5);
+		const String s_params = p_text.substr(i_par_start + 1, i_par_end - i_par_start - 1);
+		bool has_added_color = false;
+
+		if (fn_name.is_empty()) {
+			String stripped = s_params.strip_edges(true, true);
+			if (stripped.length() > 1 && (stripped[0] == '"' || stripped[0] == '\'')) {
+				// String constructor.
+				const char32_t string_delimiter = stripped[0];
+				if (stripped[stripped.length() - 1] == string_delimiter) {
+					const String color_string = stripped.substr(1, stripped.length() - 2);
+					if (!color_string.contains_char(string_delimiter)) {
+						color_info["color"] = Color::from_string(color_string, Color());
+						color_info["color_mode"] = MODE_STRING;
+						has_added_color = true;
 					}
 				}
+			} else if (stripped.length() == 10 && stripped.begins_with("0x")) {
+				// Hex constructor.
+				const String color_string = stripped.substr(2);
+				if (color_string.is_valid_hex_number(false)) {
+					color_info["color"] = Color::from_string(color_string, Color());
+					color_info["color_mode"] = MODE_HEX;
+					has_added_color = true;
+				}
+			} else if (stripped.is_empty()) {
+				// Empty Color() constructor.
+				color_info["color"] = Color();
+				color_info["color_mode"] = MODE_RGB;
+				has_added_color = true;
 			}
+		}
+		// Float & int parameters.
+		if (!has_added_color && s_params.size() > 0) {
+			const PackedStringArray s_params_split = s_params.split(",", false, 4);
+			PackedFloat64Array params;
+			bool valid_floats = true;
+			for (const String &s_param : s_params_split) {
+				// Only allow float literals, expressions won't be evaluated and could get replaced.
+				if (!s_param.strip_edges().is_valid_float()) {
+					valid_floats = false;
+					break;
+				}
+				params.push_back(s_param.to_float());
+			}
+			if (valid_floats && params.size() == 3) {
+				params.push_back(1.0);
+			}
+			if (valid_floats && params.size() == 4) {
+				has_added_color = true;
+				if (fn_name == ".from_ok_hsl") {
+					color_info["color"] = Color::from_ok_hsl(params[0], params[1], params[2], params[3]);
+					color_info["color_mode"] = MODE_OKHSL;
+				} else if (fn_name == ".from_hsv") {
+					color_info["color"] = Color::from_hsv(params[0], params[1], params[2], params[3]);
+					color_info["color_mode"] = MODE_HSV;
+				} else if (fn_name == ".from_rgba8") {
+					color_info["color"] = Color::from_rgba8(int(params[0]), int(params[1]), int(params[2]), int(params[3]));
+					color_info["color_mode"] = MODE_RGB8;
+				} else if (fn_name.is_empty()) {
+					color_info["color"] = Color(params[0], params[1], params[2], params[3]);
+					color_info["color_mode"] = MODE_RGB;
+				} else {
+					has_added_color = false;
+				}
+			}
+		}
+
+		if (has_added_color) {
+			result.push_back(color_info);
+			i_end_previous = i_par_end + 1;
 		}
 		i_end_previous = MAX(i_end_previous, i_start);
 		i_start = p_text.find("Color", i_start + 1);
@@ -494,9 +522,10 @@ void ScriptTextEditor::_inline_object_draw(const Dictionary &p_info, const Rect2
 		if (color_alpha_texture.is_null()) {
 			color_alpha_texture = inline_color_picker->get_theme_icon("sample_bg", "ColorPicker");
 		}
-		code_editor->get_text_editor()->draw_texture_rect(color_alpha_texture, col_rect, false);
-		code_editor->get_text_editor()->draw_rect(col_rect, Color(p_info["color"]));
-		code_editor->get_text_editor()->draw_rect(col_rect, Color(1, 1, 1), false, 1);
+		RID text_ci = code_editor->get_text_editor()->get_text_canvas_item();
+		RS::get_singleton()->canvas_item_add_rect(text_ci, p_rect.grow(-3), Color(1, 1, 1));
+		color_alpha_texture->draw_rect(text_ci, col_rect);
+		RS::get_singleton()->canvas_item_add_rect(text_ci, col_rect, Color(p_info["color"]));
 	}
 }
 
@@ -599,6 +628,50 @@ void ScriptTextEditor::_update_color_constructor_options() {
 			inline_color_options->add_item(option_text);
 		} else {
 			inline_color_options->set_item_text(i, option_text);
+		}
+	}
+}
+
+void ScriptTextEditor::_update_background_color() {
+	// Clear background lines.
+	CodeEdit *te = code_editor->get_text_editor();
+	for (int i = 0; i < te->get_line_count(); i++) {
+		bool is_folded_code_region = te->is_line_code_region_start(i) && te->is_line_folded(i);
+		te->set_line_background_color(i, is_folded_code_region ? folded_code_region_color : Color(0, 0, 0, 0));
+	}
+
+	// Set the warning background.
+	if (warning_line_color.a != 0.0) {
+		for (const ScriptLanguage::Warning &warning : warnings) {
+			int folder_line_header = te->get_folded_line_header(warning.end_line - 2);
+			bool is_folded = folder_line_header != (warning.end_line - 2);
+
+			if (is_folded) {
+				te->set_line_background_color(folder_line_header, warning_line_color);
+			} else if (warning.end_line - warning.start_line > 0 && warning.end_line - warning.start_line < 20) {
+				// If the warning spans below 20 lines (arbitrary), set the background color for all lines.
+				// (W.end_line - W.start_line > 0) ensures that we set the background for single line warnings.
+				for (int i = warning.start_line - 1; i < warning.end_line - 1; i++) {
+					te->set_line_background_color(i, warning_line_color);
+				}
+			} else {
+				// Otherwise, just set the background color for the start line of the warning.
+				te->set_line_background_color(warning.start_line - 1, warning_line_color);
+			}
+		}
+	}
+
+	// Set the error background.
+	if (marked_line_color.a != 0.0) {
+		for (const ScriptLanguage::ScriptError &error : errors) {
+			int folder_line_header = te->get_folded_line_header(error.line - 1);
+			bool is_folded_code = folder_line_header != (error.line - 1);
+
+			if (is_folded_code) {
+				te->set_line_background_color(folder_line_header, marked_line_color);
+			} else {
+				te->set_line_background_color(error.line - 1, marked_line_color);
+			}
 		}
 	}
 }
@@ -804,6 +877,7 @@ void ScriptTextEditor::_validate_script() {
 	_update_connected_methods();
 	_update_warnings();
 	_update_errors();
+	_update_background_color();
 
 	emit_signal(SNAME("name_changed"));
 	emit_signal(SNAME("edited_script_changed"));
@@ -934,23 +1008,11 @@ void ScriptTextEditor::_update_errors() {
 		errors_panel->pop(); // Indent.
 	}
 
-	CodeEdit *te = code_editor->get_text_editor();
 	bool highlight_safe = EDITOR_GET("text_editor/appearance/gutters/highlight_type_safe_lines");
 	bool last_is_safe = false;
-	for (int i = 0; i < te->get_line_count(); i++) {
-		if (errors.is_empty()) {
-			bool is_folded_code_region = te->is_line_code_region_start(i) && te->is_line_folded(i);
-			te->set_line_background_color(i, is_folded_code_region ? folded_code_region_color : Color(0, 0, 0, 0));
-		} else {
-			for (const ScriptLanguage::ScriptError &E : errors) {
-				bool error_line = i == E.line - 1;
-				te->set_line_background_color(i, error_line ? marked_line_color : Color(0, 0, 0, 0));
-				if (error_line) {
-					break;
-				}
-			}
-		}
+	CodeEdit *te = code_editor->get_text_editor();
 
+	for (int i = 0; i < te->get_line_count(); i++) {
 		if (highlight_safe) {
 			if (safe_lines.has(i + 1)) {
 				te->set_line_gutter_item_color(i, line_number_gutter, safe_line_number_color);
@@ -1463,8 +1525,8 @@ String ScriptTextEditor::_get_absolute_path(const String &rel_path) {
 	return path.replace("///", "//").simplify_path();
 }
 
-void ScriptTextEditor::update_toggle_scripts_button() {
-	code_editor->update_toggle_scripts_button();
+void ScriptTextEditor::update_toggle_files_button() {
+	code_editor->update_toggle_files_button();
 }
 
 void ScriptTextEditor::_update_connected_methods() {
@@ -1737,11 +1799,9 @@ void ScriptTextEditor::_edit_option(int p_op) {
 		} break;
 		case EDIT_FOLD_ALL_LINES: {
 			tx->fold_all_lines();
-			tx->queue_redraw();
 		} break;
 		case EDIT_UNFOLD_ALL_LINES: {
 			tx->unfold_all_lines();
-			tx->queue_redraw();
 		} break;
 		case EDIT_CREATE_CODE_REGION: {
 			tx->create_code_region();
@@ -1871,7 +1931,6 @@ void ScriptTextEditor::_edit_option(int p_op) {
 		} break;
 		case SEARCH_LOCATE_FUNCTION: {
 			quick_open->popup_dialog(get_functions());
-			quick_open->set_title(TTR("Go to Function"));
 		} break;
 		case SEARCH_GOTO_LINE: {
 			goto_line_popup->popup_find_line(code_editor);
@@ -2036,6 +2095,13 @@ void ScriptTextEditor::_change_syntax_highlighter(int p_idx) {
 
 void ScriptTextEditor::_notification(int p_what) {
 	switch (p_what) {
+		case NOTIFICATION_TRANSLATION_CHANGED: {
+			if (is_ready() && is_visible_in_tree()) {
+				_update_errors();
+				_update_warnings();
+			}
+		} break;
+
 		case NOTIFICATION_THEME_CHANGED:
 			if (!editor_enabled) {
 				break;
@@ -2043,6 +2109,7 @@ void ScriptTextEditor::_notification(int p_what) {
 			if (is_visible_in_tree()) {
 				_update_warnings();
 				_update_errors();
+				_update_background_color();
 			}
 			[[fallthrough]];
 		case NOTIFICATION_ENTER_TREE: {
@@ -2422,7 +2489,7 @@ void ScriptTextEditor::_text_edit_gui_input(const Ref<InputEvent> &ev) {
 			}
 		}
 
-		String word_at_pos = tx->get_word_at_pos(local_pos);
+		String word_at_pos = tx->get_lookup_word(mouse_line, mouse_column);
 		if (word_at_pos.is_empty()) {
 			word_at_pos = tx->get_word_under_caret(selection_clicked);
 		}
@@ -2553,7 +2620,7 @@ void ScriptTextEditor::_prepare_edit_menu() {
 void ScriptTextEditor::_make_context_menu(bool p_selection, bool p_color, bool p_foldable, bool p_open_docs, bool p_goto_definition, Vector2 p_pos) {
 	context_menu->clear();
 	if (DisplayServer::get_singleton()->has_feature(DisplayServer::FEATURE_EMOJI_AND_SYMBOL_PICKER)) {
-		context_menu->add_item(TTR("Emoji & Symbols"), EDIT_EMOJI_AND_SYMBOL);
+		context_menu->add_item(TTRC("Emoji & Symbols"), EDIT_EMOJI_AND_SYMBOL);
 		context_menu->add_separator();
 	}
 	context_menu->add_shortcut(ED_GET_SHORTCUT("ui_undo"), EDIT_UNDO);
@@ -2590,7 +2657,7 @@ void ScriptTextEditor::_make_context_menu(bool p_selection, bool p_color, bool p
 			context_menu->add_shortcut(ED_GET_SHORTCUT("script_text_editor/goto_symbol"), LOOKUP_SYMBOL);
 		}
 		if (p_color) {
-			context_menu->add_item(TTR("Pick Color"), EDIT_PICK_COLOR);
+			context_menu->add_item(TTRC("Pick Color"), EDIT_PICK_COLOR);
 		}
 	}
 
@@ -2625,8 +2692,9 @@ void ScriptTextEditor::_enable_code_editor() {
 	code_editor->get_text_editor()->connect("gutter_added", callable_mp(this, &ScriptTextEditor::_update_gutter_indexes));
 	code_editor->get_text_editor()->connect("gutter_removed", callable_mp(this, &ScriptTextEditor::_update_gutter_indexes));
 	code_editor->get_text_editor()->connect("gutter_clicked", callable_mp(this, &ScriptTextEditor::_gutter_clicked));
+	code_editor->get_text_editor()->connect("_fold_line_updated", callable_mp(this, &ScriptTextEditor::_update_background_color));
 	code_editor->get_text_editor()->connect(SceneStringName(gui_input), callable_mp(this, &ScriptTextEditor::_text_edit_gui_input));
-	code_editor->show_toggle_scripts_button();
+	code_editor->show_toggle_files_button();
 	_update_gutter_indexes();
 
 	editor_box->add_child(warnings_panel);
@@ -2656,6 +2724,7 @@ void ScriptTextEditor::_enable_code_editor() {
 	color_panel->add_child(color_picker);
 
 	quick_open = memnew(ScriptEditorQuickOpen);
+	quick_open->set_title(TTRC("Go to Function"));
 	quick_open->connect("goto_line", callable_mp(this, &ScriptTextEditor::_goto_line));
 	add_child(quick_open);
 
@@ -2688,7 +2757,7 @@ void ScriptTextEditor::_enable_code_editor() {
 		sub_menu->add_shortcut(ED_GET_SHORTCUT("script_text_editor/delete_line"), EDIT_DELETE_LINE);
 		sub_menu->add_shortcut(ED_GET_SHORTCUT("script_text_editor/toggle_comment"), EDIT_TOGGLE_COMMENT);
 		sub_menu->connect(SceneStringName(id_pressed), callable_mp(this, &ScriptTextEditor::_edit_option));
-		edit_menu->get_popup()->add_submenu_node_item(TTR("Line"), sub_menu);
+		edit_menu->get_popup()->add_submenu_node_item(TTRC("Line"), sub_menu);
 	}
 	{
 		PopupMenu *sub_menu = memnew(PopupMenu);
@@ -2697,7 +2766,7 @@ void ScriptTextEditor::_enable_code_editor() {
 		sub_menu->add_shortcut(ED_GET_SHORTCUT("script_text_editor/unfold_all_lines"), EDIT_UNFOLD_ALL_LINES);
 		sub_menu->add_shortcut(ED_GET_SHORTCUT("script_text_editor/create_code_region"), EDIT_CREATE_CODE_REGION);
 		sub_menu->connect(SceneStringName(id_pressed), callable_mp(this, &ScriptTextEditor::_edit_option));
-		edit_menu->get_popup()->add_submenu_node_item(TTR("Folding"), sub_menu);
+		edit_menu->get_popup()->add_submenu_node_item(TTRC("Folding"), sub_menu);
 	}
 	edit_menu->get_popup()->add_separator();
 	edit_menu->get_popup()->add_shortcut(ED_GET_SHORTCUT("ui_text_completion_query"), EDIT_COMPLETE);
@@ -2709,7 +2778,7 @@ void ScriptTextEditor::_enable_code_editor() {
 		sub_menu->add_shortcut(ED_GET_SHORTCUT("script_text_editor/convert_indent_to_tabs"), EDIT_CONVERT_INDENT_TO_TABS);
 		sub_menu->add_shortcut(ED_GET_SHORTCUT("script_text_editor/auto_indent"), EDIT_AUTO_INDENT);
 		sub_menu->connect(SceneStringName(id_pressed), callable_mp(this, &ScriptTextEditor::_edit_option));
-		edit_menu->get_popup()->add_submenu_node_item(TTR("Indentation"), sub_menu);
+		edit_menu->get_popup()->add_submenu_node_item(TTRC("Indentation"), sub_menu);
 	}
 	edit_menu->get_popup()->connect(SceneStringName(id_pressed), callable_mp(this, &ScriptTextEditor::_edit_option));
 	edit_menu->get_popup()->add_separator();
@@ -2719,9 +2788,9 @@ void ScriptTextEditor::_enable_code_editor() {
 		sub_menu->add_shortcut(ED_GET_SHORTCUT("script_text_editor/convert_to_lowercase"), EDIT_TO_LOWERCASE);
 		sub_menu->add_shortcut(ED_GET_SHORTCUT("script_text_editor/capitalize"), EDIT_CAPITALIZE);
 		sub_menu->connect(SceneStringName(id_pressed), callable_mp(this, &ScriptTextEditor::_edit_option));
-		edit_menu->get_popup()->add_submenu_node_item(TTR("Convert Case"), sub_menu);
+		edit_menu->get_popup()->add_submenu_node_item(TTRC("Convert Case"), sub_menu);
 	}
-	edit_menu->get_popup()->add_submenu_node_item(TTR("Syntax Highlighter"), highlighter_menu);
+	edit_menu->get_popup()->add_submenu_node_item(TTRC("Syntax Highlighter"), highlighter_menu);
 	highlighter_menu->connect(SceneStringName(id_pressed), callable_mp(this, &ScriptTextEditor::_change_syntax_highlighter));
 
 	edit_hb->add_child(search_menu);
@@ -2744,12 +2813,12 @@ void ScriptTextEditor::_enable_code_editor() {
 	goto_menu->get_popup()->add_shortcut(ED_GET_SHORTCUT("script_text_editor/goto_symbol"), LOOKUP_SYMBOL);
 	goto_menu->get_popup()->add_separator();
 
-	goto_menu->get_popup()->add_submenu_node_item(TTR("Bookmarks"), bookmarks_menu);
+	goto_menu->get_popup()->add_submenu_node_item(TTRC("Bookmarks"), bookmarks_menu);
 	_update_bookmark_list();
 	bookmarks_menu->connect("about_to_popup", callable_mp(this, &ScriptTextEditor::_update_bookmark_list));
 	bookmarks_menu->connect("index_pressed", callable_mp(this, &ScriptTextEditor::_bookmark_item_pressed));
 
-	goto_menu->get_popup()->add_submenu_node_item(TTR("Breakpoints"), breakpoints_menu);
+	goto_menu->get_popup()->add_submenu_node_item(TTRC("Breakpoints"), breakpoints_menu);
 	_update_breakpoint_list();
 	breakpoints_menu->connect("about_to_popup", callable_mp(this, &ScriptTextEditor::_update_breakpoint_list));
 	breakpoints_menu->connect("index_pressed", callable_mp(this, &ScriptTextEditor::_breakpoint_item_pressed));
@@ -2809,7 +2878,7 @@ ScriptTextEditor::ScriptTextEditor() {
 	edit_hb = memnew(HBoxContainer);
 
 	edit_menu = memnew(MenuButton);
-	edit_menu->set_text(TTR("Edit"));
+	edit_menu->set_text(TTRC("Edit"));
 	edit_menu->set_switch_on_hover(true);
 	edit_menu->set_shortcut_context(this);
 
@@ -2825,12 +2894,12 @@ ScriptTextEditor::ScriptTextEditor() {
 	set_syntax_highlighter(highlighter);
 
 	search_menu = memnew(MenuButton);
-	search_menu->set_text(TTR("Search"));
+	search_menu->set_text(TTRC("Search"));
 	search_menu->set_switch_on_hover(true);
 	search_menu->set_shortcut_context(this);
 
 	goto_menu = memnew(MenuButton);
-	goto_menu->set_text(TTR("Go To"));
+	goto_menu->set_text(TTRC("Go To"));
 	goto_menu->set_switch_on_hover(true);
 	goto_menu->set_shortcut_context(this);
 

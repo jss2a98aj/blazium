@@ -771,7 +771,7 @@ void DisplayServerWeb::_vk_input_text_callback(const String &p_text, int p_curso
 		return;
 	}
 	// Call input_text
-	ds->input_text_callback.call(p_text);
+	ds->input_text_callback.call(p_text, true);
 	// Insert key right to reach position.
 	Input *input = Input::get_singleton();
 	Ref<InputEventKey> k;

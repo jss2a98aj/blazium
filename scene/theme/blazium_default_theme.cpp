@@ -1672,6 +1672,7 @@ void make_default_theme(Ref<Font> p_font, ThemeTemplate &p_template) {
 	t->set_constant("minimum_character_width", "LineEdit", 4);
 	t->set_constant("completion_scroll_width", "CodeEdit", 6);
 	t->set_constant("completion_lines", "CodeEdit", 7);
+	t->set_constant("wrap_offset", "TextEdit", 10);
 
 	t->set_color("font_shadow_color", "Label", Color(0, 0, 0, 0));
 	t->set_color("font_shadow_color", "GraphNodeTitleLabel", Color(0, 0, 0, 0));
