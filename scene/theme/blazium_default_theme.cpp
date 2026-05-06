@@ -1202,6 +1202,7 @@ void update_theme_scale(const Ref<Theme> &p_theme) {
 	h_split_bar_background->set_expand_margin_individual(x2_scale, 0, x2_scale, 0);
 	v_split_bar_background->set_expand_margin_individual(0, x2_scale, 0, x2_scale);
 
+	progress_fill_style->set_content_margin_all(x4_scale);
 	grabber_style->set_content_margin_all(x4_scale);
 	h_scroll_style->set_content_margin_individual(0, x4_scale, 0, x4_scale);
 	v_scroll_style->set_content_margin_individual(x4_scale, 0, x4_scale, 0);

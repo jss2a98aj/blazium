@@ -455,7 +455,7 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 	// ProgressBar
 
 	theme->set_stylebox("background", "ProgressBar", make_flat_stylebox(style_disabled_color, 2, 2, 2, 2, 6));
-	theme->set_stylebox("fill", "ProgressBar", make_flat_stylebox(style_progress_color, 2, 2, 2, 2, 6));
+	theme->set_stylebox("fill", "ProgressBar", make_flat_stylebox(style_progress_color, 4, 4, 4, 4, 6));
 
 	theme->set_font(SceneStringName(font), "ProgressBar", Ref<Font>());
 	theme->set_font_size(SceneStringName(font_size), "ProgressBar", -1);
