@@ -10,14 +10,11 @@ def configure(env):
 def get_doc_classes():
     return [
         "Autowork",
-        "AutoworkAwaiter",
         "AutoworkCollector",
         "AutoworkConfig",
         "AutoworkDoubler",
         "AutoworkHookScript",
         "AutoworkInputSender",
-        "AutoworkJSONExporter",
-        "AutoworkJUnitExporter",
         "AutoworkLogger",
         "AutoworkRuntimeUI",
         "AutoworkSignalHook",

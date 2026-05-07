@@ -1442,6 +1442,7 @@ void EditorSettings::set_initial_value(const StringName &p_setting, const Varian
 
 Variant _EDITOR_DEF(const String &p_setting, const Variant &p_default, bool p_restart_if_changed, bool p_basic) {
 	if (!EditorSettings::get_singleton()) {
+		ERR_PRINT("EditorSettings not instantiated yet.");
 		return p_default;
 	}
 

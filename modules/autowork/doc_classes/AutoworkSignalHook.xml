@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="AutoworkSignalHook" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="AutoworkSignalHook" inherits="Object" experimental="Some methods may not be implemented and may be changed in future versions." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
+		Provides utilities for working with signals during tests.
 	</brief_description>
 	<description>
-		Core class for the Autowork framework: AutoworkSignalHook.
-		Enables native testing, assertions, and mock implementations within Blazium Engine.
+		The AutoworkSignalHook is used internally to observe and interact with signals in the context of testing.
 	</description>
 	<tutorials>
 	</tutorials>

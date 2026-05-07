@@ -51,6 +51,5 @@ public:
 	void abort() { aborted = true; }
 	bool should_abort() const { return aborted; }
 
-	// GDVIRTUAL macro forces GDScript implementers to override this function, identically to GUT's run()
 	GDVIRTUAL0(_run)
 };

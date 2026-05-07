@@ -31,7 +31,6 @@
 
 #include "core/io/file_access.h"
 #include "core/io/json.h"
-#include "modules/autowork/autowork_main.h"
 
 void AutoworkConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("load_options", "file_path"), &AutoworkConfig::load_options);
@@ -101,9 +100,8 @@ void AutoworkConfig::write_options(const String &p_file_path) {
 	}
 }
 
-void AutoworkConfig::apply_options(Object *p_runner) {
-	Autowork *runner = Object::cast_to<Autowork>(p_runner);
-	if (!runner) {
+void AutoworkConfig::apply_options(Autowork *p_runner) {
+	if (!p_runner) {
 		return;
 	}
 
@@ -113,14 +111,14 @@ void AutoworkConfig::apply_options(Object *p_runner) {
 		String prefix = options["prefix"];
 		String suffix = options["suffix"];
 		for (int i = 0; i < dirs.size(); i++) {
-			runner->add_directory(dirs[i], prefix, suffix);
+			p_runner->add_directory(dirs[i], prefix, suffix);
 		}
 	}
 
 	if (options.has("tests")) {
 		Array tests = options["tests"];
 		for (int i = 0; i < tests.size(); i++) {
-			runner->add_script(tests[i]);
+			p_runner->add_script(tests[i]);
 		}
 	}
 

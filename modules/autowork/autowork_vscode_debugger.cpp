@@ -45,7 +45,7 @@ Error AutoworkVSCodeDebugger::_capture(void *p_user, const String &p_msg, const 
 				main_runner->add_script(script);
 			}
 			if (!test.is_empty()) {
-				main_runner->set_select(test);
+				main_runner->set_test(test);
 			}
 			main_runner->run_tests();
 		}
