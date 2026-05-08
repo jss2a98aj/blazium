@@ -441,6 +441,9 @@
 		<member name="audio/video/video_delay_compensation_ms" type="int" setter="" getter="" default="0">
 			Setting to hardcode audio delay when playing video. Best to leave this unchanged unless you know what you are doing.
 		</member>
+		<member name="blazium/autowork/e2e_enabled" type="bool" setter="" getter="" default="false">
+			If [code]true[/code], the Autowork framework will boot its WebSocket E2E server on startup, enabling orchestration from standard web runners (e.g. Playwright, Jest, Cypress).
+		</member>
 		<member name="blazium/justamcp/disable_game_mcp" type="bool" setter="" getter="" default="false">
 			If [code]true[/code], disables the Model Context Protocol (MCP) server from running alongside exported builds or game tests. Ensure this is marked true for strict production releases to deny introspection.
 		</member>

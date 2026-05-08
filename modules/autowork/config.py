@@ -24,6 +24,8 @@ def get_doc_classes():
         "AutoworkStubber",
         "AutoworkTest",
         "AutoworkVSCodeDebugger",
+        "AutoworkE2EConfig",
+        "AutoworkE2EServer",
     ]
 
 
