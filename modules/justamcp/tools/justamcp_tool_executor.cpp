@@ -460,6 +460,8 @@ Array JustAMCPToolExecutor::get_tool_schemas(bool p_register_only, bool p_ignore
 			if (EditorSettings::get_singleton()) {
 				EDITOR_DEF_BASIC(cat_path, is_core);
 				EDITOR_DEF_BASIC(tool_path, true);
+				EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::BOOL, cat_path));
+				EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::BOOL, tool_path));
 			}
 #endif
 			return;
@@ -2716,6 +2718,69 @@ Dictionary JustAMCPToolExecutor::execute_tool(const String &p_tool_name, const D
 	}
 	if (p_tool_name.begins_with("project/")) {
 		return project_tools->execute_tool(internal_name, p_args);
+	}
+
+	if (internal_name.begins_with("editor_")) {
+		if (internal_name == "editor_play_scene") {
+			return editor_tools->editor_play_scene(p_args);
+		}
+		if (internal_name == "editor_play_main") {
+			return editor_tools->editor_play_main(p_args);
+		}
+		if (internal_name == "editor_stop_play") {
+			return editor_tools->editor_stop_play(p_args);
+		}
+		if (internal_name == "editor_is_playing") {
+			return editor_tools->editor_is_playing(p_args);
+		}
+		if (internal_name == "editor_select_node") {
+			return editor_tools->editor_select_node(p_args);
+		}
+		if (internal_name == "editor_get_selected") {
+			return editor_tools->editor_get_selected(p_args);
+		}
+		if (internal_name == "editor_undo") {
+			return editor_tools->editor_undo(p_args);
+		}
+		if (internal_name == "editor_redo") {
+			return editor_tools->editor_redo(p_args);
+		}
+		if (internal_name == "editor_take_screenshot") {
+			return editor_tools->editor_take_screenshot(p_args);
+		}
+		if (internal_name == "editor_set_main_screen") {
+			return editor_tools->editor_set_main_screen(p_args);
+		}
+		if (internal_name == "editor_open_scene") {
+			return editor_tools->editor_open_scene(p_args);
+		}
+		if (internal_name == "editor_get_settings") {
+			return editor_tools->editor_get_settings(p_args);
+		}
+		if (internal_name == "editor_set_settings") {
+			return editor_tools->editor_set_settings(p_args);
+		}
+		if (internal_name == "editor_clear_output") {
+			return editor_tools->editor_clear_output(p_args);
+		}
+		if (internal_name == "editor_screenshot_game") {
+			return editor_tools->editor_screenshot_game(p_args);
+		}
+		if (internal_name == "editor_get_output_log") {
+			return editor_tools->editor_get_output_log(p_args);
+		}
+		if (internal_name == "editor_get_errors") {
+			return editor_tools->editor_get_errors(p_args);
+		}
+		if (internal_name == "editor_reload_project") {
+			return editor_tools->editor_reload_project(p_args);
+		}
+		if (internal_name == "editor_save_all_scenes") {
+			return editor_tools->editor_save_all_scenes(p_args);
+		}
+		if (internal_name == "editor_get_signals") {
+			return editor_tools->editor_get_signals(p_args);
+		}
 	}
 
 	result["ok"] = false;

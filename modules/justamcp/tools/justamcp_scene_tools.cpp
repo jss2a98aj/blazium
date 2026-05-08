@@ -41,12 +41,21 @@
 #include "editor/editor_file_system.h"
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
+#include "editor/editor_undo_redo_manager.h"
 #include "scene/2d/sprite_2d.h"
 #include "scene/3d/sprite_3d.h"
 #include "scene/resources/packed_scene.h"
 
 void JustAMCPSceneTools::_bind_methods() {
 	// Bindings for tool methods
+}
+
+static bool _is_active_scene(const String &p_scene_path) {
+	if (!EditorNode::get_singleton() || !EditorInterface::get_singleton()) {
+		return false;
+	}
+	Node *root = EditorInterface::get_singleton()->get_edited_scene_root();
+	return root && root->get_scene_file_path() == p_scene_path;
 }
 
 JustAMCPSceneTools::JustAMCPSceneTools() {
@@ -814,16 +823,24 @@ Dictionary JustAMCPSceneTools::add_node(const Dictionary &p_args) {
 		return ret;
 	}
 
-	Array result = _load_scene(scene_path);
-	Dictionary err = result[1];
-	if (!err.is_empty()) {
-		return err;
+	bool is_active = _is_active_scene(scene_path);
+	Node *root = nullptr;
+	if (is_active) {
+		root = EditorInterface::get_singleton()->get_edited_scene_root();
+	} else {
+		Array result = _load_scene(scene_path);
+		Dictionary load_err = result[1];
+		if (!load_err.is_empty()) {
+			return load_err;
+		}
+		root = Object::cast_to<Node>(result[0]);
 	}
 
-	Node *root = Object::cast_to<Node>(result[0]);
 	Node *parent = _find_node(root, parent_node_path);
 	if (!parent) {
-		memdelete(root);
+		if (!is_active) {
+			memdelete(root);
+		}
 		Dictionary ret;
 		ret["ok"] = false;
 		ret["error"] = "Parent node not found: " + parent_node_path;
@@ -836,7 +853,9 @@ Dictionary JustAMCPSceneTools::add_node(const Dictionary &p_args) {
 		if (_new_node_obj) {
 			memdelete(_new_node_obj);
 		}
-		memdelete(root);
+		if (!is_active) {
+			memdelete(root);
+		}
 		Dictionary ret;
 		ret["ok"] = false;
 		ret["error"] = "Failed to instantiate nodeType: " + node_type;
@@ -845,12 +864,22 @@ Dictionary JustAMCPSceneTools::add_node(const Dictionary &p_args) {
 
 	new_node->set_name(node_name);
 	_set_node_properties(new_node, properties);
-	parent->add_child(new_node);
-	_set_owner_recursive(new_node, root);
 
-	err = _save_scene(root, scene_path);
-	if (!err.is_empty()) {
-		return err;
+	if (is_active) {
+		EditorUndoRedoManager *ur = EditorUndoRedoManager::get_singleton();
+		ur->create_action(TTR("AI Local: Add Node"), UndoRedo::MERGE_DISABLE, parent);
+		ur->add_do_method(parent, "add_child", new_node, true);
+		ur->add_do_method(new_node, "set_owner", root);
+		ur->add_do_reference(new_node);
+		ur->add_undo_method(parent, "remove_child", new_node);
+		ur->commit_action(true);
+	} else {
+		parent->add_child(new_node);
+		_set_owner_recursive(new_node, root);
+		Dictionary save_err = _save_scene(root, scene_path);
+		if (!save_err.is_empty()) {
+			return save_err;
+		}
 	}
 
 	Dictionary ret;
@@ -881,16 +910,24 @@ Dictionary JustAMCPSceneTools::instance_scene(const Dictionary &p_args) {
 		return ret;
 	}
 
-	Array result = _load_scene(target_scene_path);
-	Dictionary err = result[1];
-	if (!err.is_empty()) {
-		return err;
+	bool is_active = _is_active_scene(target_scene_path);
+	Node *root = nullptr;
+	if (is_active) {
+		root = EditorInterface::get_singleton()->get_edited_scene_root();
+	} else {
+		Array result = _load_scene(target_scene_path);
+		Dictionary err = result[1];
+		if (!err.is_empty()) {
+			return err;
+		}
+		root = Object::cast_to<Node>(result[0]);
 	}
 
-	Node *root = Object::cast_to<Node>(result[0]);
 	Node *parent = _find_node(root, parent_node_path);
 	if (!parent) {
-		memdelete(root);
+		if (!is_active) {
+			memdelete(root);
+		}
 		Dictionary ret;
 		ret["ok"] = false;
 		ret["error"] = "Parent node not found: " + parent_node_path;
@@ -899,7 +936,9 @@ Dictionary JustAMCPSceneTools::instance_scene(const Dictionary &p_args) {
 
 	Node *new_node = packed->instantiate();
 	if (!new_node) {
-		memdelete(root);
+		if (!is_active) {
+			memdelete(root);
+		}
 		Dictionary ret;
 		ret["ok"] = false;
 		ret["error"] = "Failed to instantiate packed scene.";
@@ -916,12 +955,21 @@ Dictionary JustAMCPSceneTools::instance_scene(const Dictionary &p_args) {
 	Dictionary properties = _parse_properties_arg(p_args.get("properties", Dictionary()));
 	_set_node_properties(new_node, properties);
 
-	parent->add_child(new_node);
-	_set_owner_recursive(new_node, root);
-
-	err = _save_scene(root, target_scene_path);
-	if (!err.is_empty()) {
-		return err;
+	if (is_active) {
+		EditorUndoRedoManager *ur = EditorUndoRedoManager::get_singleton();
+		ur->create_action(TTR("AI Local: Instance Scene"), UndoRedo::MERGE_DISABLE, parent);
+		ur->add_do_method(parent, "add_child", new_node, true);
+		ur->add_do_method(new_node, "set_owner", root);
+		ur->add_do_reference(new_node);
+		ur->add_undo_method(parent, "remove_child", new_node);
+		ur->commit_action(true);
+	} else {
+		parent->add_child(new_node);
+		_set_owner_recursive(new_node, root);
+		Dictionary save_err = _save_scene(root, target_scene_path);
+		if (!save_err.is_empty()) {
+			return save_err;
+		}
 	}
 
 	Dictionary ret;
@@ -942,16 +990,24 @@ Dictionary JustAMCPSceneTools::delete_node(const Dictionary &p_args) {
 		return ret;
 	}
 
-	Array result = _load_scene(scene_path);
-	Dictionary err = result[1];
-	if (!err.is_empty()) {
-		return err;
+	bool is_active = _is_active_scene(scene_path);
+	Node *root = nullptr;
+	if (is_active) {
+		root = EditorInterface::get_singleton()->get_edited_scene_root();
+	} else {
+		Array result = _load_scene(scene_path);
+		Dictionary err = result[1];
+		if (!err.is_empty()) {
+			return err;
+		}
+		root = Object::cast_to<Node>(result[0]);
 	}
 
-	Node *root = Object::cast_to<Node>(result[0]);
 	Node *node = _find_node(root, node_path);
 	if (!node) {
-		memdelete(root);
+		if (!is_active) {
+			memdelete(root);
+		}
 		Dictionary ret;
 		ret["ok"] = false;
 		ret["error"] = "Node not found: " + node_path;
@@ -960,19 +1016,30 @@ Dictionary JustAMCPSceneTools::delete_node(const Dictionary &p_args) {
 
 	Node *parent = node->get_parent();
 	if (!parent) {
-		memdelete(root);
+		if (!is_active) {
+			memdelete(root);
+		}
 		Dictionary ret;
 		ret["ok"] = false;
 		ret["error"] = "Cannot delete root node";
 		return ret;
 	}
 
-	parent->remove_child(node);
-	memdelete(node);
-
-	err = _save_scene(root, scene_path);
-	if (!err.is_empty()) {
-		return err;
+	if (is_active) {
+		EditorUndoRedoManager *ur = EditorUndoRedoManager::get_singleton();
+		ur->create_action(TTR("AI Local: Delete Node"), UndoRedo::MERGE_DISABLE, node);
+		ur->add_do_method(parent, "remove_child", node);
+		ur->add_undo_method(parent, "add_child", node, true);
+		ur->add_undo_method(node, "set_owner", root);
+		ur->add_undo_reference(node);
+		ur->commit_action(true);
+	} else {
+		parent->remove_child(node);
+		memdelete(node);
+		Dictionary save_err = _save_scene(root, scene_path);
+		if (!save_err.is_empty()) {
+			return save_err;
+		}
 	}
 
 	Dictionary ret;
@@ -995,16 +1062,24 @@ Dictionary JustAMCPSceneTools::duplicate_node(const Dictionary &p_args) {
 		return ret;
 	}
 
-	Array result = _load_scene(scene_path);
-	Dictionary err = result[1];
-	if (!err.is_empty()) {
-		return err;
+	bool is_active = _is_active_scene(scene_path);
+	Node *root = nullptr;
+	if (is_active) {
+		root = EditorInterface::get_singleton()->get_edited_scene_root();
+	} else {
+		Array result = _load_scene(scene_path);
+		Dictionary err = result[1];
+		if (!err.is_empty()) {
+			return err;
+		}
+		root = Object::cast_to<Node>(result[0]);
 	}
 
-	Node *root = Object::cast_to<Node>(result[0]);
 	Node *source = _find_node(root, node_path);
 	if (!source) {
-		memdelete(root);
+		if (!is_active) {
+			memdelete(root);
+		}
 		Dictionary ret;
 		ret["ok"] = false;
 		ret["error"] = "Node not found: " + node_path;
@@ -1016,7 +1091,9 @@ Dictionary JustAMCPSceneTools::duplicate_node(const Dictionary &p_args) {
 		target_parent = _find_node(root, parent_path);
 	}
 	if (!target_parent) {
-		memdelete(root);
+		if (!is_active) {
+			memdelete(root);
+		}
 		Dictionary ret;
 		ret["ok"] = false;
 		ret["error"] = "Parent not found: " + parent_path;
@@ -1025,7 +1102,9 @@ Dictionary JustAMCPSceneTools::duplicate_node(const Dictionary &p_args) {
 
 	Node *duplicated_node = source->duplicate();
 	if (!duplicated_node) {
-		memdelete(root);
+		if (!is_active) {
+			memdelete(root);
+		}
 		Dictionary ret;
 		ret["ok"] = false;
 		ret["error"] = "Failed to duplicate node: " + node_path;
@@ -1033,12 +1112,22 @@ Dictionary JustAMCPSceneTools::duplicate_node(const Dictionary &p_args) {
 	}
 
 	duplicated_node->set_name(new_name);
-	target_parent->add_child(duplicated_node);
-	_set_owner_recursive(duplicated_node, root);
 
-	err = _save_scene(root, scene_path);
-	if (!err.is_empty()) {
-		return err;
+	if (is_active) {
+		EditorUndoRedoManager *ur = EditorUndoRedoManager::get_singleton();
+		ur->create_action(TTR("AI Local: Duplicate Node"), UndoRedo::MERGE_DISABLE, duplicated_node);
+		ur->add_do_method(target_parent, "add_child", duplicated_node, true);
+		ur->add_do_method(duplicated_node, "set_owner", root);
+		ur->add_do_reference(duplicated_node);
+		ur->add_undo_method(target_parent, "remove_child", duplicated_node);
+		ur->commit_action(true);
+	} else {
+		target_parent->add_child(duplicated_node);
+		_set_owner_recursive(duplicated_node, root);
+		Dictionary save_err = _save_scene(root, scene_path);
+		if (!save_err.is_empty()) {
+			return save_err;
+		}
 	}
 
 	Dictionary ret;
@@ -1122,27 +1211,48 @@ Dictionary JustAMCPSceneTools::set_node_properties(const Dictionary &p_args) {
 	String node_path = p_args.get("nodePath", ".");
 	Dictionary properties = _parse_properties_arg(p_args.get("properties", Dictionary()));
 
-	Array result = _load_scene(scene_path);
-	Dictionary err = result[1];
-	if (!err.is_empty()) {
-		return err;
+	bool is_active = _is_active_scene(scene_path);
+	Node *root = nullptr;
+	if (is_active) {
+		root = EditorInterface::get_singleton()->get_edited_scene_root();
+	} else {
+		Array result = _load_scene(scene_path);
+		Dictionary err = result[1];
+		if (!err.is_empty()) {
+			return err;
+		}
+		root = Object::cast_to<Node>(result[0]);
 	}
 
-	Node *root = Object::cast_to<Node>(result[0]);
 	Node *node = _find_node(root, node_path);
 	if (!node) {
-		memdelete(root);
+		if (!is_active) {
+			memdelete(root);
+		}
 		Dictionary ret;
 		ret["ok"] = false;
 		ret["error"] = "Node not found: " + node_path;
 		return ret;
 	}
 
-	_set_node_properties(node, properties);
-
-	err = _save_scene(root, scene_path);
-	if (!err.is_empty()) {
-		return err;
+	if (is_active) {
+		EditorUndoRedoManager *ur = EditorUndoRedoManager::get_singleton();
+		ur->create_action(TTR("AI Local: Set Properties"), UndoRedo::MERGE_DISABLE, node);
+		Array keys = properties.keys();
+		for (int i = 0; i < keys.size(); i++) {
+			String prop_name = keys[i];
+			Variant new_val = _parse_value(properties[prop_name]);
+			Variant old_val = node->get(prop_name);
+			ur->add_do_property(node, prop_name, new_val);
+			ur->add_undo_property(node, prop_name, old_val);
+		}
+		ur->commit_action(true);
+	} else {
+		_set_node_properties(node, properties);
+		Dictionary save_err = _save_scene(root, scene_path);
+		if (!save_err.is_empty()) {
+			return save_err;
+		}
 	}
 
 	Dictionary ret;
